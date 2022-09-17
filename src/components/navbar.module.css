@@ -1,0 +1,4 @@
+.rotateHover:hover {
+    transform: rotate(360deg);
+    transition: transform 1.75s ease;
+}
