@@ -1,6 +1,10 @@
 import React from 'react'
 import { StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import Navbar from './navbar';
+import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
 
 declare module '@mui/material/styles' {
@@ -56,16 +60,28 @@ const theme = createTheme({
 // });
 
 type layoutProps = {
-    children?: React.ReactNode
+    children?: React.ReactNode,
 }
 
 export default function Layout({ children }: layoutProps) {
+    //let user;
+    const user: User = {
+        name: "John Doe",
+        email: "",
+    };
+
+
     return (
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
-                <div className='bg-slate-800'>
-                    {children}
-                </div>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <div className='bg-slate-800 overflow-hidden'>
+                        <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
+                        <Navbar title="E-Cinema" userInfo={user} />
+                            {children}
+                        </main>
+                    </div>
+                </LocalizationProvider>
             </ThemeProvider>
         </StyledEngineProvider>
     )

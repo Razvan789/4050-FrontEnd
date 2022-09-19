@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
+import Link from 'next/link';
 
 type NavbarProps = {
   title?: string
@@ -20,10 +21,12 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
   const theme = useTheme();
   return (
     <div className="flex flex-row items-center justify-between h-12 md:h-16 bg-slate-900 shadow-md p-4">
-      <div id='Brand' className='flex flex-row items-center text-2xl text-slate-300 hover:text-slate-100 cursor-pointer md:text-3xl font-bold text-white'>
-        <MovieIcon className='md:mr-4 text-3xl md:text-5xl' />
-        <h1 className='hidden md:block'>{title}</h1>
-      </div>
+      <Link href="/" >
+        <div id='Brand' className='flex flex-row items-center text-2xl text-slate-300 hover:text-slate-100 cursor-pointer md:text-3xl font-bold text-white'>
+          <MovieIcon className='md:mr-4 text-3xl md:text-5xl' />
+          <h1 className='hidden md:block'>{title}</h1>
+        </div>
+      </Link>
       <div id='right' className='flex flex-row'>
         <TextField label="Search" className='scale-90' size='small' />
 
