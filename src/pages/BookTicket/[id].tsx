@@ -1,4 +1,3 @@
-import { Main } from 'next/document';
 import Head from 'next/head';
 import React, { useState } from 'react'
 import Layout from '../../components/layout';
@@ -18,7 +17,9 @@ import Typography from '@mui/material/Typography';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import { TextField } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
+import SeatPicker from '../../components/seatPicker';
 
 interface staticProps {
     params: {
@@ -65,17 +66,17 @@ export default function BookMovie({ movie }: BookMovieProps) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const handleSelectChange = (event: SelectChangeEvent<string | number>, callFunction: React.Dispatch<React.SetStateAction<string | number>>) => {
+    const handleSelectChange = (event: SelectChangeEvent<any>, callFunction: React.Dispatch<React.SetStateAction<any>>) => {
         callFunction(event.target.value);
     }
 
     function getStepContent(step: number) {
         switch (step) {
-            case 0:
+            case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
                 return (
                     <CalendarPicker date={date} className="bg-slate-900 mt-3 rounded-xl shadow-xl text-white border-[1px] border-purple-300" onChange={(newDate) => setDate(newDate)} />
                 );
-            case 1:
+            case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
                 return (
                     <div className='mb-[7rem] md:mb-0'>
                         <h2 className='text-center text-2xl font-extrabold text-purple-300'></h2>
@@ -126,15 +127,40 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         </div>
                     </div>
                 )
-            case 2:
-                return (<h2 className='text-center font-extrabold text-2xl text-purple-300'>
-                    Pick Seats
-                </h2>)
-            case 3:
-                return (<h2 className='text-center text-2xl font-extrabold text-purple-300'>
-                    Checkout
-                </h2>)
-            default:
+            case 2: //----------------------------------------------------------------------------------------------------------------PICK SEATS
+                return (
+                    <div className='flex flex-col items-center justify-between'>
+                        <h3 className='text-center text-xl font-extrabold text-purple-300'>Seats Left: {adultTickets + childTickets}</h3>
+                        <SeatPicker />
+                    </div>
+
+                )
+            case 3: //----------------------------------------------------------------------------------------------------------------CHECKOUT
+                return (
+                    <div className="flex flex-col w-[500px] mx-auto">
+                        <h2 className='text-center text-2xl font-extrabold text-purple-300'>Checkout</h2>
+                        <div className='flex flex-col items-center justify-between'>
+                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2'>
+                                <Button className='text-lg font-extrabold text-purple-300 w-full h-full min-h-[50px]'>Use Existing Card</Button>
+                            </div>
+                            <h2 className='text-center text-3xl font-extrabold text-purple-300'>Or</h2>
+                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2 p-2'>
+                                <h4 className='text-xl font-extrabold text-purple-300 mb-2'>Enter New info</h4>
+                                <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
+                                <div className=" flex w-[250px]">
+                                    <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
+                                    <TextField id="outlined-basic" size="small" label="CVV" variant="outlined" />
+                                </div>
+                                <br />
+                                <TextField id="outlined-basic" size="small" label="Name on Card" variant="outlined" className='w-[250px] mt-2' />
+                                <TextField id="outlined-basic" size="small" label="Billing Address" variant="outlined" className='w-[250px] mt-2' />
+                                <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
+
+                            </div>
+                        </div>
+                    </div>
+                )
+            default: //----------------------------------------------------------------------------------------------------------------Error/Done
                 return <h2 className='text-center text-2xl font-extrabold text-purple-300'> Order Placed</h2>;
         }
     }
@@ -178,21 +204,22 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 <div className='h-full'>
                     {getStepContent(activeStep)}
                 </div>
+                <div className='flex justify-between p-4'>
+                    <Button
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        variant="outlined"
+                        className=""
+                    >Back</Button>
+                    <Button
+                        disabled={activeStep === steps.length}
+                        onClick={handleNext}
+                        variant="outlined"
+                        className=""
+                    >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
+                </div>
             </div>
-            <div className='flex justify-between p-4'>
-                <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    variant="outlined"
-                    className=""
-                >Back</Button>
-                <Button
-                    disabled={activeStep === steps.length}
-                    onClick={handleNext}
-                    variant="outlined"
-                    className=""
-                >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
-            </div>
+
         </Layout>
 
     )

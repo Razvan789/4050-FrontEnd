@@ -6,7 +6,7 @@ export type Movie = {
     image: string;
 };
 
-export function getMovie(id): Movie {
+export function getMovie(id: number): Movie {
     return ({
         title: "Spider-Man No Way Home",
         rating: 3.5,
