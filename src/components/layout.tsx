@@ -7,6 +7,7 @@ import Navbar from './navbar';
 import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
 
+//Required for theming in typescript
 declare module '@mui/material/styles' {
     interface Theme {
         status: {
@@ -33,6 +34,7 @@ declare module '@mui/material/styles' {
         };
     }
 }
+//Change MUI component theme here
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
@@ -48,16 +50,6 @@ const theme = createTheme({
         },
     },
 });
-// theme = createTheme({
-//     palette: {
-//         primary: {
-//             main: orange[500],
-//         },
-//         secondary: {
-//             main: '#f44336',
-//         },
-//     },
-// });
 
 type layoutProps = {
     children?: React.ReactNode,

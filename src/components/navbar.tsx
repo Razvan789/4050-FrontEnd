@@ -38,10 +38,14 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
           </Button>
           :
           <div className='flex flex-row items-center'>
-            <Avatar alt={userInfo.name} src="/static/images/avatar/1.jpg" className='scale-90' />
-            <IconButton className={styles.rotateHover}>
-              <SettingsIcon />
-            </IconButton>
+            <Link href="/adminPage">
+              <Avatar alt={userInfo.name} src="/static/images/avatar/1.jpg" className='scale-90 cursor-pointer hover:scale-100 transition-all hover:bg-purple-300' />
+            </Link>
+            <Link href="/userSettings">
+              <IconButton href='' className={styles.rotateHover}>
+                <SettingsIcon />
+              </IconButton>
+            </Link>
           </div>
         }
       </div>

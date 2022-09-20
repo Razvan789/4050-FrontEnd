@@ -3,7 +3,6 @@ import Head from "next/head";
 import Navbar from "../components/navbar";
 import Layout from "../components/layout";
 import { User } from "../utils/user";
-import useTheme from "@mui/material/styles/useTheme";
 import Card from "../components/card";
 import CardContainer from "../components/cardContainer";
 
@@ -16,7 +15,6 @@ export default function Home({ user }: HomeProps) {
     name: "John Doe",
     email: "",
   };
-  const theme = useTheme();
   return (
     <Layout>
       <Head>

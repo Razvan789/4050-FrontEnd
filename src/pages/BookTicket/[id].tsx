@@ -2,7 +2,6 @@ import Head from 'next/head';
 import React, { useState } from 'react'
 import Layout from '../../components/layout';
 import { getMovie, Movie } from '../../utils/movie';
-import { User } from '../../utils/user';
 import Image from 'next/future/image';
 import { myLoader } from '../../utils/image';
 //stepper stuffs
@@ -13,12 +12,9 @@ import Button from '@mui/material/Button';
 import Rating from '@mui/material/Rating';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarPicker } from '@mui/x-date-pickers/CalendarPicker';
-import Typography from '@mui/material/Typography';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { TextField } from '@mui/material';
-import FormControl from '@mui/material/FormControl';
 import SeatPicker from '../../components/seatPicker';
 
 interface staticProps {
@@ -78,10 +74,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 );
             case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
                 return (
-                    <div className='mb-[7rem] md:mb-0'>
-                        <h2 className='text-center text-2xl font-extrabold text-purple-300'></h2>
-                        <div className='mx-auto w-fit my-5'>
-                            <div className='flex items-center mb-3'>
+                    <div className='mb-[4.3rem] md:mb-0 p-5'>
+                        <div className='mx-auto max-w-[300px] bg-slate-900 p-4 rounded-xl border-[1px] border-purple-300 shadow-lg'>
+                            <div className='flex items-center mb-3 justify-center'>
                                 <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Show times: </h3>
                                 <Select
                                     value={showTime}
@@ -94,7 +89,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     <MenuItem value="10:00pm">10:00pm</MenuItem>
                                 </Select>
                             </div>
-                            <div className='flex items-center mb-3'>
+                            <div className='flex items-center mb-3 justify-center'>
                                 <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Adult Tickets: </h3>
                                 <Select
                                     value={adultTickets}
@@ -109,7 +104,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     <MenuItem value={5}>5</MenuItem>
                                 </Select>
                             </div>
-                            <div className='flex items-center mb-3'>
+                            <div className='flex items-center mb-3 justify-center'>
                                 <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Child Tickets: </h3>
                                 <Select
                                     value={childTickets}
@@ -189,7 +184,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             </div>
             <div className='lg:w-2/3 lg:mx-auto p-4 h-full'>
                 <Stepper activeStep={activeStep}>
-                    {steps.map((label, index) => {
+                    {steps.map((label) => {
                         const stepProps: { completed?: boolean } = {};
                         const labelProps: {
                             optional?: React.ReactNode;
