@@ -5,6 +5,7 @@ import Layout from "../components/layout";
 import { User } from "../utils/user";
 import Card from "../components/card";
 import CardContainer from "../components/cardContainer";
+import {useState} from "react";
 
 interface HomeProps {
   user: User;
