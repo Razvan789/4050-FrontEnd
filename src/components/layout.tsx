@@ -56,11 +56,11 @@ type layoutProps = {
 }
 
 export default function Layout({ children }: layoutProps) {
-    //let user;
-    const user: User = {
-        name: "John Doe",
-        email: "",
-    };
+    let user;
+    //const user: User = {
+    //    name: "John Doe",
+    //    email: "",
+    //};
 
 
     return (

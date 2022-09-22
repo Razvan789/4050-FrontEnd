@@ -12,10 +12,10 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
-  user = {
-    name: "John Doe",
-    email: "",
-  };
+  // user = {
+  //   name: "John Doe",
+  //   email: "",
+  // };
   return (
     <Layout>
       <Head>
