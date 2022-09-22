@@ -7,6 +7,15 @@ import Tab from '@mui/material/Tab';
 import { useState } from 'react'
 import { Button, Modal, Typography, TextField } from '@mui/material';
 
+/* 
+    This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
+    This will contain the user last name, user first name, and any other user information such as the email, 
+    encrypted password, and whatever the DB engineers deem essential/optional for account creation. 
+
+    -SUGGEST age as optional slot
+    -SUGGEST Username slot (not just an email) 
+    -Will have UIDs with specific and likely self incrementing options
+*/
 const rows = [
     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
@@ -19,6 +28,10 @@ const rows = [
     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
 
 ];
+
+/*
+    This is the style of the modal that pops up when the edit button is selected. 
+*/
 
 const modalStyle = {
     position: 'absolute',
@@ -47,6 +60,12 @@ export default function AdminPage() {
         setTabValue(newValue);
     };
 
+
+    /*
+        Definition of the grif and the inclusion of buttons
+        This will label the information displayed in the user grid with the const
+        This includes the definition of the buttons to be used to edit and delete the specific users
+    */
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'firstName', headerName: 'First name', width: 130 },
@@ -85,6 +104,14 @@ export default function AdminPage() {
         },
     ];
 
+
+    /*
+        The actual page definition and display, includes the icon and other factors
+        will optimize for accessibility purposes, including dyslexia and visual impairment of other kinds 
+
+        -SUGGEST DYSLEXIA FONT
+        -SUGGEST FONT DIZE DYNAMICS
+    */
     return (
         <Layout>
             <Head>
