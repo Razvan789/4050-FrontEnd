@@ -33,9 +33,11 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
 
 
         {!userInfo ?
-          <Button color='primary' variant="outlined" className='scale-95' startIcon={<AccountCircleIcon />}>
-            Sign in
-          </Button>
+          <Link href="/login">
+            <Button color='primary' variant="outlined" className='scale-95' startIcon={<AccountCircleIcon />}>
+              Sign in
+            </Button>
+          </Link>
           :
           <div className='flex flex-row items-center'>
             <Link href="/adminPage">
