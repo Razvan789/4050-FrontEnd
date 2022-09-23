@@ -110,7 +110,7 @@ export default function AdminPage() {
         will optimize for accessibility purposes, including dyslexia and visual impairment of other kinds 
 
         -SUGGEST DYSLEXIA FONT
-        -SUGGEST FONT DIZE DYNAMICS
+        -SUGGEST FONT SIZE DYNAMICS
     */
     return (
         <Layout>
