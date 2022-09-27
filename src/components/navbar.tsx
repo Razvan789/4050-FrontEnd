@@ -10,6 +10,8 @@ import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
+import Badge from '@mui/material/Badge';
 import Link from 'next/link';
 
 type NavbarProps = {
@@ -43,8 +45,13 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
             <Link href="/adminPage">
               <Avatar alt={userInfo.name} src="/static/images/avatar/1.jpg" className='scale-90 cursor-pointer hover:scale-100 transition-all hover:bg-purple-300' />
             </Link>
+            <IconButton >
+              <Badge className="scale-[95%]" badgeContent={100} color="primary">
+                <LocalActivityIcon className={styles.rotateHover}/>
+              </Badge>
+            </IconButton>
             <Link href="/userSettings">
-              <IconButton href='' className={styles.rotateHover}>
+              <IconButton className={styles.rotateHover}>
                 <SettingsIcon />
               </IconButton>
             </Link>

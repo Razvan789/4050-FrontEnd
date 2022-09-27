@@ -5,7 +5,7 @@ import Link from "next/link"
 export default function login() {
     return (
         <Layout>
-            <Box className="rounded-xl border-2 border-purple-300 w-[400px] m-auto p-3 pt-0">
+            <div className="rounded-xl border-2 border-purple-300 w-[400px] mx-auto my-10 p-3 pt-0 bg-slate-900">
                 <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-600">
                     <span className="text-purple-300">Login</span>
                 </h1>
@@ -14,14 +14,19 @@ export default function login() {
                         <TextField id="outlined-basic" label="Email" type="email" variant="standard" />
                         <TextField id="outlined-basic" label="Password" type="password" variant="standard" />
                         <FormControlLabel className="text-white" control={<Checkbox />} label="Remember Me" />
-                        <div className="flex">
+
+                        <Link href='/'>
+                            <Button className="mx-auto w-full bg-purple-300 font-extrabold" variant="contained">Login</Button>
+                        </Link>
+
+                        <div className="flex flex-col text-center">
                             <p className="text-white">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-purple-300">Sign up</span></Link></p>
-                            <Button className="ml-auto bg-purple-300" variant="contained">Login</Button>
+                            <p className="text-white">Forgot your password? <Link href='/resetPassword'><span className="cursor-pointer underline text-purple-300">Reset Password</span></Link></p>
                         </div>
                     </div>
                 </FormGroup>
 
-            </Box>
+            </div>
         </Layout>
     )
 }

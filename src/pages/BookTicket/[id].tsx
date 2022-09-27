@@ -132,7 +132,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 )
             case 3: //----------------------------------------------------------------------------------------------------------------CHECKOUT
                 return (
-                    <div className="flex flex-col w-[375px] mx-auto">
+                    <div className="flex flex-col w-[500px] mx-auto">
                         <h2 className='text-center text-2xl font-extrabold text-purple-300'>Checkout</h2>
                         <div className='flex flex-col items-center justify-between'>
                             <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2'>
@@ -161,7 +161,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
     }
 
     return (
-
         <Layout>
             <Head>
                 <title>Book {movie.title}</title>
