@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Navbar from './navbar';
+import { useRouter } from 'next/router';
 import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
 
@@ -54,25 +55,30 @@ const theme = createTheme({
 type layoutProps = {
     children?: React.ReactNode,
 }
-
+export const UserContext = React.createContext({} as User);
 export default function Layout({ children }: layoutProps) {
-    let user;
-    //const user: User = {
-    //    name: "John Doe",
-    //    email: "",
-    //};
-
-
+    const router = useRouter();
+    let user: User = null;
+    if (router.query.user) {
+        console.log(router.query.user);
+        user = {
+            name: String(router.query.user),
+            email: "",
+        };
+        console.log(user);
+    }
     return (
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <div className='bg-slate-800 overflow-hidden'>
-                        <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
-                        <Navbar title="E-Cinema" userInfo={user} />
-                            {children}
-                        </main>
-                    </div>
+                    <UserContext.Provider value={user}>
+                        <div className='bg-slate-800 overflow-hidden'>
+                            <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
+                                <Navbar title="E-Cinema" userInfo={user} />
+                                {children}
+                            </main>
+                        </div>
+                    </UserContext.Provider>
                 </LocalizationProvider>
             </ThemeProvider>
         </StyledEngineProvider>
