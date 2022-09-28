@@ -1,21 +1,16 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Navbar from "../components/navbar";
-import Layout from "../components/layout";
+import Layout, {UserContext} from "../components/layout";
 import { User } from "../utils/user";
 import Card from "../components/card";
 import CardContainer from "../components/cardContainer";
-import {useState} from "react";
+import {useState, useContext} from "react";
+import {useRouter} from "next/router";
 
-interface HomeProps {
-  user: User;
-}
 
-export default function Home({ user }: HomeProps) {
-  // user = {
-  //   name: "John Doe",
-  //   email: "",
-  // };
+export default function Home() {
+  const user = useContext(UserContext);
   return (
     <Layout>
       <Head>

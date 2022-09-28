@@ -15,7 +15,7 @@ export default function login() {
                         <TextField id="outlined-basic" label="Password" type="password" variant="standard" />
                         <FormControlLabel className="text-white" control={<Checkbox />} label="Remember Me" />
 
-                        <Link href='/'>
+                        <Link href='/?user=test'>
                             <Button className="mx-auto w-full bg-purple-300 font-extrabold" variant="contained">Login</Button>
                         </Link>
 

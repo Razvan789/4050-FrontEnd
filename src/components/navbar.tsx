@@ -43,7 +43,7 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
           :
           <div className='flex flex-row items-center'>
             <Link href="/adminPage">
-              <Avatar alt={userInfo.name} src="/static/images/avatar/1.jpg" className='scale-90 cursor-pointer hover:scale-100 transition-all hover:bg-purple-300' />
+              <Avatar alt={userInfo.name?.toLocaleUpperCase()} src="" className='scale-90 cursor-pointer hover:scale-100 transition-all hover:bg-purple-300' />
             </Link>
             <IconButton >
               <Badge className="scale-[95%]" badgeContent={100} color="primary">
