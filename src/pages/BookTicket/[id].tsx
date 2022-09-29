@@ -8,7 +8,6 @@ import { myLoader } from '../../utils/image';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
-import Button from '@mui/material/Button';
 import Rating from '@mui/material/Rating';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarPicker } from '@mui/x-date-pickers/CalendarPicker';
@@ -16,6 +15,8 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Divider, TextField } from '@mui/material';
 import SeatPicker from '../../components/seatPicker';
+import { Box, Button, Modal, Typography, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface staticProps {
     params: {
@@ -27,7 +28,14 @@ interface BookMovieProps {
     movie: Movie
 }
 
-
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    boxShadow: 24,
+    p: 4,
+};
 
 export async function getStaticProps({ params }: staticProps) {
     const movie = getMovie(parseInt(params.id));
@@ -55,6 +63,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [adultTickets, setAdultTickets] = React.useState(0);
     const [childTickets, setChildTickets] = React.useState(0);
     const [showTime, setShowTime] = React.useState("Select Time");
+    const [open, setOpen] = useState(false);
+    const handleModalOpen = () => setOpen(true);
+    const handleModalClose = () => setOpen(false);
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -217,6 +228,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     <div className='hidden md:block'>
                         <p className='text-lg text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p>
                     </div>
+                    <Button variant='contained' className='bg-purple-300' onClick={handleModalOpen}> More Information</Button>
                 </div>
 
             </div>
@@ -252,7 +264,35 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
                 </div>
             </div>
+            <Modal
+                open={open}
+                onClose={handleModalClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-white border-purple-300 border-2 rounded-xl bg-slate-900 w-[350px] h-[600px] lg:w-[800px] p-0'>
+                    <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
+                        <div className="flex justify-between items-center ">
+                            <Typography id="modal-modal-title" variant="h6" component="h2">
+                                Movie Information will be here
+                            </Typography>
+                            <IconButton className='' onClick={handleModalClose}>
+                                <CloseIcon />
+                            </IconButton>
+                        </div>
 
+                        <div className="flex justify-center">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/JfVOs4VSpmA" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                        </div>
+                        <div className="flex flex-col justify-center items-center">
+                            <h2 className='text-2xl font-extrabold text-purple-300'>Movie Information</h2>
+                            <Divider />
+                            <p className='text-gray-300'> Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam, ab! Reprehenderit soluta iure sed voluptatum mollitia modi? Vel voluptatem, molestias numquam cum eos libero obcaecati provident a eum, repellendus hic magni quasi aperiam, tempore aut assumenda cumque minima reiciendis asperiores! Possimus quas nesciunt asperiores facere culpa, quibusdam blanditiis sint cum dolores, odit ipsum nam ullam minus sunt quaerat incidunt. Est, debitis voluptatum? Velit esse enim odit laboriosam doloribus, optio quasi eum doloremque ratione voluptas recusandae magnam dolore voluptates accusamus excepturi et deleniti alias? Cum, eaque. Unde odio officiis, minima laboriosam expedita totam sequi sit alias, et nam perspiciatis qui quos.</p>
+                        </div>
+                    </div>
+                    <Button variant='contained' className='bg-purple-300 float-right m-4' onClick={handleModalClose}> Close</Button>
+                </Box>
+            </Modal>
         </Layout>
 
     )
