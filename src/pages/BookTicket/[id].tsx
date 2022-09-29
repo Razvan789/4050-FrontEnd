@@ -138,7 +138,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 return (
                     <div className='flex justify-center mt-5'>
                         <SeatPicker />
-                        
+
                         <div className="flex flex-col text-white ml-10">
                             <h3 className='text-center text-xl font-extrabold text-purple-300'>Seats Left:</h3>
                             <Divider />
@@ -152,6 +152,13 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 return (
                     <div className="flex flex-col w-[500px] mx-auto">
                         <h2 className='text-center text-2xl font-extrabold text-purple-300'>Checkout</h2>
+                        <Divider />
+                        <div className='flex flex-col justify-center items-center'>
+                            <h3 className='text-xl text-purple-300 font-extrabold'>Total Cost: </h3>
+                            <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
+                            <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
+                            <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
+                        </div>
                         <div className='flex flex-col items-center justify-between'>
                             <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2'>
                                 <Button className='text-lg font-extrabold text-purple-300 w-full h-full min-h-[50px]'>Use Existing Card</Button>
@@ -174,7 +181,19 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     </div>
                 )
             default: //----------------------------------------------------------------------------------------------------------------Error/Done
-                return <h2 className='text-center text-2xl font-extrabold text-purple-300'> Order Placed</h2>;
+                return (
+                    <div className='flex flex-col justify-center mt-5'>
+                        <h2 className='text-center text-2xl font-extrabold text-purple-300'> Order Placed</h2>
+                        <Divider />
+                        <div className='flex flex-col justify-center items-center'>
+                            <h3 className='text-xl text-purple-300 font-extrabold'>Ticket information: </h3>
+                            <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
+                            <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
+                            <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
+                            <p className='text-white'>Show Time: {showTime}</p>
+                        </div>
+                    </div>
+                );
         }
     }
 
