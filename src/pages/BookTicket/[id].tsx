@@ -14,7 +14,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { CalendarPicker } from '@mui/x-date-pickers/CalendarPicker';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { TextField } from '@mui/material';
+import { Divider, TextField } from '@mui/material';
 import SeatPicker from '../../components/seatPicker';
 
 interface staticProps {
@@ -70,7 +70,19 @@ export default function BookMovie({ movie }: BookMovieProps) {
         switch (step) {
             case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
                 return (
-                    <CalendarPicker date={date} className="bg-slate-900 mt-3 rounded-xl shadow-xl text-white border-[1px] border-purple-300" onChange={(newDate) => setDate(newDate)} />
+                    <div className="flex flex-wrap  justify-center p-5">
+                        <CalendarPicker date={date} className="bg-slate-900 m-5 mt-3 rounded-xl shadow-xl text-white border-[1px] border-purple-300" onChange={(newDate) => setDate(newDate)} />
+                        <div className='flex flex-col'>
+                            <h3 className='text-xl text-purple-300 font-extrabold'> Available Times</h3>
+                            <Divider />
+                            <ul>
+                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
+                            </ul>
+                        </div>
+                    </div>
                 );
             case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
                 return (
@@ -124,9 +136,15 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 )
             case 2: //----------------------------------------------------------------------------------------------------------------PICK SEATS
                 return (
-                    <div className='flex flex-col items-center justify-between'>
-                        <h3 className='text-center text-xl font-extrabold text-purple-300'>Seats Left: {adultTickets + childTickets}</h3>
+                    <div className='flex justify-center mt-5'>
                         <SeatPicker />
+                        
+                        <div className="flex flex-col text-white ml-10">
+                            <h3 className='text-center text-xl font-extrabold text-purple-300'>Seats Left:</h3>
+                            <Divider />
+                            <p> Adult Tickets: {adultTickets}</p>
+                            <p> Child Tickets: {childTickets}</p>
+                        </div>
                     </div>
 
                 )
@@ -177,7 +195,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 <div className="flex flex-col p-3 w-96">
                     <h2 className='font-extrabold text-3xl leading-loose text-purple-300'>{movie.title}</h2>
                     <Rating name="read-only" value={movie.rating} precision={0.1} readOnly />
-                    {/* <p className='text-sm text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p> */}
+                    <div className='hidden md:block'>
+                        <p className='text-lg text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p>
+                    </div>
                 </div>
 
             </div>

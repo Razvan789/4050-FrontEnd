@@ -31,6 +31,7 @@ export default function SignUp() {
                     <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
                         <TextField variant='standard' type="email" label='Email'></TextField>
                         <TextField variant='standard' type="text" label='Username'></TextField>
+                        <TextField variant='standard' type="text" label='Phone Number'></TextField>
                         <TextField variant='standard' type="password" label='Password'></TextField>
                         <TextField variant='standard' type="password" label='Confirm Password'></TextField>
                     </form>

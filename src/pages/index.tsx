@@ -1,13 +1,17 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Navbar from "../components/navbar";
-import Layout, {UserContext} from "../components/layout";
+import Layout, { UserContext } from "../components/layout";
 import { User } from "../utils/user";
 import Card from "../components/card";
 import CardContainer from "../components/cardContainer";
-import {useState, useContext} from "react";
-import {useRouter} from "next/router";
+import { useState, useContext } from "react";
+import { useRouter } from "next/router";
+import { Pagination, Chip } from "@mui/material";
 
+const handleFilterDelete = () => {
+  console.log("deleted Filter");
+}
 
 export default function Home() {
   const user = useContext(UserContext);
@@ -35,7 +39,11 @@ export default function Home() {
           <Card />
           <Card />
         </CardContainer>
-        <h2 className="text-purple-100 text-2xl leading-loose font-extrabold"> All Movies →</h2>
+        <div className="flex items-center">
+          <h2 className="text-purple-100 text-2xl leading-loose font-extrabold"> All Movies →</h2>
+          <Chip label="Filters will go here" color='primary' variant="outlined" onDelete={handleFilterDelete} className="ml-2" />
+          <Chip label="Filter 2" color='primary' onDelete={handleFilterDelete} className="ml-2" />
+        </div>
         <CardContainer grid>
           <Card little></Card>
           <Card little></Card>
@@ -48,6 +56,7 @@ export default function Home() {
           <Card little></Card>
           <Card little></Card>
         </CardContainer>
+        <Pagination count={10} className='mx-auto mt-10' color="primary" />
       </main>
     </Layout>
   );
