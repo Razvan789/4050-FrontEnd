@@ -270,24 +270,25 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-white border-purple-300 border-2 rounded-xl bg-slate-900 w-[350px] h-[600px] lg:w-[800px] p-0'>
+                <Box sx={modalStyle} className='text-white border-purple-300 border-2 rounded-xl bg-slate-900 w-[400px] lg:w-[800px] p-0'>
+                    <div className="flex justify-between items-center m-3">
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Movie Information will be here
+                        </Typography>
+                        <IconButton className='' onClick={handleModalClose}>
+                            <CloseIcon />
+                        </IconButton>
+                    </div>
                     <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
-                        <div className="flex justify-between items-center ">
-                            <Typography id="modal-modal-title" variant="h6" component="h2">
-                                Movie Information will be here
-                            </Typography>
-                            <IconButton className='' onClick={handleModalClose}>
-                                <CloseIcon />
-                            </IconButton>
-                        </div>
-
                         <div className="flex justify-center">
                             <iframe width="560" height="315" src="https://www.youtube.com/embed/JfVOs4VSpmA" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                         </div>
                         <div className="flex flex-col justify-center items-center">
                             <h2 className='text-2xl font-extrabold text-purple-300'>Movie Information</h2>
                             <Divider />
-                            <p className='text-gray-300'> Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam, ab! Reprehenderit soluta iure sed voluptatum mollitia modi? Vel voluptatem, molestias numquam cum eos libero obcaecati provident a eum, repellendus hic magni quasi aperiam, tempore aut assumenda cumque minima reiciendis asperiores! Possimus quas nesciunt asperiores facere culpa, quibusdam blanditiis sint cum dolores, odit ipsum nam ullam minus sunt quaerat incidunt. Est, debitis voluptatum? Velit esse enim odit laboriosam doloribus, optio quasi eum doloremque ratione voluptas recusandae magnam dolore voluptates accusamus excepturi et deleniti alias? Cum, eaque. Unde odio officiis, minima laboriosam expedita totam sequi sit alias, et nam perspiciatis qui quos.</p>
+                            <p className='text-gray-300'>
+                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloremque aspernatur, quae laudantium nemo deserunt cum possimus ratione aperiam. Amet aut sequi eos quae ipsam accusantium deserunt assumenda consequatur autem! Sit quod ipsum quo, maxime voluptatibus cum perspiciatis tempora modi assumenda nihil dicta amet ea totam repellendus recusandae quisquam culpa eum dolore numquam ab nulla suscipit reiciendis incidunt aut. Voluptatum officiis saepe porro ratione laudantium nulla veritatis aperiam corrupti minus assumenda et suscipit, dolore ut non recusandae expedita dolorem eius praesentium aliquid itaque facere quibusdam ex nemo! Odio dolore laborum reprehenderit. Sed temporibus in accusamus impedit numquam modi? Voluptatum suscipit voluptates dolore, in libero natus necessitatibus neque temporibus alias labore at ex vel eaque a ipsam eveniet quae nesciunt! Quo maxime quae, eaque doloremque culpa consequatur! Voluptas reiciendis reprehenderit, beatae perspiciatis eaque ea labore quisquam facilis laborum. Cum, vero. Eos quibusdam ipsam reiciendis hic, iusto consectetur possimus perferendis voluptates facere repudiandae molestiae vel autem nisi, alias dolor dolores velit optio magni aliquid? Iusto ea, consectetur quae tempore autem aperiam magnam odit dignissimos cupiditate. Explicabo animi quidem consequatur molestias nisi itaque alias dignissimos perspiciatis rem! Totam, neque, temporibus libero ipsa odit mollitia alias voluptatum similique autem at corrupti, ea iste officiis pariatur dolor amet. Voluptatem et, fugiat vitae eligendi nesciunt vero iure beatae, dolores aliquid est aut praesentium quas alias? Fugiat, quasi. Excepturi quas voluptas perspiciatis sed. Sit sunt ad numquam maiores laboriosam obcaecati nihil tenetur omnis veniam. Aliquam ea, cum eaque consequatur provident totam fugiat modi libero tempora unde culpa ullam praesentium laboriosam doloremque deserunt? Laboriosam cupiditate nulla, ab fugit quasi architecto ullam, numquam praesentium consectetur magnam ad officiis dolorum a obcaecati veniam assumenda rem asperiores quis sed voluptatum vitae sequi eveniet quam nemo? Ducimus ab odio deleniti autem beatae dolores qui. Voluptatem dolores natus accusantium quia vel, pariatur porro minima!
+                            </p>
                         </div>
                     </div>
                     <Button variant='contained' className='bg-purple-300 float-right m-4' onClick={handleModalClose}> Close</Button>
