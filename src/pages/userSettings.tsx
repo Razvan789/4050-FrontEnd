@@ -106,7 +106,7 @@ export default function UserSettings() {
             </Head>
             <main className="container mx-auto flex flex-col min-h-screen p-4 max-w-5xl">
                 <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-600">
-                    <span className="text-purple-300">User</span> Settings
+                    <span className="text-primary">User</span> Settings
                 </h1>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
@@ -123,7 +123,7 @@ export default function UserSettings() {
                             <TextField variant='standard' type="email" label='Email'></TextField>
                             <TextField variant='standard' type="text" label='Username'></TextField>
                             <TextField variant='standard' type="password" label='Password'></TextField>
-                            <Button className="bg-purple-300 w-full font-extrabold my-3" variant='contained'>Update Account</Button>
+                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Account</Button>
                         </form>
                     </Box>
                 </TabPanel>
@@ -149,7 +149,7 @@ export default function UserSettings() {
                                 />
                                 <TextField variant='standard' type="text" label='CCV'></TextField>
                             </form>
-                            <Button className="bg-purple-300 w-full font-extrabold my-3" variant='contained'>Submit</Button>
+                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Submit</Button>
                         </div>
                         <DataGrid
                             rows={rows}
@@ -171,7 +171,7 @@ export default function UserSettings() {
                     <Box sx={{ height: 600, width: 1 }}>
                         <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
                             <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-purple-300">Fonts: </span> 
+                                <span className="text-primary">Fonts: </span> 
                             </h1>
                             <select>
                                 <option value="Times New Roman">Times New Roman</option>
@@ -180,13 +180,13 @@ export default function UserSettings() {
                                 <option value="Helvetica">Helvetica</option>
                             </select>
                             <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-purple-300">Colorblind Mode: </span> 
+                                <span className="text-primary">Colorblind Mode: </span> 
                             </h1>
                             <select>
                                 <option value="Not Colorblind">Not Colorblind</option>
                                 <option value="Red-Green Colorblind">Red-Green Colorblind</option>
                             </select>
-                            <Button className="bg-purple-300 w-full font-extrabold my-3" variant='contained'>Update Site Settings</Button>
+                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Site Settings</Button>
                         </form>
                     </Box>
                 </TabPanel>

@@ -122,7 +122,7 @@ export default function AdminPage() {
             </Head>
             <main className="container mx-auto flex flex-col min-h-screen p-4 max-w-5xl">
                 <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-600">
-                    <span className="text-purple-300">Admin</span> Page
+                    <span className="text-primary">Admin</span> Page
                 </h1>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
@@ -170,7 +170,7 @@ export default function AdminPage() {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-white border-purple-300 border-2 rounded-xl bg-slate-900 w-[350px] lg:w-[800px] p-0'>
+                <Box sx={modalStyle} className='text-white border-primary border-2 rounded-xl bg-slate-900 w-[350px] lg:w-[800px] p-0'>
                     <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
                         <div className="flex justify-between items-center ">
                             <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -193,7 +193,7 @@ export default function AdminPage() {
                             <TextField variant='standard' className='' label="Categories"></TextField>
                         </div>
                     </div>
-                    <Button variant='contained' className='bg-purple-300 float-right m-4' onClick={handleClose}> Save Changes</Button>
+                    <Button variant='contained' className='bg-primary float-right m-4' onClick={handleClose}> Save Changes</Button>
                 </Box>
             </Modal>
         </Layout>

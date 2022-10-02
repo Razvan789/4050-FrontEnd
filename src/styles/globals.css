@@ -3,6 +3,13 @@
 @tailwind utilities;
 @import "react-alice-carousel/lib/alice-carousel.css";
 
+
+@layer base {
+  :root {
+    --color-primary: 216 180 254;
+  }
+
+}
 /* width */
 ::-webkit-scrollbar {
     width: 5px;

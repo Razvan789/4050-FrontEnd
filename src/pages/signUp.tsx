@@ -25,7 +25,7 @@ export default function SignUp() {
         <Layout>
             <StyleBox className="transition-all">
                 <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-600 ">
-                    <span className="text-purple-300">Sign</span> Up
+                    <span className="text-primary">Sign</span> Up
                 </h1>
                 <div className="lg:flex">
                     <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
@@ -59,9 +59,9 @@ export default function SignUp() {
                 <Button className='w-full my-2' onClick={handleOpenCard}> {cardDetailsOpen ? "Not Right Now" : "Add a Payment Method"}</Button>
 
                 <Link href='/login'>
-                    <Button className="bg-purple-300 w-full font-extrabold" variant='contained'>Sign Up</Button>
+                    <Button className="bg-primary w-full font-extrabold" variant='contained'>Sign Up</Button>
                 </Link>
-                <Link href='/login'><p className='text-purple-300 cursor-pointer text-center mt-3 underline'>Return to Login</p></Link>
+                <Link href='/login'><p className='text-primary cursor-pointer text-center mt-3 underline'>Return to Login</p></Link>
             </StyleBox>
         </Layout>
     )

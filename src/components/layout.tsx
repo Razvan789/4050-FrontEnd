@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyledEngineProvider } from '@mui/material/styles';
+import { hexToRgb, StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -36,6 +36,13 @@ declare module '@mui/material/styles' {
     }
 }
 //Change MUI component theme here
+const primary = "#D8B4FE"; //D8B4FE
+const primaryParse = parseColorString(hexToRgb(primary));
+
+if(typeof window !== 'undefined'){
+    document.documentElement.style.setProperty('--color-primary', primaryParse);
+}
+
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
@@ -43,7 +50,7 @@ const theme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: '#D8B4FE',
+            main: primary,
         },
         neutral: {
             main: '#64748B',
@@ -83,4 +90,10 @@ export default function Layout({ children }: layoutProps) {
             </ThemeProvider>
         </StyledEngineProvider>
     )
+}
+
+
+function parseColorString(color: string): string {
+    const newColor = color.replace(/rgb\(|\)/g, '').replace(/ /g, '');
+    return newColor.replace(/,/g, ' ');
 }

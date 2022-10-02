@@ -82,15 +82,15 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
                 return (
                     <div className="flex flex-wrap  justify-center p-5">
-                        <CalendarPicker date={date} className="bg-slate-900 m-5 mt-3 rounded-xl shadow-xl text-white border-[1px] border-purple-300" onChange={(newDate) => setDate(newDate)} />
+                        <CalendarPicker date={date} className="bg-slate-900 m-5 mt-3 rounded-xl shadow-xl text-white border-[1px] border-primary" onChange={(newDate) => setDate(newDate)} />
                         <div className='flex flex-col'>
-                            <h3 className='text-xl text-purple-300 font-extrabold'> Available Times</h3>
+                            <h3 className='text-xl text-primary font-extrabold'> Available Times</h3>
                             <Divider />
                             <ul>
-                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-purple-300' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
+                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
                             </ul>
                         </div>
                     </div>
@@ -98,9 +98,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
                 return (
                     <div className='mb-[4.3rem] md:mb-0 p-5'>
-                        <div className='mx-auto max-w-[300px] bg-slate-900 p-4 rounded-xl border-[1px] border-purple-300 shadow-lg'>
+                        <div className='mx-auto max-w-[300px] bg-slate-900 p-4 rounded-xl border-[1px] border-primary shadow-lg'>
                             <div className='flex items-center mb-3 justify-center'>
-                                <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Show times: </h3>
+                                <h3 className='text-xl text-primary font-extrabold mr-5'>Show times: </h3>
                                 <Select
                                     value={showTime}
                                     onChange={(event) => handleSelectChange(event, setShowTime)}
@@ -113,7 +113,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 </Select>
                             </div>
                             <div className='flex items-center mb-3 justify-center'>
-                                <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Adult Tickets: </h3>
+                                <h3 className='text-xl text-primary font-extrabold mr-5'>Adult Tickets: </h3>
                                 <Select
                                     value={adultTickets}
                                     onChange={(event) => handleSelectChange(event, setAdultTickets)}
@@ -128,7 +128,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 </Select>
                             </div>
                             <div className='flex items-center mb-3 justify-center'>
-                                <h3 className='text-xl text-purple-300 font-extrabold mr-5'>Child Tickets: </h3>
+                                <h3 className='text-xl text-primary font-extrabold mr-5'>Child Tickets: </h3>
                                 <Select
                                     value={childTickets}
                                     onChange={(event) => handleSelectChange(event, setChildTickets)}
@@ -151,7 +151,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         <SeatPicker />
 
                         <div className="flex flex-col text-white ml-10">
-                            <h3 className='text-center text-xl font-extrabold text-purple-300'>Seats Left:</h3>
+                            <h3 className='text-center text-xl font-extrabold text-primary'>Seats Left:</h3>
                             <Divider />
                             <p> Adult Tickets: {adultTickets}</p>
                             <p> Child Tickets: {childTickets}</p>
@@ -162,21 +162,21 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 3: //----------------------------------------------------------------------------------------------------------------CHECKOUT
                 return (
                     <div className="flex flex-col w-[500px] mx-auto">
-                        <h2 className='text-center text-2xl font-extrabold text-purple-300'>Checkout</h2>
+                        <h2 className='text-center text-2xl font-extrabold text-primary'>Checkout</h2>
                         <Divider />
                         <div className='flex flex-col justify-center items-center'>
-                            <h3 className='text-xl text-purple-300 font-extrabold'>Total Cost: </h3>
+                            <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
                             <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
                             <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
                             <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
                         </div>
                         <div className='flex flex-col items-center justify-between'>
-                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2'>
-                                <Button className='text-lg font-extrabold text-purple-300 w-full h-full min-h-[50px]'>Use Existing Card</Button>
+                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
+                                <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]'>Use Existing Card</Button>
                             </div>
-                            <h2 className='text-center text-3xl font-extrabold text-purple-300'>Or</h2>
-                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] border-[1px] border-purple-300 rounded-xl shadow-lg mt-2 p-2'>
-                                <h4 className='text-xl font-extrabold text-purple-300 mb-2'>Enter New info</h4>
+                            <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
+                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
+                                <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
                                 <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
                                 <div className=" flex w-[250px]">
                                     <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
@@ -194,10 +194,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
             default: //----------------------------------------------------------------------------------------------------------------Error/Done
                 return (
                     <div className='flex flex-col justify-center mt-5'>
-                        <h2 className='text-center text-2xl font-extrabold text-purple-300'> Order Placed</h2>
+                        <h2 className='text-center text-2xl font-extrabold text-primary'> Order Placed</h2>
                         <Divider />
                         <div className='flex flex-col justify-center items-center'>
-                            <h3 className='text-xl text-purple-300 font-extrabold'>Ticket information: </h3>
+                            <h3 className='text-xl text-primary font-extrabold'>Ticket information: </h3>
                             <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
                             <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
                             <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
@@ -223,12 +223,12 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     className={'rounded-lg w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6'}
                 />
                 <div className="flex flex-col p-3 w-96">
-                    <h2 className='font-extrabold text-3xl leading-loose text-purple-300'>{movie.title}</h2>
+                    <h2 className='font-extrabold text-3xl leading-loose text-primary'>{movie.title}</h2>
                     <Rating name="read-only" value={movie.rating} precision={0.1} readOnly />
                     <div className='hidden md:block'>
                         <p className='text-lg text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p>
                     </div>
-                    <Button variant='contained' className='bg-purple-300' onClick={handleModalOpen}> More Information</Button>
+                    <Button variant='contained' className='bg-primary' onClick={handleModalOpen}> More Information</Button>
                 </div>
 
             </div>
@@ -270,7 +270,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-white border-purple-300 border-2 rounded-xl bg-slate-900 w-[400px] lg:w-[800px] p-0'>
+                <Box sx={modalStyle} className='text-white border-primary border-2 rounded-xl bg-slate-900 w-[400px] lg:w-[800px] p-0'>
                     <div className="flex justify-between items-center m-3">
                         <Typography id="modal-modal-title" variant="h6" component="h2">
                             Movie Information will be here
@@ -284,14 +284,14 @@ export default function BookMovie({ movie }: BookMovieProps) {
                             <iframe width="560" height="315" src="https://www.youtube.com/embed/JfVOs4VSpmA" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                         </div>
                         <div className="flex flex-col justify-center items-center">
-                            <h2 className='text-2xl font-extrabold text-purple-300'>Movie Information</h2>
+                            <h2 className='text-2xl font-extrabold text-primary'>Movie Information</h2>
                             <Divider />
                             <p className='text-gray-300'>
                                 Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloremque aspernatur, quae laudantium nemo deserunt cum possimus ratione aperiam. Amet aut sequi eos quae ipsam accusantium deserunt assumenda consequatur autem! Sit quod ipsum quo, maxime voluptatibus cum perspiciatis tempora modi assumenda nihil dicta amet ea totam repellendus recusandae quisquam culpa eum dolore numquam ab nulla suscipit reiciendis incidunt aut. Voluptatum officiis saepe porro ratione laudantium nulla veritatis aperiam corrupti minus assumenda et suscipit, dolore ut non recusandae expedita dolorem eius praesentium aliquid itaque facere quibusdam ex nemo! Odio dolore laborum reprehenderit. Sed temporibus in accusamus impedit numquam modi? Voluptatum suscipit voluptates dolore, in libero natus necessitatibus neque temporibus alias labore at ex vel eaque a ipsam eveniet quae nesciunt! Quo maxime quae, eaque doloremque culpa consequatur! Voluptas reiciendis reprehenderit, beatae perspiciatis eaque ea labore quisquam facilis laborum. Cum, vero. Eos quibusdam ipsam reiciendis hic, iusto consectetur possimus perferendis voluptates facere repudiandae molestiae vel autem nisi, alias dolor dolores velit optio magni aliquid? Iusto ea, consectetur quae tempore autem aperiam magnam odit dignissimos cupiditate. Explicabo animi quidem consequatur molestias nisi itaque alias dignissimos perspiciatis rem! Totam, neque, temporibus libero ipsa odit mollitia alias voluptatum similique autem at corrupti, ea iste officiis pariatur dolor amet. Voluptatem et, fugiat vitae eligendi nesciunt vero iure beatae, dolores aliquid est aut praesentium quas alias? Fugiat, quasi. Excepturi quas voluptas perspiciatis sed. Sit sunt ad numquam maiores laboriosam obcaecati nihil tenetur omnis veniam. Aliquam ea, cum eaque consequatur provident totam fugiat modi libero tempora unde culpa ullam praesentium laboriosam doloremque deserunt? Laboriosam cupiditate nulla, ab fugit quasi architecto ullam, numquam praesentium consectetur magnam ad officiis dolorum a obcaecati veniam assumenda rem asperiores quis sed voluptatum vitae sequi eveniet quam nemo? Ducimus ab odio deleniti autem beatae dolores qui. Voluptatem dolores natus accusantium quia vel, pariatur porro minima!
                             </p>
                         </div>
                     </div>
-                    <Button variant='contained' className='bg-purple-300 float-right m-4' onClick={handleModalClose}> Close</Button>
+                    <Button variant='contained' className='bg-primary float-right m-4' onClick={handleModalClose}> Close</Button>
                 </Box>
             </Modal>
         </Layout>
