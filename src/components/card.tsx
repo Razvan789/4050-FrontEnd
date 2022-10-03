@@ -25,8 +25,8 @@ export default function Card({ movie = getMovie(1), link = "/BookTicket/1", litt
                 />
                 {little ? null
                     :
-                    <div id="cardDesc" className='z-10 md:-z-10 absolute w-full bottom-0 rounded-b-lg bg-slate-900 opacity-100 p-3 md:group-hover:translate-y-full transition-all overflow-visible'>
-                        <h1 className='text-lg font-extrabold text-slate-500'>{movie.title}</h1>
+                    <div id="cardDesc" className='z-10 md:-z-10 absolute w-full bottom-0 rounded-b-lg bg-bg-dark opacity-100 p-3 md:group-hover:translate-y-full transition-all overflow-visible'>
+                        <h1 className='text-lg font-extrabold text-text-dark'>{movie.title}</h1>
                         <div className="flex flex-col items-center justify-center">
                             <Rating name="read-only" value={movie.rating} precision={0.1} readOnly />
                         </div>

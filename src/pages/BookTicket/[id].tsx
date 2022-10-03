@@ -82,15 +82,15 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
                 return (
                     <div className="flex flex-wrap  justify-center p-5">
-                        <CalendarPicker date={date} className="bg-slate-900 m-5 mt-3 rounded-xl shadow-xl text-white border-[1px] border-primary" onChange={(newDate) => setDate(newDate)} />
+                        <CalendarPicker date={date} className="bg-bg-dark m-5 mt-3 rounded-xl shadow-xl text-text-light border-[1px] border-primary" onChange={(newDate) => setDate(newDate)} />
                         <div className='flex flex-col'>
                             <h3 className='text-xl text-primary font-extrabold'> Available Times</h3>
                             <Divider />
                             <ul>
-                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
-                                <li className='text-white cursor-pointer hover:text-primary' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
+                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
+                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
+                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
+                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
                             </ul>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
                 return (
                     <div className='mb-[4.3rem] md:mb-0 p-5'>
-                        <div className='mx-auto max-w-[300px] bg-slate-900 p-4 rounded-xl border-[1px] border-primary shadow-lg'>
+                        <div className='mx-auto max-w-[300px] bg-bg-dark p-4 rounded-xl border-[1px] border-primary shadow-lg'>
                             <div className='flex items-center mb-3 justify-center'>
                                 <h3 className='text-xl text-primary font-extrabold mr-5'>Show times: </h3>
                                 <Select
@@ -150,7 +150,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     <div className='flex justify-center mt-5'>
                         <SeatPicker />
 
-                        <div className="flex flex-col text-white ml-10">
+                        <div className="flex flex-col text-text-light ml-10">
                             <h3 className='text-center text-xl font-extrabold text-primary'>Seats Left:</h3>
                             <Divider />
                             <p> Adult Tickets: {adultTickets}</p>
@@ -166,16 +166,16 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         <Divider />
                         <div className='flex flex-col justify-center items-center'>
                             <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
-                            <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
-                            <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
-                            <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
+                            <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
+                            <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
+                            <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
                         </div>
                         <div className='flex flex-col items-center justify-between'>
-                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
+                            <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
                                 <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]'>Use Existing Card</Button>
                             </div>
                             <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
-                            <div className='flex flex-col items-center justify-between bg-slate-900 w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
+                            <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
                                 <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
                                 <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
                                 <div className=" flex w-[250px]">
@@ -198,10 +198,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         <Divider />
                         <div className='flex flex-col justify-center items-center'>
                             <h3 className='text-xl text-primary font-extrabold'>Ticket information: </h3>
-                            <p className='text-white'>Adult Tickets: ${adultTickets * 10}</p>
-                            <p className='text-white'>Child Tickets: ${childTickets * 5}</p>
-                            <p className='text-white'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
-                            <p className='text-white'>Show Time: {showTime}</p>
+                            <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
+                            <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
+                            <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
+                            <p className='text-text-light'>Show Time: {showTime}</p>
                         </div>
                     </div>
                 );
@@ -270,7 +270,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-white border-primary border-2 rounded-xl bg-slate-900 w-[400px] lg:w-[800px] p-0'>
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[400px] lg:w-[800px] p-0'>
                     <div className="flex justify-between items-center m-3">
                         <Typography id="modal-modal-title" variant="h6" component="h2">
                             Movie Information will be here
@@ -286,7 +286,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         <div className="flex flex-col justify-center items-center">
                             <h2 className='text-2xl font-extrabold text-primary'>Movie Information</h2>
                             <Divider />
-                            <p className='text-gray-300'>
+                            <p className='text-text-dark'>
                                 Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloremque aspernatur, quae laudantium nemo deserunt cum possimus ratione aperiam. Amet aut sequi eos quae ipsam accusantium deserunt assumenda consequatur autem! Sit quod ipsum quo, maxime voluptatibus cum perspiciatis tempora modi assumenda nihil dicta amet ea totam repellendus recusandae quisquam culpa eum dolore numquam ab nulla suscipit reiciendis incidunt aut. Voluptatum officiis saepe porro ratione laudantium nulla veritatis aperiam corrupti minus assumenda et suscipit, dolore ut non recusandae expedita dolorem eius praesentium aliquid itaque facere quibusdam ex nemo! Odio dolore laborum reprehenderit. Sed temporibus in accusamus impedit numquam modi? Voluptatum suscipit voluptates dolore, in libero natus necessitatibus neque temporibus alias labore at ex vel eaque a ipsam eveniet quae nesciunt! Quo maxime quae, eaque doloremque culpa consequatur! Voluptas reiciendis reprehenderit, beatae perspiciatis eaque ea labore quisquam facilis laborum. Cum, vero. Eos quibusdam ipsam reiciendis hic, iusto consectetur possimus perferendis voluptates facere repudiandae molestiae vel autem nisi, alias dolor dolores velit optio magni aliquid? Iusto ea, consectetur quae tempore autem aperiam magnam odit dignissimos cupiditate. Explicabo animi quidem consequatur molestias nisi itaque alias dignissimos perspiciatis rem! Totam, neque, temporibus libero ipsa odit mollitia alias voluptatum similique autem at corrupti, ea iste officiis pariatur dolor amet. Voluptatem et, fugiat vitae eligendi nesciunt vero iure beatae, dolores aliquid est aut praesentium quas alias? Fugiat, quasi. Excepturi quas voluptas perspiciatis sed. Sit sunt ad numquam maiores laboriosam obcaecati nihil tenetur omnis veniam. Aliquam ea, cum eaque consequatur provident totam fugiat modi libero tempora unde culpa ullam praesentium laboriosam doloremque deserunt? Laboriosam cupiditate nulla, ab fugit quasi architecto ullam, numquam praesentium consectetur magnam ad officiis dolorum a obcaecati veniam assumenda rem asperiores quis sed voluptatum vitae sequi eveniet quam nemo? Ducimus ab odio deleniti autem beatae dolores qui. Voluptatem dolores natus accusantium quia vel, pariatur porro minima!
                             </p>
                         </div>

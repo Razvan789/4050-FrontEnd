@@ -42,7 +42,7 @@ export default function ResetPassword() {
                 }
                 <div className="flex flex-col text-center">
                     <Link href='/login'><p className='text-primary cursor-pointer underline'>Return to Login</p></Link>
-                    <p className="text-white">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-primary">Sign up</span></Link></p>
+                    <p className="text-text-light">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-primary">Sign up</span></Link></p>
                 </div>
             </StyleBox>
         </Layout>

@@ -22,9 +22,9 @@ type NavbarProps = {
 export default function Navbar({ title = "Default Value", userInfo }: NavbarProps) {
   const theme = useTheme();
   return (
-    <div className="flex flex-row items-center justify-between h-12 md:h-16 bg-slate-900 shadow-md p-4">
+    <div className="flex flex-row items-center justify-between h-12 md:h-16 bg-bg-dark shadow-md p-4">
       <Link href="/" >
-        <div id='Brand' className='flex flex-row items-center text-2xl text-slate-300 hover:text-slate-100 cursor-pointer md:text-3xl font-bold text-white'>
+        <div id='Brand' className='flex flex-row items-center text-2xl text-text-light hover:text-text-dark cursor-pointer md:text-3xl font-bold'>
           <MovieIcon className='md:mr-4 text-3xl md:text-5xl' />
           <h1 className='hidden md:block'>{title}</h1>
         </div>

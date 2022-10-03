@@ -7,6 +7,7 @@ import Navbar from './navbar';
 import { useRouter } from 'next/router';
 import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
+import { text } from 'stream/consumers';
 
 //Required for theming in typescript
 declare module '@mui/material/styles' {
@@ -35,22 +36,40 @@ declare module '@mui/material/styles' {
         };
     }
 }
-//Change MUI component theme here
-const primary = "#D8B4FE"; //D8B4FE
-const primaryParse = parseColorString(hexToRgb(primary));
-
-if(typeof window !== 'undefined'){
-    document.documentElement.style.setProperty('--color-primary', primaryParse);
+const colorMode = 'dark';
+//Change theme here
+const colors =  {
+    'light' : {
+        primary: "#396b73",
+        bg :{
+            light: "#D8DBE2",
+            dark : "#A9BCD0"
+        },
+        text : {
+            light: "#373F51",
+            dark : "#1B1B1E"
+        }
+    },
+    'dark' : {
+        primary: "#58A4B0",
+        bg :{
+            light: "#373F51",
+            dark : "#1B1B1E"
+        },
+        text : {
+            light: "#D8DBE2",
+            dark : "#A9BCD0"
+        }
+    }
 }
-
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
     },
     palette: {
-        mode: 'dark',
+        mode: colorMode,
         primary: {
-            main: primary,
+            main: colors[colorMode].primary,
         },
         neutral: {
             main: '#64748B',
@@ -58,6 +77,16 @@ const theme = createTheme({
         },
     },
 });
+
+const primaryParse = parseColors(colors[colorMode]);
+    console.log(primaryParse);
+if(typeof window !== 'undefined'){
+    document.documentElement.style.setProperty('--color-primary', colors[colorMode].primary);
+    document.documentElement.style.setProperty('--color-bg-light', colors[colorMode].bg.light);
+    document.documentElement.style.setProperty('--color-bg-dark', colors[colorMode].bg.dark);
+    document.documentElement.style.setProperty('--color-text-light', colors[colorMode].text.light);
+    document.documentElement.style.setProperty('--color-text-dark', colors[colorMode].text.dark);
+}
 
 type layoutProps = {
     children?: React.ReactNode,
@@ -79,7 +108,7 @@ export default function Layout({ children }: layoutProps) {
             <ThemeProvider theme={theme}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <UserContext.Provider value={user}>
-                        <div className='bg-slate-800 overflow-hidden'>
+                        <div className='bg-bg-light overflow-hidden'>
                             <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
                                 <Navbar title="E-Cinema" userInfo={user} />
                                 {children}
@@ -93,7 +122,19 @@ export default function Layout({ children }: layoutProps) {
 }
 
 
-function parseColorString(color: string): string {
+function parseColorString(color : string): string {
     const newColor = color.replace(/rgb\(|\)/g, '').replace(/ /g, '');
     return newColor.replace(/,/g, ' ');
+}
+
+function parseColors(colors: any): string {
+
+    for (const key in colors) {
+        if (typeof colors[key] === 'object') {
+            parseColors(colors[key]);
+        } else {
+            colors[key] = parseColorString(hexToRgb(colors[key]));
+        }
+    }
+    return colors;
 }
