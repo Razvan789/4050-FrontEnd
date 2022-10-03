@@ -38,30 +38,58 @@ declare module '@mui/material/styles' {
 }
 const colorMode = 'dark';
 //Change theme here
-const colors =  {
-    'light' : {
-        primary: "#396b73",
-        bg :{
-            light: "#D8DBE2",
-            dark : "#A9BCD0"
+const themes = [
+    {
+        'light': {
+            primary: "#396b73",
+            bg: {
+                light: "#D8DBE2",
+                dark: "#A9BCD0"
+            },
+            text: {
+                light: "#373F51",
+                dark: "#1B1B1E"
+            }
         },
-        text : {
-            light: "#373F51",
-            dark : "#1B1B1E"
+        'dark': {
+            primary: "#58A4B0",
+            bg: {
+                light: "#373F51",
+                dark: "#1B1B1E"
+            },
+            text: {
+                light: "#D8DBE2",
+                dark: "#A9BCD0"
+            }
         }
     },
-    'dark' : {
-        primary: "#58A4B0",
-        bg :{
-            light: "#373F51",
-            dark : "#1B1B1E"
+    {
+        'light': {
+            primary: "#396b73",
+            bg: {
+                light: "#D8DBE2",
+                dark: "#A9BCD0"
+            },
+            text: {
+                light: "#373F51",
+                dark: "#1B1B1E"
+            }
         },
-        text : {
-            light: "#D8DBE2",
-            dark : "#A9BCD0"
+        'dark': {
+            primary: "#D8B4FE",
+            bg: {
+                light: "#1F293C",
+                dark: "#0F172A"
+            },
+            text: {
+                light: "#FFFFFF",
+                dark: "#64748B"
+            }
         }
-    }
-}
+    },
+]
+
+const colors = themes[1];
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
@@ -78,14 +106,14 @@ const theme = createTheme({
     },
 });
 
-const primaryParse = parseColors(colors[colorMode]);
-    console.log(primaryParse);
-if(typeof window !== 'undefined'){
-    document.documentElement.style.setProperty('--color-primary', colors[colorMode].primary);
-    document.documentElement.style.setProperty('--color-bg-light', colors[colorMode].bg.light);
-    document.documentElement.style.setProperty('--color-bg-dark', colors[colorMode].bg.dark);
-    document.documentElement.style.setProperty('--color-text-light', colors[colorMode].text.light);
-    document.documentElement.style.setProperty('--color-text-dark', colors[colorMode].text.dark);
+const primaryParse = parseColors(colors?.[colorMode]);
+console.log(primaryParse);
+if (typeof window !== 'undefined') {
+    document.documentElement.style.setProperty('--color-primary', colors?.[colorMode].primary || '#58A4B0');
+    document.documentElement.style.setProperty('--color-bg-light', colors?.[colorMode].bg.light || '#373F51');
+    document.documentElement.style.setProperty('--color-bg-dark', colors?.[colorMode].bg.dark || '#1B1B1E');
+    document.documentElement.style.setProperty('--color-text-light', colors?.[colorMode].text.light || '#D8DBE2');
+    document.documentElement.style.setProperty('--color-text-dark', colors?.[colorMode].text.dark || '#A9BCD0');
 }
 
 type layoutProps = {
@@ -122,7 +150,7 @@ export default function Layout({ children }: layoutProps) {
 }
 
 
-function parseColorString(color : string): string {
+function parseColorString(color: string): string {
     const newColor = color.replace(/rgb\(|\)/g, '').replace(/ /g, '');
     return newColor.replace(/,/g, ' ');
 }
