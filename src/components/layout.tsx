@@ -90,7 +90,7 @@ const themes = [
     },
 ]
 
-const colors = themes[1];
+const colors = themes[0];
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
@@ -155,7 +155,7 @@ export default function Layout({ children, }: layoutProps) {
     )
 }
 
-
+//Takes in a color string in the form of rgb(r,g,b) and returns the string r g b
 function parseColorString(color: string): string {
     const newColor = color.replace(/rgb\(|\)/g, '').replace(/ /g, '');
     return newColor.replace(/,/g, ' ');
