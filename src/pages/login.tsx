@@ -2,7 +2,11 @@ import Layout from "../components/layout"
 import Head from 'next/head'
 import { Box, TextField, Button, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
 import Link from "next/link"
-export default function login() {
+import { useContext } from "react"
+import { UserContext } from "../components/layout"
+import { User } from "../utils/user"
+export default function Login() {
+    let user = useContext(UserContext);
     return (
         <Layout>
             <div className="rounded-xl border-2 border-primary w-[400px] mx-auto my-10 p-3 pt-0 bg-bg-dark">
@@ -16,7 +20,7 @@ export default function login() {
                         <FormControlLabel className="text-text-light" control={<Checkbox />} label="Remember Me" />
 
                         <Link href='/?user=test'>
-                            <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained">Login</Button>
+                            <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" onClick={()=>{user = {name: "Razvan"} as User}}>Login</Button>
                         </Link>
 
                         <div className="flex flex-col text-center">

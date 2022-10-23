@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createContext, useEffect, useState} from 'react'
 import { hexToRgb, StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
 import { text } from 'stream/consumers';
+import {serverUrl} from '../utils/backendInfo';
 
 //Required for theming in typescript
 declare module '@mui/material/styles' {
@@ -97,7 +98,7 @@ const theme = createTheme({
     palette: {
         mode: colorMode,
         primary: {
-            main: colors[colorMode].primary,
+            main: colors?.[colorMode].primary || '#58A4B0',
         },
         neutral: {
             main: '#64748B',
@@ -118,19 +119,23 @@ if (typeof window !== 'undefined') {
 
 type layoutProps = {
     children?: React.ReactNode,
+    user?: User,
 }
-export const UserContext = React.createContext({} as User);
-export default function Layout({ children }: layoutProps) {
-    const router = useRouter();
-    let user: User = null;
-    if (router.query.user) {
-        console.log(router.query.user);
-        user = {
-            name: String(router.query.user),
-            email: "",
-        };
-        console.log(user);
+export let UserContext = createContext({} as User);
+export default function Layout({ children, }: layoutProps) {
+    const [user, setUser] = useState<User>(null);
+    async function getUser(email: string): Promise<User> {
+        const res = await fetch(`${serverUrl}/check-user?email=${email}`);
+        const user = await res.json();
+        return user as User;
     }
+    useEffect(() => {
+        getUser("razvanbeldeanu789@gmail.com").then((user) => {
+            console.log(user);
+            setUser(user);
+        });
+    }, []);
+    UserContext = createContext(user);
     return (
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
@@ -139,6 +144,7 @@ export default function Layout({ children }: layoutProps) {
                         <div className='bg-bg-light overflow-hidden'>
                             <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
                                 <Navbar title="E-Cinema" userInfo={user} />
+                                <button onClick={() => {getUser("razvanbeldeanu789@gmail.com").then((user)=> setUser(user))}}>Click</button>
                                 {children}
                             </main>
                         </div>
