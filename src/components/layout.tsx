@@ -90,7 +90,7 @@ const themes = [
     },
 ]
 
-const colors = themes[0];
+const colors = themes[1];
 const theme = createTheme({
     status: {
         danger: '#e53e3e',
@@ -144,7 +144,6 @@ export default function Layout({ children, }: layoutProps) {
                         <div className='bg-bg-light overflow-hidden'>
                             <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
                                 <Navbar title="E-Cinema" userInfo={user} />
-                                <button onClick={() => {getUser("razvanbeldeanu789@gmail.com").then((user)=> setUser(user))}}>Click</button>
                                 {children}
                             </main>
                         </div>

@@ -15,7 +15,7 @@ const handleFilterDelete = () => {
 
 export default function Home() {
   const user: User = useContext(UserContext);
-  console.log("User from ind",user);
+  console.log("User from in",user);
   return (
     <Layout>
       <Head>
