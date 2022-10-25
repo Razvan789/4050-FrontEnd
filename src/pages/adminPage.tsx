@@ -7,6 +7,7 @@ import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react'
 import { Button, Modal, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useUser } from '../utils/user';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -56,16 +57,17 @@ export default function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [adminLogged, setAdminLogged] = useState(false);
     const [open, setOpen] = useState(false);
+    const user = useUser();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
     useEffect(() => {
-        if (window.sessionStorage.getItem('admin') == null) {
-            window.location.href = '/login';
-        } else {
+        if(window.sessionStorage.getItem("admin") == "true"){
             setAdminLogged(true);
+        } else {
+            window.location.href = "/";
         }
     }, []);
 
@@ -174,7 +176,7 @@ export default function AdminPage() {
 
                 </main>
             ) : <div className="flex justify-center mt-10">
-                <CircularProgress disableShrink className='w-full'/>
+                <CircularProgress disableShrink className='w-full' />
             </div>}
             <Modal
                 open={open}
