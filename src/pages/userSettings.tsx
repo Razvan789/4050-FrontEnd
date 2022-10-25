@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { TextField, Button, Divider } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs';
+import { useUser } from '../utils/user';
 import Link from 'next/link'
 
 
@@ -23,7 +24,6 @@ const customToolbar = () => {
     return (
         <GridToolbarContainer className='p-2 pb-0'>
             <GridToolbarQuickFilter debounceMs={500} className='w-full' />
-
         </GridToolbarContainer>
     );
 };
@@ -36,6 +36,7 @@ export default function UserSettings() {
     const handleClose = () => setOpen(false);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
+    const user = useUser();
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
@@ -120,10 +121,10 @@ export default function UserSettings() {
                     <Box sx={{ height: 600, width: 1 }}>
                         
                         <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-                            <TextField variant='standard' type="email" label='Email'></TextField>
-                            <TextField variant='standard' type="text" label='Username'></TextField>
-                            <TextField variant='standard' type="password" label='Password'></TextField>
-                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Account</Button>
+                            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{readOnly: true}}></TextField>
+                            <TextField variant='standard' type="password" label='Current Password'></TextField>
+                            <TextField variant='standard' type="password" label='New Password'></TextField>
+                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Password</Button>
                         </form>
                     </Box>
                 </TabPanel>

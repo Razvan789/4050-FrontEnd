@@ -1,5 +1,5 @@
 import { type } from "os";
-import React from "react";
+import React, {useState, useEffect} from "react";
 
 export type User = {
     userID: number,
@@ -13,3 +13,13 @@ export type User = {
     address: string,
     status: string,
 } | null;
+
+
+export function useUser() {
+    const [user, setUser] = useState<User>(null);
+    useEffect(() => {
+        const tempUser = typeof window !== 'undefined' ? JSON.parse(window.sessionStorage.getItem('user') || '{}') : {};
+        setUser(tempUser);
+    }, [])
+    return user;
+}
