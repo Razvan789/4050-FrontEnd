@@ -1,13 +1,12 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import { DataGrid, GridToolbar, GridColDef, GridRenderCellParams, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react'
 import { Button, Modal, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useUser } from '../utils/user';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -57,7 +56,6 @@ export default function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [adminLogged, setAdminLogged] = useState(false);
     const [open, setOpen] = useState(false);
-    const user = useUser();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {

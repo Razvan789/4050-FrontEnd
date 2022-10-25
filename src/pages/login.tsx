@@ -4,14 +4,14 @@ import { Box, TextField, Button, FormGroup, FormControlLabel, Checkbox } from '@
 import Link from "next/link"
 import { useEffect } from "react"
 import { User , useUser} from "../utils/user"
+import { useRouter } from "next/router"
 import { LoginForm } from "../components/forms"
 export default function Login() {
     const user: User = useUser();
-
+    const router = useRouter();
     useEffect(() => {
-        console.log("",user);
         if (user?.name != null) {
-            window.location.href = "/";
+            router.push("/");
         }
     }, [user])
     

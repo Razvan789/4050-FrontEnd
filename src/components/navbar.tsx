@@ -23,7 +23,6 @@ type NavbarProps = {
 
 
 export default function Navbar({ title = "Default Value", userInfo }: NavbarProps) {
-  const theme = useTheme();
   const [signingOut, setSigningOut] = useState(false);
   
   return (

@@ -4,6 +4,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
 import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from '@mui/material'
 import Link from 'next/link'
+import Router, { useRouter, NextRouter } from 'next/router';
 import { UserContext } from './layout';
 import { User } from '../utils/user';
 export type signUpInfo = {
@@ -152,6 +153,7 @@ export function SignUpForm() {
 
 
 export function LoginForm() {
+    const router = useRouter();
     const [loginCode, setLoginCode] = useState(0); //0 - not logged in, 1 - success,2 - error server, 3 - error account, 4 - error email/password
     const [rememberMe, setRememberMe] = useState(false);
     const [loginInfo, setLoginInfo] = useState<loginInfo>({
@@ -202,9 +204,9 @@ export function LoginForm() {
                     setLoginCode(1);
                     if (data.type == 'admin') {
                         window.sessionStorage.setItem('admin', 'true');
-                        window.location.href = '/adminPage';
+                        router.push('/adminPage');
                     } else {
-                        window.location.href = "/";
+                        router.push('/');
                     }
                 } else {
                     setLoginCode(3);
