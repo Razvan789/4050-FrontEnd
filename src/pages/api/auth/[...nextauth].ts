@@ -1,4 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
+import { serverUrl } from "../../../utils/backendInfo.js";
+import Providers from "next-auth/providers";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "../../../env/server.mjs";
 
@@ -14,11 +16,20 @@ export const authOptions: NextAuthOptions = {
   },
   // Configure one or more authentication providers
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
     // ...add more providers here
+    // Providers.Credentials({
+    //   name: "customLogin",
+    //   credentials: {
+    //     username: { label: "Username", type: "text", placeholder: "jsmith" },
+    //     password: { label: "Password", type: "password" },
+    //   },
+    //   async authorize(credentials) {
+    //     const user = await fetch(`${serverUrl}/check-user?email`).then(res => {
+    //       if (res.ok) {
+    //         return res.json();
+    //       }
+    //       return null;
+    //     }).then(data => data);
   ],
 };
 

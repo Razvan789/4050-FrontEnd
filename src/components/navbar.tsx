@@ -1,5 +1,5 @@
 import { Container } from 'postcss';
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import styles from './navbar.module.css';
 import Avatar from '@mui/material/Avatar';
 import { User } from '../utils/user';
@@ -13,14 +13,19 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 import Badge from '@mui/material/Badge';
 import Link from 'next/link';
+import { signOut } from '../components/forms';
 
 type NavbarProps = {
   title?: string
   userInfo?: User
 }
 
+
+
 export default function Navbar({ title = "Default Value", userInfo }: NavbarProps) {
   const theme = useTheme();
+  const [signingOut, setSigningOut] = useState(false);
+  
   return (
     <div className="flex flex-row items-center justify-between h-12 md:h-16 bg-bg-dark shadow-md p-4">
       <Link href="/" >
@@ -34,7 +39,7 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
 
 
 
-        {!userInfo ?
+        {!userInfo?.name ?
           <Link href="/login">
             <Button color='primary' variant="outlined" className='scale-95' startIcon={<AccountCircleIcon />}>
               Sign in
@@ -55,6 +60,9 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
                 <SettingsIcon />
               </IconButton>
             </Link>
+            <Button color='primary' variant="outlined" className='scale-95' onClick={signOut}>
+              Sign Out
+            </Button>
           </div>
         }
       </div>

@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState} from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { hexToRgb, StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { User } from '../utils/user';
 import orange from '@mui/material/colors/orange';
 import { text } from 'stream/consumers';
-import {serverUrl} from '../utils/backendInfo';
+import { serverUrl } from '../utils/backendInfo';
 
 //Required for theming in typescript
 declare module '@mui/material/styles' {
@@ -123,18 +123,11 @@ type layoutProps = {
 }
 export let UserContext = createContext({} as User);
 export default function Layout({ children, }: layoutProps) {
-    const [user, setUser] = useState<User>(null);
-    async function getUser(email: string): Promise<User> {
-        const res = await fetch(`${serverUrl}/check-user?email=${email}`);
-        const user = await res.json();
-        return user as User;
-    }
     useEffect(() => {
-        getUser("razvanbeldeanu789@gmail.com").then((user) => {
-            console.log(user);
-            setUser(user);
-        });
-    }, []);
+        const tempUser = typeof window !== 'undefined' ? JSON.parse(window.sessionStorage.getItem('user') || '{}') : {};
+        setUser(tempUser);
+    }, [])
+    const [user, setUser] = useState<User>({} as User);
     UserContext = createContext(user);
     return (
         <StyledEngineProvider injectFirst>
@@ -144,7 +137,7 @@ export default function Layout({ children, }: layoutProps) {
                         <div className='bg-bg-light overflow-hidden'>
                             <main className="container flex flex-col min-h-screen mx-auto min-w-full" >
                                 <Navbar title="E-Cinema" userInfo={user} />
-                                {children}
+                                    {children}
                             </main>
                         </div>
                     </UserContext.Provider>
@@ -153,6 +146,7 @@ export default function Layout({ children, }: layoutProps) {
         </StyledEngineProvider>
     )
 }
+
 
 //Takes in a color string in the form of rgb(r,g,b) and returns the string r g b
 function parseColorString(color: string): string {
