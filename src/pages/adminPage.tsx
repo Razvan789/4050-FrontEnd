@@ -1,6 +1,6 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import { DataGrid, GridToolbar, GridColDef, GridRenderCellParams, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -62,10 +62,10 @@ export default function AdminPage() {
         setTabValue(newValue);
     };
     useEffect(() => {
-        if (window.sessionStorage.getItem('admin') == null) {
-            window.location.href = '/login';
-        } else {
+        if(window.sessionStorage.getItem("admin") == "true"){
             setAdminLogged(true);
+        } else {
+            window.location.href = "/";
         }
     }, []);
 
@@ -174,7 +174,7 @@ export default function AdminPage() {
 
                 </main>
             ) : <div className="flex justify-center mt-10">
-                <CircularProgress disableShrink className='w-full'/>
+                <CircularProgress disableShrink className='w-full' />
             </div>}
             <Modal
                 open={open}

@@ -2,11 +2,19 @@ import Layout from "../components/layout"
 import Head from 'next/head'
 import { Box, TextField, Button, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
 import Link from "next/link"
-import { useContext } from "react"
-import { UserContext } from "../components/layout"
-import { User } from "../utils/user"
+import { useEffect } from "react"
+import { User , useUser} from "../utils/user"
+import { useRouter } from "next/router"
 import { LoginForm } from "../components/forms"
 export default function Login() {
+    const user: User = useUser();
+    const router = useRouter();
+    useEffect(() => {
+        if (user?.name != null) {
+            router.push("/");
+        }
+    }, [user])
+    
     return (
         <Layout>
             <div className="rounded-xl border-2 border-primary w-[400px] mx-auto my-10 p-3 pt-0 bg-bg-dark">

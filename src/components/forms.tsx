@@ -2,8 +2,9 @@ import React, { useState, useContext, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
-import { TextField, Button, FormControlLabel, Checkbox } from '@mui/material'
+import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from '@mui/material'
 import Link from 'next/link'
+import Router, { useRouter, NextRouter } from 'next/router';
 import { UserContext } from './layout';
 import { User } from '../utils/user';
 export type signUpInfo = {
@@ -152,8 +153,8 @@ export function SignUpForm() {
 
 
 export function LoginForm() {
-    let user = useContext(UserContext);
-    const [loginCode, setLoginCode] = useState(0); //Use Reducer instead of state
+    const router = useRouter();
+    const [loginCode, setLoginCode] = useState(0); //0 - not logged in, 1 - success,2 - error server, 3 - error account, 4 - error email/password
     const [rememberMe, setRememberMe] = useState(false);
     const [loginInfo, setLoginInfo] = useState<loginInfo>({
         email: '',
@@ -180,13 +181,14 @@ export function LoginForm() {
         setRememberMe(!rememberMe);
     }
 
-    function submitLogin() {
+    function submitLogin(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         fetch(`${serverUrl}/check-user?email=${loginInfo.email}`).then((response) => {
             console.log(response);
             if (response.status == 200) {
                 return response.json()
             }
-            setLoginCode(1);
+            setLoginCode(2);
             return null;
         }).then((data) => {
             if (data == null) return;
@@ -199,34 +201,48 @@ export function LoginForm() {
                     } else {
                         localStorage.removeItem('savedEmail');
                     }
-                    console.log(data);
+                    setLoginCode(1);
                     if (data.type == 'admin') {
                         window.sessionStorage.setItem('admin', 'true');
-                        window.location.href = '/adminPage';
+                        router.push('/adminPage');
                     } else {
-                        window.location.href = "/";
+                        router.push('/');
                     }
                 } else {
-                    setLoginCode(2);
+                    setLoginCode(3);
                 }
+            } else {
+                setLoginCode(4);
             }
         });
     }
     return (
-        <div className="flex flex-col space-y-3">
-            <TextField name='email' label="Email" type="email" variant="standard" value={loginInfo.email} onChange={handleLoginChange} />
-            <TextField name='password' label="Password" type="password" variant="standard" value={loginInfo.password} onChange={handleLoginChange} />
-            <FormControlLabel className="text-text-light" control={<Checkbox checked={rememberMe} onChange={handleRememberMeToggle} />} label="Remember Me" />
+        <>
+            {loginCode != 1 ?
+                <form noValidate onSubmit={submitLogin}>
+                    <div className="flex flex-col space-y-3">
+                        <TextField name='email' label="Email" type="email" variant="standard" value={loginInfo.email} onChange={handleLoginChange} />
+                        <TextField name='password' label="Password" type="password" variant="standard" value={loginInfo.password} onChange={handleLoginChange} />
+                        <FormControlLabel className="text-text-light" control={<Checkbox checked={rememberMe} onChange={handleRememberMeToggle} />} label="Remember Me" />
 
-            {loginCode == 1 ? <h3 className='text-xl font-extrabold text-red-600'>Login Error Please try again</h3> : null}
-            {loginCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Your account is not active, please check your email</h3> : null}
-            <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" onClick={submitLogin}>Login</Button>
-
-            <div className="flex flex-col text-center">
-                <p className="text-text-light">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-primary">Sign up</span></Link></p>
-                <p className="text-text-light">Forgot your password? <Link href='/resetPassword'><span className="cursor-pointer underline text-primary">Reset Password</span></Link></p>
-            </div>
-        </div>
+                        {loginCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Login Error Please try again</h3> : null}
+                        {loginCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Your account is not active, please check your email</h3> : null}
+                        {loginCode == 4 ? <h3 className='text-xl font-extrabold text-red-600'>Password is incorrect</h3> : null}
+                        <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" type='submit'>Login</Button>
+                        <div className="flex flex-col text-center">
+                            <p className="text-text-light">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-primary">Sign up</span></Link></p>
+                            <p className="text-text-light">Forgot your password? <Link href='/resetPassword'><span className="cursor-pointer underline text-primary">Reset Password</span></Link></p>
+                        </div>
+                    </div>
+                </form>
+                :
+                <div className='flex flex-col justify-center space-y-6 p-4 mb-4 text-text-light'>
+                    <CircularProgress disableShrink />
+                    <h1 className='text-2xl font-bold'>Logging In...</h1>
+                    <p className='text-lg'>Please wait while we log you in.</p>
+                </div>
+            }
+        </>
     )
 }
 
