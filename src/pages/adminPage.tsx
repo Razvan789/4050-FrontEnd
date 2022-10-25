@@ -174,7 +174,7 @@ export default function AdminPage() {
 
                 </main>
             ) : <div className="flex justify-center mt-10">
-                <CircularProgress className='w-full'/>
+                <CircularProgress disableShrink className='w-full'/>
             </div>}
             <Modal
                 open={open}
