@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
@@ -6,8 +6,6 @@ import { TextField, Button, FormControlLabel, Checkbox } from '@mui/material'
 import Link from 'next/link'
 import { UserContext } from './layout';
 import { User } from '../utils/user';
-
-
 export type signUpInfo = {
     firstName: string,
     lastName: string,
@@ -22,6 +20,7 @@ export type signUpInfo = {
     promotionsSubscribed: boolean,
 }
 
+
 export type loginInfo = {
     email: string,
     password: string,
@@ -31,7 +30,7 @@ export type loginInfo = {
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const [successCode, setSuccessCode] = useState(0); //1 = success, 2 = error
     const [signUpInfo, setSignUpInfo] = useState<signUpInfo>({
         firstName: '',
         lastName: '',
@@ -77,25 +76,35 @@ export function SignUpForm() {
         }).then(res => {
             if (res.status == 200) {
                 console.log('signup send', signUpInfo);
-                setSuccess(true);
+                setSuccessCode(1);
             }
         })
         
     }
+
+    function canSignUp(signUpInfo: signUpInfo) {
+        if (signUpInfo.firstName.length > 0 && signUpInfo.lastName.length > 0 && signUpInfo.email.length > 0 && signUpInfo.password.length > 0 && signUpInfo.confirmPassword.length > 0 && signUpInfo.phoneNumber.length > 0) {
+            if (signUpInfo.password == signUpInfo.confirmPassword) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     return (
         <>
-            {!success ? //If the user has not successfully signed up
+            {successCode == 0 ? //If the user has not successfully signed up
                 <form noValidate >
                     <div className='lg:flex'>
                         <div id='topField' className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-                            <TextField id='email' name="email" variant='standard' type="email" label='Email' value={signUpInfo.email} onChange={handleSignUpChange}></TextField>
+                            <TextField id='email' name="email" variant='standard' type="email" label='Email *' value={signUpInfo.email} onChange={handleSignUpChange}></TextField>
                             <div className='flex w-full'>
-                                <TextField name="firstName" className='w-full mr-1' variant='standard' type="text" label='First Name' value={signUpInfo.firstName} onChange={handleSignUpChange}></TextField>
-                                <TextField name="lastName" className='w-full' variant='standard' type="text" label='Last Name' value={signUpInfo.lastName} onChange={handleSignUpChange}></TextField>
+                                <TextField name="firstName" className='w-full mr-1' variant='standard' type="text" label='First Name *' value={signUpInfo.firstName} onChange={handleSignUpChange}></TextField>
+                                <TextField name="lastName" className='w-full' variant='standard' type="text" label='Last Name *' value={signUpInfo.lastName} onChange={handleSignUpChange}></TextField>
                             </div>
-                            <TextField name="phoneNumber" variant='standard' type="text" label='Phone Number' value={signUpInfo.phoneNumber} onChange={handleSignUpChange}></TextField>
-                            <TextField name="password" variant='standard' type="password" label='Password' onChange={handleSignUpChange}></TextField>
-                            <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password' onChange={handleSignUpChange}></TextField>
+                            <TextField name="phoneNumber" variant='standard' type="text" label='Phone Number *' value={signUpInfo.phoneNumber} onChange={handleSignUpChange}></TextField>
+                            <TextField name="password" variant='standard' type="password" label='Password *' onChange={handleSignUpChange}></TextField>
+                            <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password *' onChange={handleSignUpChange}></TextField>
                         </div>
 
                         <div id='botField' className={cardDetailsOpen ? "block w-full" : "hidden"}>
@@ -122,7 +131,7 @@ export function SignUpForm() {
                     <FormControlLabel className="text-text-light" control={<Checkbox checked={signUpInfo.promotionsSubscribed} onChange={handlePromotionToggle} />} label="Subscribe To promotions?" />
                     <Button className='w-full my-2' onClick={handleOpenCard}> {cardDetailsOpen ? "Not Right Now" : "Add a Payment Method"}</Button>
 
-                    {signUpInfo.password === signUpInfo.confirmPassword && signUpInfo.password ?
+                    {canSignUp(signUpInfo) ?
                         <Button className="bg-primary w-full font-extrabold" variant='contained' onClick={() => { sendSignUpInfo() }}>Sign Up</Button>
                         :
                         <Button className="bg-primary w-full font-extrabold" variant='contained' disabled>Sign Up</Button>
@@ -145,16 +154,30 @@ export function SignUpForm() {
 export function LoginForm() {
     let user = useContext(UserContext);
     const [loginCode, setLoginCode] = useState(0); //Use Reducer instead of state
+    const [rememberMe, setRememberMe] = useState(false);
     const [loginInfo, setLoginInfo] = useState<loginInfo>({
         email: '',
         password: '',
     } as loginInfo);
 
+    useEffect(()=> {
+        if(localStorage.getItem('savedEmail')) {
+            setLoginInfo({
+                ...loginInfo,
+                email: localStorage.getItem('savedEmail') as string
+            })
+            setRememberMe(true);
+        }
+    }, []);
     function handleLoginChange(event: React.ChangeEvent<HTMLInputElement>) {
         setLoginInfo({
             ...loginInfo,
             [event.target.name]: event.target.value
         } as loginInfo);
+    }
+
+    function handleRememberMeToggle() {
+        setRememberMe(!rememberMe);
     }
 
     function submitLogin() {
@@ -170,6 +193,11 @@ export function LoginForm() {
             //Password match check here
             if(data.password == loginInfo.password) {
                 window.sessionStorage.setItem('user', JSON.stringify(data));
+                if(rememberMe) {
+                    localStorage.setItem('savedEmail', loginInfo.email);
+                } else {
+                    localStorage.removeItem('savedEmail');
+                }
                 console.log(data);
                 if(data.type == 'admin') {
                     window.sessionStorage.setItem('admin', 'true');
@@ -184,7 +212,7 @@ export function LoginForm() {
         <div className="flex flex-col space-y-3">
             <TextField name='email'  label="Email" type="email" variant="standard" value={loginInfo.email} onChange={handleLoginChange} />
             <TextField name='password'  label="Password" type="password" variant="standard" value={loginInfo.password} onChange={handleLoginChange}/>
-            <FormControlLabel className="text-text-light" control={<Checkbox />} label="Remember Me" />
+            <FormControlLabel className="text-text-light" control={<Checkbox checked={rememberMe} onChange={handleRememberMeToggle}/>} label="Remember Me" />
 
             {loginCode == 1 ? <h3 className='text-xl font-extrabold text-red-600'>Login Error Please try again</h3> : null}
             <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" onClick={submitLogin}>Login</Button>
