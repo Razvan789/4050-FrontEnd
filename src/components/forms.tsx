@@ -31,7 +31,7 @@ export type loginInfo = {
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
-    const [successCode, setSuccessCode] = useState(0); //1 = success, 2 = error
+    const [successCode, setSuccessCode] = useState(0); //1 = success, 2 = error, 3- Email already in use
     const [signUpInfo, setSignUpInfo] = useState<signUpInfo>({
         firstName: '',
         lastName: '',
@@ -68,18 +68,32 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-        fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=inactive&type=customer&address=noadr`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(signUpInfo)
-        }).then(res => {
-            if (res.status == 200) {
-                console.log('signup send', signUpInfo);
-                setSuccessCode(1);
+        
+        fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
+            if (res.status === 404) {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=inactive&type=customer&address=noadr`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(signUpInfo)
+                }).then(res => {
+                    if (res.status == 200) {
+                        console.log('signup send', signUpInfo);
+                        setSuccessCode(1);
+                    }
+                })
+            } 
+            else if (res.status === 200) {
+                setSuccessCode(3);
             }
-        })
+        });
+
+
+
+
+
+        
 
     }
 
@@ -94,7 +108,7 @@ export function SignUpForm() {
 
     return (
         <>
-            {successCode == 0 ? //If the user has not successfully signed up
+            {successCode != 1 ? //If the user has not successfully signed up
                 <form noValidate >
                     <div className='lg:flex'>
                         <div id='topField' className='flex flex-col space-y-6 p-4 mb-4 w-full'>
@@ -131,7 +145,7 @@ export function SignUpForm() {
                     </div>
                     <FormControlLabel className="text-text-light" control={<Checkbox checked={signUpInfo.promotionsSubscribed} onChange={handlePromotionToggle} />} label="Subscribe To promotions?" />
                     <Button className='w-full my-2' onClick={handleOpenCard}> {cardDetailsOpen ? "Not Right Now" : "Add a Payment Method"}</Button>
-
+                    {successCode == 3 ? <p className='text-red-500'>Email already in use</p> : null}
                     {canSignUp(signUpInfo) ?
                         <Button className="bg-primary w-full font-extrabold" variant='contained' onClick={() => { sendSignUpInfo() }}>Sign Up</Button>
                         :
