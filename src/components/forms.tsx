@@ -266,3 +266,34 @@ export function signOut() {
     window.location.href = '/';
 }
 
+// export function UpdatePasswordForm() {
+//     const [success, setSuccess] = useState(false);
+//     const [newPasswordInfo, setNewPassword] = useState<newPasswordInfo>({
+//         email: '',
+//         currentPassword: '',
+//         newPassword: '',
+//     } as newPasswordInfo);
+
+//     function handleUpdatePassword(event: React.ChangeEvent<HTMLInputElement>) {
+//         setNewPassword({
+//             ...newPasswordInfo,
+//             [event.target.name]: event.target.value
+//         } as newPasswordInfo);
+//     }
+
+//     function sendNewPassword() {
+//         fetch(`${serverUrl}/edit-profile?email= ${user?.email}password=${newPasswordInfo.newPassword}`, {
+//             method: 'PUT',
+//             body: JSON.stringify(newPasswordInfo)
+//         }).then((response) => {
+//             if (newPasswordInfo.currentPassword === user?.password) {
+//                 setSuccess(true);
+//             }
+//             if (response.status == 200) {
+//                 console.log('update password send', newPasswordInfo);
+//                 setSuccess(true);
+//             }
+//         })
+        
+//     }
+// }
