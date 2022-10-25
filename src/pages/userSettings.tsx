@@ -11,6 +11,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs';
 import { useUser } from '../utils/user';
 import Link from 'next/link'
+import { serverUrl } from '../utils/backendInfo';
 
 
 const rows = [
@@ -28,6 +29,11 @@ const customToolbar = () => {
     );
 };
 
+export type newPasswordInfo = {
+    email: string,
+    currentPassword: string,
+    newPassword: string,
+}
 
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
@@ -49,47 +55,73 @@ export default function UserSettings() {
         }
     }
 
-        /*
-        Definition of the grif and the inclusion of buttons
-        This will label the information displayed in the user grid with the const
-        This includes the definition of the buttons to be used to edit and delete the specific users
-    */
-        const columns: GridColDef[] = [
-            { field: 'id', headerName: 'ID', width: 70 },
-            { field: 'cardNumber', headerName: 'Card Number', width: 130 },
-    
-            {
-                field: 'buttons',
-                headerName: 'Buttons',
-                width: 200,
-                renderCell: (params) => (
-                    <span className=''>
-                        <Button
-                            color="secondary"
-                            variant="outlined"
-                            size="small"
-                            className='font-extrabold'
-                            onClick={handleOpen}
-                            style={{ marginLeft: 16 }}
-                            tabIndex={params.hasFocus ? 0 : -1}
-                        >
-                            Edit
-                        </Button>
-                        <Button
-                            color='error'
-                            variant="outlined"
-                            size="small"
-                            className='font-extrabold'
-                            style={{ marginLeft: 16 }}
-                            tabIndex={params.hasFocus ? 0 : -1}
-                        >
-                            Delete
-                        </Button>
-                    </span>
-                ),
-            },
-        ];
-    
+    /*
+    Definition of the grif and the inclusion of buttons
+    This will label the information displayed in the user grid with the const
+    This includes the definition of the buttons to be used to edit and delete the specific users
+*/
+    const columns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'cardNumber', headerName: 'Card Number', width: 130 },
+
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 200,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        onClick={handleOpen}
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        color='error'
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Delete
+                    </Button>
+                </span>
+            ),
+        },
+    ];
+    const [success, setSuccess] = useState(false);
+    const [newPasswordInfo, setNewPassword] = useState<newPasswordInfo>({
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+    } as newPasswordInfo);
+
+    function handleUpdatePassword(event: React.ChangeEvent<HTMLInputElement>) {
+        setNewPassword({
+            ...newPasswordInfo,
+            [event.target.name]: event.target.value
+        } as newPasswordInfo);
+    }
+
+    function sendNewPassword() {
+        fetch(`${serverUrl}/edit-profile?email= ${user?.email}password=${newPasswordInfo.newPassword}`, {
+            method: 'PUT'
+        }).then((response) => {
+            if (newPasswordInfo.currentPassword === user?.password) {
+                setSuccess(true);
+            }
+        }).then(response => {
+            if(response == null) return;
+        })
+        
+    }
+        
 
     /*
         The actual page definition and display, includes the icon and other factors
@@ -119,17 +151,17 @@ export default function UserSettings() {
                 </Box>
                 <TabPanel value={tabValue} index={0}>
                     <Box sx={{ height: 600, width: 1 }}>
-                        
+
                         <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-                            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{readOnly: true}}></TextField>
-                            <TextField variant='standard' type="password" label='Current Password'></TextField>
-                            <TextField variant='standard' type="password" label='New Password'></TextField>
-                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Password</Button>
+                            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{ readOnly: true }}></TextField>
+                            <TextField variant='standard' type="password" label='Current Password' name="currentPassword" value={newPasswordInfo.currentPassword} onChange={handleUpdatePassword}></TextField>
+                            <TextField variant='standard' type="password" label='New Password' name="newPassword" value={newPasswordInfo.newPassword} onChange={handleUpdatePassword}></TextField>
+                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={sendNewPassword}>Update Password</Button>
                         </form>
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                    <Box sx={{ height: 600, width: 1 }}>                    
+                    <Box sx={{ height: 600, width: 1 }}>
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={handleOpenCard}>Add Payment Method</Button>
                         <div className={cardDetailsOpen ? "block w-full" : "hidden"}>
                             {/* <Divider className='lg:float-left' orientation={
@@ -156,7 +188,7 @@ export default function UserSettings() {
                             rows={rows}
                             columns={columns}
                             components={{ Toolbar: customToolbar }}
-                        />             
+                        />
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
@@ -165,14 +197,14 @@ export default function UserSettings() {
                             rows={rows}
                             columns={columns}
                             components={{ Toolbar: customToolbar }}
-                        />             
+                        />
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={3}>
                     <Box sx={{ height: 600, width: 1 }}>
                         <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
                             <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-primary">Fonts: </span> 
+                                <span className="text-primary">Fonts: </span>
                             </h1>
                             <select>
                                 <option value="Times New Roman">Times New Roman</option>
@@ -181,7 +213,7 @@ export default function UserSettings() {
                                 <option value="Helvetica">Helvetica</option>
                             </select>
                             <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-primary">Colorblind Mode: </span> 
+                                <span className="text-primary">Colorblind Mode: </span>
                             </h1>
                             <select>
                                 <option value="Not Colorblind">Not Colorblind</option>
