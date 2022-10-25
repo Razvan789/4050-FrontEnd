@@ -111,13 +111,16 @@ export default function UserSettings() {
 
     function sendNewPassword() {
         fetch(`${serverUrl}/edit-profile?email= ${user?.email}password=${newPasswordInfo.newPassword}`, {
-            method: 'PUT'
+            method: 'PUT',
+            body: JSON.stringify(newPasswordInfo)
         }).then((response) => {
             if (newPasswordInfo.currentPassword === user?.password) {
                 setSuccess(true);
             }
-        }).then(response => {
-            if(response == null) return;
+            if (response.status == 200) {
+                console.log('update password send', newPasswordInfo);
+                setSuccess(true);
+            }
         })
         
     }
