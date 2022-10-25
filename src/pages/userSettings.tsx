@@ -10,6 +10,7 @@ import { TextField, Button, Divider } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs';
 import { useUser } from '../utils/user';
+import { UpdateProfileForm } from '../components/forms'; 
 import Link from 'next/link'
 import { serverUrl } from '../utils/backendInfo';
 
@@ -29,11 +30,6 @@ const customToolbar = () => {
     );
 };
 
-export type newPasswordInfo = {
-    email: string,
-    currentPassword: string,
-    newPassword: string,
-}
 
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
@@ -95,36 +91,6 @@ export default function UserSettings() {
             ),
         },
     ];
-    const [success, setSuccess] = useState(false);
-    const [newPasswordInfo, setNewPassword] = useState<newPasswordInfo>({
-        email: '',
-        currentPassword: '',
-        newPassword: '',
-    } as newPasswordInfo);
-
-    function handleUpdatePassword(event: React.ChangeEvent<HTMLInputElement>) {
-        setNewPassword({
-            ...newPasswordInfo,
-            [event.target.name]: event.target.value
-        } as newPasswordInfo);
-    }
-
-    function sendNewPassword() {
-        fetch(`${serverUrl}/edit-profile?email= ${user?.email}password=${newPasswordInfo.newPassword}`, {
-            method: 'PUT',
-            body: JSON.stringify(newPasswordInfo)
-        }).then((response) => {
-            if (newPasswordInfo.currentPassword === user?.password) {
-                setSuccess(true);
-            }
-            if (response.status == 200) {
-                console.log('update password send', newPasswordInfo);
-                setSuccess(true);
-            }
-        })
-        
-    }
-        
 
     /*
         The actual page definition and display, includes the icon and other factors
@@ -154,13 +120,7 @@ export default function UserSettings() {
                 </Box>
                 <TabPanel value={tabValue} index={0}>
                     <Box sx={{ height: 600, width: 1 }}>
-
-                        <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-                            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{ readOnly: true }}></TextField>
-                            <TextField variant='standard' type="password" label='Current Password' name="currentPassword" value={newPasswordInfo.currentPassword} onChange={handleUpdatePassword}></TextField>
-                            <TextField variant='standard' type="password" label='New Password' name="newPassword" value={newPasswordInfo.newPassword} onChange={handleUpdatePassword}></TextField>
-                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={sendNewPassword}>Update Password</Button>
-                        </form>
+                        <UpdateProfileForm user={user}/>
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>

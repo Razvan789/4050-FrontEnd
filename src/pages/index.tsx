@@ -27,7 +27,6 @@ export default function Home() {
           <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-text-dark">
             <span className="text-primary">E-Cinema</span> App
           </h1>
-          <h2 className="w-full text-center text-2xl md:text-3xl text-text-dark">Welcome</h2>
           <h2 className="text-text-light text-2xl leading-loose font-extrabold">Trending →</h2>
           <CardContainer>
             <Card />

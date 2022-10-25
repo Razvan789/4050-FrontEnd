@@ -6,7 +6,7 @@ import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from 
 import Link from 'next/link'
 import Router, { useRouter, NextRouter } from 'next/router';
 import { UserContext } from './layout';
-import { User } from '../utils/user';
+import { User, useUser } from '../utils/user';
 export type signUpInfo = {
     firstName: string,
     lastName: string,
@@ -25,6 +25,16 @@ export type signUpInfo = {
 export type loginInfo = {
     email: string,
     password: string,
+}
+
+export type updateProfileInfo = {
+    name: string,
+    lastname: string,
+    currentPassword: string,
+    password: string,
+    address: string,
+    promotionSubscribed: boolean,
+
 }
 
 
@@ -68,7 +78,7 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-        
+
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
                 fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=inactive&type=customer&address=noadr`, {
@@ -83,7 +93,7 @@ export function SignUpForm() {
                         setSuccessCode(1);
                     }
                 })
-            } 
+            }
             else if (res.status === 200) {
                 setSuccessCode(3);
             }
@@ -93,7 +103,7 @@ export function SignUpForm() {
 
 
 
-        
+
 
     }
 
@@ -120,9 +130,9 @@ export function SignUpForm() {
                             <TextField name="phoneNumber" variant='standard' type="text" label='Phone Number *' value={signUpInfo.phoneNumber} onChange={handleSignUpChange}></TextField>
                             <TextField name="password" variant='standard' type="password" label='Password *' onChange={handleSignUpChange}></TextField>
                             <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password *' onChange={handleSignUpChange}></TextField>
-                            /* var bcrypt = require('bcryptjs');
+                            {/* /* var bcrypt = require('bcryptjs');
                             var salt = bcrypt.genSaltSync(10);
-                            var hash = bcrypt.hashSync("B4c0/\/", salt); */
+    var hash = bcrypt.hashSync("B4c0/\/", salt); */ }
                         </div>
 
                         <div id='botField' className={cardDetailsOpen ? "block w-full" : "hidden"}>
@@ -266,37 +276,90 @@ export function LoginForm() {
 export function signOut() {
     window.sessionStorage.removeItem('user');
     window.sessionStorage.removeItem('admin');
-    window.location.href = '/';
 }
 
-// export function UpdatePasswordForm() {
-//     const [success, setSuccess] = useState(false);
-//     const [newPasswordInfo, setNewPassword] = useState<newPasswordInfo>({
-//         email: '',
-//         currentPassword: '',
-//         newPassword: '',
-//     } as newPasswordInfo);
 
-//     function handleUpdatePassword(event: React.ChangeEvent<HTMLInputElement>) {
-//         setNewPassword({
-//             ...newPasswordInfo,
-//             [event.target.name]: event.target.value
-//         } as newPasswordInfo);
-//     }
+export function UpdateProfileForm({ user }: { user: User }) {
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2- Wrong Current Password, 3 - Server Error
+    const [updateProfileInfo, setUpdateProfileInfo] = useState<updateProfileInfo>({
+        name: user?.name,
+        lastname: user?.lastname,
+        currentPassword: '',
+        password: '',
+        address: user?.address,
+        promotionSubscribed: user?.promotionSubscribed || false,
+    } as updateProfileInfo);
 
-//     function sendNewPassword() {
-//         fetch(`${serverUrl}/edit-profile?email= ${user?.email}password=${newPasswordInfo.newPassword}`, {
-//             method: 'PUT',
-//             body: JSON.stringify(newPasswordInfo)
-//         }).then((response) => {
-//             if (newPasswordInfo.currentPassword === user?.password) {
-//                 setSuccess(true);
-//             }
-//             if (response.status == 200) {
-//                 console.log('update password send', newPasswordInfo);
-//                 setSuccess(true);
-//             }
-//         })
-        
-//     }
-// }
+    function handleProfileUpdate(event: React.ChangeEvent<HTMLInputElement>) {
+        setUpdateProfileInfo({
+            ...updateProfileInfo,
+            [event.target.name]: event.target.value
+        } as updateProfileInfo);
+    }
+
+    function getUrlFromJSON(json: updateProfileInfo) {
+        //add &promotionsSubscribed=${updateProfileInfo.promotionSubscribed}`; to the end of this eventually
+        let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}`;
+        if (updateProfileInfo.password != '') {
+            url += `&password=${updateProfileInfo.password}`;
+        }
+        return url;
+        // let key: keyof updateProfileInfo;
+        // for (key in json) {
+        //     console.log('Keys: ', key)
+        //     if (json[key] != 'email' && json[key] != 'currentPassword') {
+        //         if (json[key] != null) {
+        //             url += `&${key}=${json[key]}`;
+        //         }
+        //     }
+        //     return url;
+        // }
+    }
+
+    function handlePromotionToggle() {
+        setUpdateProfileInfo({
+            ...updateProfileInfo,
+            promotionSubscribed: !updateProfileInfo.promotionSubscribed
+        });
+    }
+
+    function sendNewPassword() {
+        if (user?.password == updateProfileInfo.currentPassword) {
+            console.log(getUrlFromJSON(updateProfileInfo));
+            fetch(getUrlFromJSON(updateProfileInfo), {
+                method: 'PUT',
+                body: JSON.stringify(updateProfileInfo)
+            }).then((response) => {
+                if (response.status == 200) {
+                    return response.json();
+                }
+                return null;
+            }).then((data) => {
+                if (data == null) {
+                    setSuccessCode(3);
+                    return
+                }
+                setSuccessCode(1);
+            });
+        } else {
+            setSuccessCode(2);
+        }
+    }
+
+    return (
+        <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
+            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{ readOnly: true }}></TextField>
+            <TextField variant='standard' name='name' label='First Name' value={updateProfileInfo.name} onChange={handleProfileUpdate}></TextField>
+            <TextField variant='standard' name='lastname' label='Last Name' value={updateProfileInfo.lastname} onChange={handleProfileUpdate}></TextField>
+            <TextField variant='standard' name='address' label='Address' value={updateProfileInfo.address} onChange={handleProfileUpdate}></TextField>
+            <TextField variant='standard' type="password" label='Current Password' name="currentPassword" value={updateProfileInfo.currentPassword} onChange={handleProfileUpdate}></TextField>
+            <TextField variant='standard' type="password" label='New Password' name="password" value={updateProfileInfo.password} onChange={handleProfileUpdate}></TextField>
+            <FormControlLabel className="text-text-light" control={<Checkbox checked={updateProfileInfo.promotionSubscribed} onChange={handlePromotionToggle} />} label="Recieve Promotion?" />
+            <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={sendNewPassword}>Update Profile</Button>
+            {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Updated Successfully</h3> : null}
+            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Current Password is incorrect</h3> : null}
+            {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+        </form>
+
+    );
+}
