@@ -15,6 +15,7 @@
     "@mui/material": "^5.10.5",
     "@mui/x-data-grid": "^5.17.3",
     "@mui/x-date-pickers": "^5.0.2",
+    "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.5",
     "next": "12.2.5",
     "next-auth": "^4.10.3",
