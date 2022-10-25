@@ -67,7 +67,7 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-        fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=active&type=customer&address=noadr`, {
+        fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=inactive&type=customer&address=noadr`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ export function SignUpForm() {
                 setSuccessCode(1);
             }
         })
-        
+
     }
 
     function canSignUp(signUpInfo: signUpInfo) {
@@ -160,8 +160,8 @@ export function LoginForm() {
         password: '',
     } as loginInfo);
 
-    useEffect(()=> {
-        if(localStorage.getItem('savedEmail')) {
+    useEffect(() => {
+        if (localStorage.getItem('savedEmail')) {
             setLoginInfo({
                 ...loginInfo,
                 email: localStorage.getItem('savedEmail') as string
@@ -183,38 +183,43 @@ export function LoginForm() {
     function submitLogin() {
         fetch(`${serverUrl}/check-user?email=${loginInfo.email}`).then((response) => {
             console.log(response);
-            if(response.status == 200) {
+            if (response.status == 200) {
                 return response.json()
             }
             setLoginCode(1);
             return null;
         }).then((data) => {
-            if(data == null) return;
+            if (data == null) return;
             //Password match check here
-            if(data.password == loginInfo.password) {
-                window.sessionStorage.setItem('user', JSON.stringify(data));
-                if(rememberMe) {
-                    localStorage.setItem('savedEmail', loginInfo.email);
+            if (data.password == loginInfo.password) {
+                if (data.status == 'active') {
+                    window.sessionStorage.setItem('user', JSON.stringify(data));
+                    if (rememberMe) {
+                        localStorage.setItem('savedEmail', loginInfo.email);
+                    } else {
+                        localStorage.removeItem('savedEmail');
+                    }
+                    console.log(data);
+                    if (data.type == 'admin') {
+                        window.sessionStorage.setItem('admin', 'true');
+                        window.location.href = '/adminPage';
+                    } else {
+                        window.location.href = "/";
+                    }
                 } else {
-                    localStorage.removeItem('savedEmail');
+                    setLoginCode(2);
                 }
-                console.log(data);
-                if(data.type == 'admin') {
-                    window.sessionStorage.setItem('admin', 'true');
-                    window.location.href = '/adminPage';
-                } else {
-                    window.location.href = "/";
-                }
-            } 
+            }
         });
     }
     return (
         <div className="flex flex-col space-y-3">
-            <TextField name='email'  label="Email" type="email" variant="standard" value={loginInfo.email} onChange={handleLoginChange} />
-            <TextField name='password'  label="Password" type="password" variant="standard" value={loginInfo.password} onChange={handleLoginChange}/>
-            <FormControlLabel className="text-text-light" control={<Checkbox checked={rememberMe} onChange={handleRememberMeToggle}/>} label="Remember Me" />
+            <TextField name='email' label="Email" type="email" variant="standard" value={loginInfo.email} onChange={handleLoginChange} />
+            <TextField name='password' label="Password" type="password" variant="standard" value={loginInfo.password} onChange={handleLoginChange} />
+            <FormControlLabel className="text-text-light" control={<Checkbox checked={rememberMe} onChange={handleRememberMeToggle} />} label="Remember Me" />
 
             {loginCode == 1 ? <h3 className='text-xl font-extrabold text-red-600'>Login Error Please try again</h3> : null}
+            {loginCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Your account is not active, please check your email</h3> : null}
             <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" onClick={submitLogin}>Login</Button>
 
             <div className="flex flex-col text-center">
