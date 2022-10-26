@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { encrypt } from '../utils/encryption'
 
 function testEncryption() {
+    var bcrypt = require('bcryptjs');
     const text = 'Hello World';
-    const key = 'secret';
+    const key = bcrypt.genSaltSync(10);
     const encrypted = encrypt(text, key);
     console.log(encrypted);
-    const decrypted = encrypt(encrypted, key);
-    console.log(decrypted);
+    console.log("this is the comparison between the unecrypted and encrypted passwords " + bcrypt.compareSync(text, encrypted));
+    
 }
 
 export default function VerifyEmail() {
@@ -26,7 +27,7 @@ export default function VerifyEmail() {
                         <LinearProgress />
                     </div>
                     
-                    {/* <Button onClick={()=> testEncryption()}>Test Encryption</Button> */}
+                    <Button onClick={()=> testEncryption()}>Test Encryption</Button>
                 </>
                 : //Verified
                 <>
