@@ -155,9 +155,7 @@ export function SignUpForm() {
                             <TextField name="address" variant='standard' type="text" label='Address' value={signUpInfo.address} onChange={handleSignUpChange}></TextField>
                             <TextField name="password" variant='standard' type="password" label='Password *' onChange={handleSignUpChange}></TextField>
                             <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password *' onChange={handleSignUpChange}></TextField>
-                            {/* /* var bcrypt = require('bcryptjs');
-                            var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync("B4c0/\/", salt); */ }
+                            
                         </div>
 
                         <div id='botField' className={cardDetailsOpen ? "block w-full" : "hidden"}>
