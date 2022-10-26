@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Router, { useRouter, NextRouter } from 'next/router';
 import { UserContext } from './layout';
 import { User, useUser } from '../utils/user';
+import { encrypt } from '../utils/encryption';
 export type signUpInfo = {
     firstName: string,
     lastName: string,
@@ -48,6 +49,7 @@ export type resetPasswordInfo = {
     confirmPassword: string,
 }
 
+const salt = require('bcryptjs').genSaltSync(10);
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
@@ -90,10 +92,10 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-
+        const hashedPassword = encrypt(signUpInfo.password, salt);
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
-                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}`, {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${hashedPassword}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
