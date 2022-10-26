@@ -18,12 +18,6 @@ function testEncryption() {
 
 }
 
-<<<<<<< HEAD
-export default function VerifyEmail() { 
-    const [verified, setVerified] = useState(0); //0 - Waiting for verification, 1 - Verified, 2 - Error
-
-
-=======
 
 
 export default function VerifyEmail() {
@@ -57,7 +51,6 @@ export default function VerifyEmail() {
         });
     }
 
->>>>>>> 88fe6cef405408464fdfaad11aa290f806b74c02
     return (
         <Layout>
             {!verifiedState ? // Not verified
