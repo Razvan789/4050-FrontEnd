@@ -5,14 +5,16 @@ import { Box } from '@mui/system';
 import { DataGrid, GridToolbar, GridColDef, GridRenderCellParams, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TextField, Button, Divider } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs';
 import { useUser } from '../utils/user';
-import { UpdateProfileForm } from '../components/forms'; 
+import { UpdateProfileForm } from '../components/forms';
 import Link from 'next/link'
 import { serverUrl } from '../utils/backendInfo';
+import PaymentCardInfo from '../components/paymentCardInfo';
+import { AddPaymentForm } from '../components/forms';
 
 
 const rows = [
@@ -31,17 +33,39 @@ const customToolbar = () => {
 };
 
 
+type cardInfo = {
+    paymentID: number,
+    paymentNum: string,
+    expDate: string,
+    cvc: string,
+}
+
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const [paymentCards, setPaymentCards] = useState<cardInfo[]>([]);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
-    const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
     const user = useUser();
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
+
+    useEffect(() => {
+        if (user?.name != null) {
+            getPaymentCards(user.userID);
+        }
+    }, [user]);
+
+    function getPaymentCards(userID: number) {
+        fetch(`${serverUrl}/payment-card?userID=${userID}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                setPaymentCards(data);
+            })
+    }
 
     function handleOpenCard() {
         if (cardDetailsOpen) {
@@ -120,38 +144,20 @@ export default function UserSettings() {
                 </Box>
                 <TabPanel value={tabValue} index={0}>
                     <Box sx={{ height: 600, width: 1 }}>
-                        <UpdateProfileForm user={user}/>
+                        <UpdateProfileForm user={user} />
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
                     <Box sx={{ height: 600, width: 1 }}>
+                        {paymentCards.length < 3 ? 
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={handleOpenCard}>Add Payment Method</Button>
+                        : null}
                         <div className={cardDetailsOpen ? "block w-full" : "hidden"}>
-                            {/* <Divider className='lg:float-left' orientation={
-                                screen?.width >= 1024 ? "vertical" : "horizontal"
-                                } /> */}
-                            <form className='flex flex-col space-y-6 p-4 mb-4'>
-                                <TextField variant='standard' type="text" label='Cardholder Name'></TextField>
-                                <TextField variant='standard' type="text" label='Card Number'></TextField>
-                                <DatePicker views={['year', 'month']}
-                                    label="Year and Month"
-                                    minDate={dayjs()}
-                                    maxDate={dayjs().add(10, 'year')}
-                                    value={expirationDate}
-                                    onChange={(newValue) => {
-                                        setExpirationDate(newValue);
-                                    }}
-                                    renderInput={(params) => <TextField {...params} variant='standard' helperText={null} />}
-                                />
-                                <TextField variant='standard' type="text" label='CCV'></TextField>
-                            </form>
-                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Submit</Button>
+                            <AddPaymentForm user={user} />
                         </div>
-                        <DataGrid
-                            rows={rows}
-                            columns={columns}
-                            components={{ Toolbar: customToolbar }}
-                        />
+                        {paymentCards.map((card) => (
+                            <PaymentCardInfo key={card.paymentID} cardNum={card.paymentNum} cardExp={card.expDate} cardID={card.paymentID} />
+                        ))}
                     </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>

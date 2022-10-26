@@ -17,6 +17,7 @@ export type signUpInfo = {
     cardName: string,
     cardExpiration: string,
     cardCVC: string,
+    address: string,
     phoneNumber: string,
     promotionsSubscribed: boolean,
 }
@@ -36,12 +37,17 @@ export type updateProfileInfo = {
     promotionSubscribed: boolean,
 
 }
-
+export type addPaymentInfo = {
+    cardNumber: string,
+    cardName: string,
+    cardExpiration: string,
+    cardCVC: string,
+}
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
-    const [successCode, setSuccessCode] = useState(0); //1 = success, 2 = error, 3- Email already in use
+    const [successCode, setSuccessCode] = useState(0); //1 = success, 2 = error, 3- Email already in use, 4- Card Error
     const [signUpInfo, setSignUpInfo] = useState<signUpInfo>({
         firstName: '',
         lastName: '',
@@ -53,6 +59,7 @@ export function SignUpForm() {
         cardExpiration: '',
         cardCVC: '',
         phoneNumber: '',
+        address: '',
         promotionsSubscribed: false,
     } as signUpInfo);
 
@@ -81,7 +88,7 @@ export function SignUpForm() {
 
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
-                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=false&status=inactive&type=customer&address=noadr`, {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -90,27 +97,44 @@ export function SignUpForm() {
                 }).then(res => {
                     if (res.status == 200) {
                         console.log('signup send', signUpInfo);
+
                         setSuccessCode(1);
+                        return res.json();
                     }
-                })
+                }).then((data) => {
+                    if (data && cardDetailsOpen) {
+                        fetch(`${serverUrl}/payment-card`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            //Add CVC here
+                            body: JSON.stringify({ paymentNum: signUpInfo.cardNumber, userID: data.userID, expDate: signUpInfo.cardExpiration })
+                        }).then(res => {
+                            if (res.status == 200) {
+                                console.log('Card Added', signUpInfo);
+                                setSuccessCode(1);
+                                return res.json();
+                            } else {
+                                setSuccessCode(4);
+                            }
+                        })
+                    }
+                });
             }
             else if (res.status === 200) {
                 setSuccessCode(3);
             }
         });
-
-
-
-
-
-
-
     }
 
     function canSignUp(signUpInfo: signUpInfo) {
-        if (signUpInfo.firstName.length > 0 && signUpInfo.lastName.length > 0 && signUpInfo.email.length > 0 && signUpInfo.password.length > 0 && signUpInfo.confirmPassword.length > 0 && signUpInfo.phoneNumber.length > 0) {
+        if (signUpInfo.firstName.length > 0 && signUpInfo.lastName.length > 0 && signUpInfo.email.length > 0 && signUpInfo.password.length > 0 && signUpInfo.confirmPassword.length > 0 && signUpInfo.phoneNumber.length > 0 && signUpInfo.address.length > 0) {
             if (signUpInfo.password == signUpInfo.confirmPassword) {
-                return true;
+                if (!cardDetailsOpen) return true;
+                if (signUpInfo.cardNumber.length > 0 && signUpInfo.cardName.length > 0 && signUpInfo.cardExpiration.length > 0 && signUpInfo.cardCVC.length > 0) {
+                    return true;
+                }
             }
         }
         return false;
@@ -128,6 +152,7 @@ export function SignUpForm() {
                                 <TextField name="lastName" className='w-full' variant='standard' type="text" label='Last Name *' value={signUpInfo.lastName} onChange={handleSignUpChange}></TextField>
                             </div>
                             <TextField name="phoneNumber" variant='standard' type="text" label='Phone Number *' value={signUpInfo.phoneNumber} onChange={handleSignUpChange}></TextField>
+                            <TextField name="address" variant='standard' type="text" label='Address' value={signUpInfo.address} onChange={handleSignUpChange}></TextField>
                             <TextField name="password" variant='standard' type="password" label='Password *' onChange={handleSignUpChange}></TextField>
                             <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password *' onChange={handleSignUpChange}></TextField>
                             {/* /* var bcrypt = require('bcryptjs');
@@ -140,8 +165,8 @@ export function SignUpForm() {
                             screen?.width >= 1024 ? "vertical" : "horizontal"
                             } /> */}
                             <div className='flex flex-col space-y-6 p-4 mb-4'>
-                                <TextField name="cardName" variant='standard' type="text" label='Cardholder Name' onChange={handleSignUpChange}></TextField>
-                                <TextField name='cardNumber' variant='standard' type="text" label='Card Number' onChange={handleSignUpChange}></TextField>
+                                <TextField name="cardName" variant='standard' type="text" label='Cardholder Name' value={signUpInfo.cardName} onChange={handleSignUpChange}></TextField>
+                                <TextField name='cardNumber' variant='standard' type="text" label='Card Number' value={signUpInfo.cardNumber} onChange={handleSignUpChange}></TextField>
                                 <DatePicker views={['year', 'month']}
                                     label="Year and Month"
                                     minDate={dayjs()}
@@ -149,16 +174,21 @@ export function SignUpForm() {
                                     value={expirationDate}
                                     onChange={(newValue) => {
                                         setExpirationDate(newValue);
+                                        setSignUpInfo({
+                                            ...signUpInfo,
+                                            cardExpiration: newValue?.format('MM/YY')
+                                        } as signUpInfo);
                                     }}
                                     renderInput={(params) => <TextField {...params} variant='standard' helperText={null} />}
                                 />
-                                <TextField name="cardCVC" variant='standard' type="text" label='CCV' onChange={handleSignUpChange}></TextField>
+                                <TextField name="cardCVC" variant='standard' type="text" label='CVC' value={signUpInfo.cardCVC} onChange={handleSignUpChange}></TextField>
                             </div>
                         </div>
                     </div>
                     <FormControlLabel className="text-text-light" control={<Checkbox checked={signUpInfo.promotionsSubscribed} onChange={handlePromotionToggle} />} label="Subscribe To promotions?" />
                     <Button className='w-full my-2' onClick={handleOpenCard}> {cardDetailsOpen ? "Not Right Now" : "Add a Payment Method"}</Button>
                     {successCode == 3 ? <p className='text-red-500'>Email already in use</p> : null}
+                    {successCode == 4 ? <p className='text-red-500'>Error adding card</p> : null}
                     {canSignUp(signUpInfo) ?
                         <Button className="bg-primary w-full font-extrabold" variant='contained' onClick={() => { sendSignUpInfo() }}>Sign Up</Button>
                         :
@@ -276,6 +306,7 @@ export function LoginForm() {
 export function signOut() {
     window.sessionStorage.removeItem('user');
     window.sessionStorage.removeItem('admin');
+    window.location.href = '/';
 }
 
 
@@ -325,7 +356,6 @@ export function UpdateProfileForm({ user }: { user: User }) {
 
     function sendNewPassword() {
         if (user?.password == updateProfileInfo.currentPassword) {
-            console.log(getUrlFromJSON(updateProfileInfo));
             fetch(getUrlFromJSON(updateProfileInfo), {
                 method: 'PUT',
                 body: JSON.stringify(updateProfileInfo)
@@ -361,5 +391,68 @@ export function UpdateProfileForm({ user }: { user: User }) {
             {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
         </form>
 
+    );
+}
+
+export function AddPaymentForm({ user }: { user: User }) {
+
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
+    const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
+    const [addPaymentInfo, setAddPaymentInfo] = useState<addPaymentInfo>({
+        cardName: '',
+        cardNumber: '',
+        cardExpiration: '',
+        cardCVC: '',
+    } as addPaymentInfo);
+
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setAddPaymentInfo({
+            ...addPaymentInfo,
+            [event.target.name]: event.target.value
+        } as addPaymentInfo);
+    }
+
+    function handleSubmit() {
+        fetch(`${serverUrl}/payment-card`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            //Add CVC here
+            body: JSON.stringify({ paymentNum: addPaymentInfo.cardNumber, userID: user?.userID, expDate: addPaymentInfo.cardExpiration })
+        }).then(res => {
+            if (res.status == 200) {
+                console.log('Card Added', addPaymentInfo);
+                setSuccessCode(1);
+                return res.json();
+            } else {
+                setSuccessCode(2);
+            }
+        })
+    }
+
+    return (
+        <form className='flex flex-col space-y-6 p-4 mb-4'>
+            <TextField name="cardName" variant='standard' type="text" label='Cardholder Name' value={addPaymentInfo.cardName} onChange={handleFormChange}></TextField>
+            <TextField name="cardNumber" variant='standard' type="text" label='Card Number' value={addPaymentInfo.cardNumber} onChange={handleFormChange}></TextField>
+            <DatePicker views={['year', 'month']}
+                label="Year and Month"
+                minDate={dayjs()}
+                maxDate={dayjs().add(10, 'year')}
+                value={expirationDate}
+                onChange={(newValue) => {
+                    setExpirationDate(newValue);
+                    setAddPaymentInfo({
+                        ...addPaymentInfo,
+                        cardExpiration: newValue?.format('MM/YY')
+                    } as addPaymentInfo);
+                }}
+                renderInput={(params) => <TextField {...params} variant='standard' helperText={null} />}
+            />
+            <TextField name="cardCVC" variant='standard' type="text" label='CCV' value={addPaymentInfo.cardCVC} onChange={handleFormChange}></TextField>
+            <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={handleSubmit}>Submit</Button>
+            {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Card Added Successfully Please refresh the page</h3> : null}
+            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+        </form>
     );
 }

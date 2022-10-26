@@ -13,8 +13,10 @@ function testEncryption() {
     console.log(decrypted);
 }
 
-export default function VerifyEmail() {
-    const [verified, setVerified] = useState(false);
+export default function VerifyEmail() { 
+    const [verified, setVerified] = useState(0); //0 - Waiting for verification, 1 - Verified, 2 - Error
+
+
     return (
         <Layout>
             {!verified ? // Not verified
