@@ -9,7 +9,7 @@ import {User, useUser} from '../utils/user'
 import { setRevalidateHeaders } from 'next/dist/server/send-payload'
 
 function testEncryption() {
-    // var bcrypt = require('bcryptjs'); This line is wrong, you need to use import not require
+    var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
     const text = 'Hello World';
     const key = bcrypt.genSaltSync(10);
     const encrypted = encrypt(text, key);
