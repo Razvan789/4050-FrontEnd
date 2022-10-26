@@ -41,13 +41,12 @@ export default function PaymentCardInfo({ cardNum, cardExp, cardID }: Props) {
     return (
         <StyleBox>
             <div className='flex justify-between'>
-                <div className="flex flex-col justify-center text-text-light">
+                <div className="flex flex-col justify-center text-text-light font-extrabold">
                     <h1 className=''>Card Number: {cardNum}</h1>
                     <h1 className=''>Card Expiration: {cardExp}</h1>
                     <h1 className=''>Card ID: {cardID}</h1>
                 </div>
                 <div className='my-auto flex flex-col'>
-                    <Button variant='outlined' color='primary' onClick={editCard}>Edit</Button>
                 </div>
             </div>
         </StyleBox>

@@ -1,10 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Layout from '../components/layout'
 import { TextField, Button, Divider } from '@mui/material'
 import StyleBox from '../components/styleBox'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-
+import { ResetEmailForm, ResetPasswordForm } from '../components/forms'
 
 export default function ResetPassword() {
     const router = useRouter();
@@ -17,14 +17,7 @@ export default function ResetPassword() {
                             <span className="text-primary">Reset</span> Password
                         </h1>
                         <Divider />
-                        <form className='flex flex-col space-y-6 p-4'>
-                            <TextField variant='standard' type="password" label='New Password'></TextField>
-                            <TextField variant='standard' type="password" label='Confirm New Password'></TextField>
-                            <Link href='/login'>
-                                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained'>Reset Password</Button>
-                            </Link>
-
-                        </form>
+                        <ResetPasswordForm token={router.query.token as string}/>
                     </>
                     :
                     <>
@@ -32,12 +25,7 @@ export default function ResetPassword() {
                             <span className="text-primary">Enter</span> Email
                         </h1>
                         <Divider />
-                        <form className='flex flex-col space-y-6 p-4'>
-                            <TextField id='emailInput' variant='standard' type="email" label='Email'></TextField>
-                            <Link href='/resetPassword?token=123'>
-                                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained'>Send Reset Email</Button>
-                            </Link>
-                        </form>
+                        <ResetEmailForm />
                     </>
                 }
                 <div className="flex flex-col text-center">

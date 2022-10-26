@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { serverUrl } from '../utils/backendInfo';
 import PaymentCardInfo from '../components/paymentCardInfo';
 import { AddPaymentForm } from '../components/forms';
+import {useRouter} from 'next/router';
 
 
 const rows = [
@@ -48,6 +49,7 @@ export default function UserSettings() {
     const [paymentCards, setPaymentCards] = useState<cardInfo[]>([]);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
     const user = useUser();
+    const router = useRouter();
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
@@ -55,7 +57,7 @@ export default function UserSettings() {
     useEffect(() => {
         if (user?.name != null) {
             getPaymentCards(user.userID);
-        }
+        } 
     }, [user]);
 
     function getPaymentCards(userID: number) {

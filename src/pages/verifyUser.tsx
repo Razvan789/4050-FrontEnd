@@ -8,21 +8,20 @@ import {serverUrl} from '../utils/backendInfo'
 import {User, useUser} from '../utils/user'
 import { setRevalidateHeaders } from 'next/dist/server/send-payload'
 
-function testEncryption() {
-    var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
-    const text = 'Hello World';
-    const key = bcrypt.genSaltSync(10);
-    const encrypted = encrypt(text, key);
-    console.log(encrypted);
-    console.log("this is the comparison between the unecrypted and encrypted passwords " + bcrypt.compareSync(text, encrypted));
+// function testEncryption() {
+//     var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
+//     const text = 'Hello World';
+//     const key = bcrypt.genSaltSync(10);
+//     const encrypted = encrypt(text, key);
+//     console.log(encrypted);
+//     console.log("this is the comparison between the unecrypted and encrypted passwords " + bcrypt.compareSync(text, encrypted));
 
-}
+// }
 
 
 
 export default function VerifyEmail() {
     const [verifiedState, setVerified] = useState(false);
-    const user = useUser();
     const router = useRouter();
 
     useEffect(() => {
@@ -30,16 +29,16 @@ export default function VerifyEmail() {
             console.log("token is " + router.query.token);
             handleVerifyEmail(router.query.token as string);
         } 
-    }, []);
+    }, [router.query.token]);
 
     function handleVerifyEmail(token: string) {
-
-        fetch(`${serverUrl}/verify-user?token=${token}`, {
+        console.log("token is " + token);
+        fetch(`${serverUrl}/verify-user`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(token)
+            body: JSON.stringify({token: token})
         }).then(res => {
                 if (res.status == 200) {
                     console.log('User Verified');

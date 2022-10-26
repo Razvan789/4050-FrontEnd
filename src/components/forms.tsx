@@ -43,6 +43,11 @@ export type addPaymentInfo = {
     cardExpiration: string,
     cardCVC: string,
 }
+export type resetPasswordInfo = {
+    password: string,
+    confirmPassword: string,
+}
+
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
@@ -155,7 +160,7 @@ export function SignUpForm() {
                             <TextField name="address" variant='standard' type="text" label='Address' value={signUpInfo.address} onChange={handleSignUpChange}></TextField>
                             <TextField name="password" variant='standard' type="password" label='Password *' onChange={handleSignUpChange}></TextField>
                             <TextField name="confirmPassword" variant='standard' type="password" label='Confirm Password *' onChange={handleSignUpChange}></TextField>
-                            
+
                         </div>
 
                         <div id='botField' className={cardDetailsOpen ? "block w-full" : "hidden"}>
@@ -451,6 +456,116 @@ export function AddPaymentForm({ user }: { user: User }) {
             <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={handleSubmit}>Submit</Button>
             {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Card Added Successfully Please refresh the page</h3> : null}
             {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+        </form>
+    );
+}
+
+export function ResetEmailForm() {
+    const [email, setEmail] = useState('');
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error, 3- Email not found
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setEmail(event.target.value);
+    }
+
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (email != '') {
+            fetch(`${serverUrl}/check-user?email=${email}`).then((res) => {
+                if (res.status == 200) { //If Email is found
+                    fetch(`${serverUrl}/reset-password`, { //Send reset password email
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: email })
+                    }).then((res) => {
+                        if (res.status == 200) {
+                            setSuccessCode(1);
+                        } else {
+                            setSuccessCode(2);
+                        }
+                    })
+                    return null;
+                }
+                //If email is not found
+                setSuccessCode(3);
+                return null;
+            });
+        }
+    }
+    return (
+        <form noValidate className='flex flex-col space-y-6 p-4' onSubmit={handleSubmit}>
+            <TextField id='emailInput' variant='standard' type="email" label='Email' value={email} onChange={handleFormChange}></TextField>
+            <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Send Reset Email</Button>
+            {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Email Sent Successfully</h3> : null}
+            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+            {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Email not found</h3> : null}
+        </form>
+    );
+}
+
+export function ResetPasswordForm({ token }: { token: string }) {
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Passwords don't match, 3 - Server Error
+    const [resetPasswordInfo, setResetPasswordInfo] = useState<resetPasswordInfo>({
+        password: '',
+        confirmPassword: '',
+    } as resetPasswordInfo);
+
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setResetPasswordInfo({
+            ...resetPasswordInfo,
+            [event.target.name]: event.target.value
+        } as resetPasswordInfo);
+    }
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (resetPasswordInfo.password == resetPasswordInfo.confirmPassword) {
+            fetch(`${serverUrl}/reset-password?token=${token}`)
+            .then((res) => {
+                if (res.status == 200) {
+                    setSuccessCode(1);
+                    console.log("Response", res);
+                    return res.text();
+                } else {
+                    setSuccessCode(3);
+                    return;
+                }
+            })
+            .then((data) => { //Data holds the email in a string
+                fetch(`${serverUrl}/edit-profile?email=${data}&password=${resetPasswordInfo.password}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                }).then((res) => {
+                    if (res.status == 200) {
+                        setSuccessCode(1);
+                    } else {
+                        setSuccessCode(3);
+                    }
+                })
+            });
+        } else {
+            setSuccessCode(2);
+        }
+    }
+
+    return (
+        <form className='flex flex-col space-y-6 p-4' onSubmit={handleSubmit}>
+            <TextField name='password' variant='standard' type="password" label='New Password' value={resetPasswordInfo.password} onChange={handleFormChange}></TextField>
+            <TextField name='confirmPassword' variant='standard' type="password" label='Confirm New Password' value={resetPasswordInfo.confirmPassword} onChange={handleFormChange}></TextField>
+            {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Password Reset Successfully</h3> : null}
+            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Passwords do not match</h3> : null}
+            {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+            {successCode == 1 ? 
+                <Link href='/login'>
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Login</Button>
+                </Link>
+                :
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Reset Password</Button>
+            }
         </form>
     );
 }
