@@ -7,7 +7,6 @@ import Link from 'next/link'
 import Router, { useRouter, NextRouter } from 'next/router';
 import { UserContext } from './layout';
 import { User, useUser } from '../utils/user';
-import { encrypt } from '../utils/encryption';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
