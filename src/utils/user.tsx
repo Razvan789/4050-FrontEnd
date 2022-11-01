@@ -1,5 +1,6 @@
 import { type } from "os";
 import React, {useState, useEffect} from "react";
+import { serverUrl } from "./backendInfo";
 
 export type User = {
     userID: number,
@@ -23,4 +24,11 @@ export function useUser() {
         setUser(tempUser);
     }, [])
     return user;
+}
+
+export async function getUsers(): Promise<User[]> {
+    const response = await fetch(`${serverUrl}/get-users`);
+    const data = await response.json();
+    console.log(data);
+    return data as User[];
 }

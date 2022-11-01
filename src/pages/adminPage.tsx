@@ -7,6 +7,8 @@ import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react'
 import { Button, Modal, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { getMovie } from '../utils/movie';
+import { getUsers, User } from '../utils/user';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -28,6 +30,15 @@ const rows = [
     { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
 
+];
+
+const movieRows = [
+    getMovie(1),
+    getMovie(2),
+    getMovie(3),
+    getMovie(4),
+    getMovie(5),
+    getMovie(6),
 ];
 
 /*
@@ -56,6 +67,7 @@ export default function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [adminLogged, setAdminLogged] = useState(false);
     const [open, setOpen] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -64,11 +76,107 @@ export default function AdminPage() {
     useEffect(() => {
         if(window.sessionStorage.getItem("admin") == "true"){
             setAdminLogged(true);
+            getUsers().then((data) => {
+                setUsers(data);
+            });
         } else {
             window.location.href = "/";
         }
     }, []);
 
+    const userRows = users.map((user) => {
+        return {
+            ...user,
+            id: user?.userID,
+        }
+    });
+
+    // Columns for the movie table
+    const movieColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'title', headerName: 'Movie Title', width: 230 },
+        { field: 'cast', headerName: 'Cast', width: 230 },
+        { field: 'director', headerName: 'Director', width: 130 },
+        { field: 'producer', headerName: 'Producer', width: 130 },
+        { field: 'synopsis', headerName: 'Synopsis', width: 230 },
+        { field: 'reviews', headerName: 'Reviews', width: 130 },
+        { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
+
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 200,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        onClick={handleOpen}
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        color='error'
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Delete
+                    </Button>
+                </span>
+            ),
+        },
+    ];
+    // Columns for the user table
+    const userColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID'},
+        { field: 'name', headerName: 'First name', width: 130 },
+        { field: 'lastname', headerName: 'Last name', width: 130 },
+        { field: 'email', headerName: 'Email', width: 130 },
+        { field: 'paymentSaved' , headerName: 'Payment Saved', width: 130 },
+        { field: 'phone', headerName: 'Phone', width: 130 },
+        { field: 'type' , headerName: 'Type', width: 130 },
+        { field: 'address', headerName: 'Address', width: 130 },
+        { field: 'status' , headerName: 'Status', width: 130 },
+        { field: 'promotionSubscribed' , headerName: 'Promotion Subscribed', width: 130 },
+
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 200,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        onClick={handleOpen}
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        color='error'
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Delete
+                    </Button>
+                </span>
+            ),
+        },
+    ];
 
     /*
         Definition of the grif and the inclusion of buttons
@@ -144,8 +252,8 @@ export default function AdminPage() {
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Movie</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows}
-                                columns={columns}
+                                rows={movieRows}
+                                columns={movieColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
@@ -154,8 +262,8 @@ export default function AdminPage() {
 
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows.slice(0, 6)}
-                                columns={columns}
+                                rows={userRows}
+                                columns={userColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
