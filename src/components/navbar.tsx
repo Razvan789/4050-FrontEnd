@@ -14,6 +14,8 @@ import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 import Badge from '@mui/material/Badge';
 import Link from 'next/link';
 import { signOut } from '../components/forms';
+import { useRouter } from 'next/router';
+import { text } from 'stream/consumers';
 
 type NavbarProps = {
   title?: string
@@ -24,7 +26,17 @@ type NavbarProps = {
 
 export default function Navbar({ title = "Default Value", userInfo }: NavbarProps) {
   const [signingOut, setSigningOut] = useState(false);
-  
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState(router.query.term as string || "");
+
+  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    router.push(`/search?term=${searchTerm}`);
+  }
+
+  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchTerm(event.target.value);
+  }
   return (
     <div className="flex flex-row items-center justify-between h-12 md:h-16 bg-bg-dark shadow-md p-4">
       <Link href="/" >
@@ -34,9 +46,9 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
         </div>
       </Link>
       <div id='right' className='flex flex-row'>
-        <TextField label="Search" className='scale-90' size='small' />
-
-
+        <form onSubmit={handleSearch}>
+          <TextField label="Search" type='text' className='scale-90' size='small' value={searchTerm} onChange={handleSearchChange}/>
+        </form>
 
         {!userInfo?.name ?
           <Link href="/login">
