@@ -16,7 +16,7 @@ export default function Card({ movie = getMovie(1), link = "/BookTicket/1", litt
     return (
         <Link href={link}>
             <div className={'relative min-w-[200px] m-2 group cursor-pointer rounded-lg  shadow-md hover:shadow-lg transition-transform ' + cardSizeClasses}>
-                <Image src={movie.image}
+                <Image src={movie.trailerPic}
                     alt={movie.title}
                     loader={myLoader}
                     width={350}
@@ -28,7 +28,7 @@ export default function Card({ movie = getMovie(1), link = "/BookTicket/1", litt
                     <div id="cardDesc" className='z-10 md:-z-10 absolute w-full bottom-0 rounded-b-lg bg-bg-dark opacity-100 p-3 md:group-hover:translate-y-full transition-all overflow-visible'>
                         <h1 className='text-lg font-extrabold text-text-dark'>{movie.title}</h1>
                         <div className="flex flex-col items-center justify-center">
-                            <Rating name="read-only" value={movie.rating} precision={0.1} readOnly />
+                            <Rating name="read-only" value={movie.ratingCode} precision={0.1} readOnly />
                         </div>
                     </div>
                 }

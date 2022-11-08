@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { Box, TextField, Button, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
 import Link from "next/link"
 import { useEffect } from "react"
-import { User , useUser} from "../utils/user"
+import { User , useUser } from "../utils/user"
 import { useRouter } from "next/router"
 import { LoginForm } from "../components/forms"
 export default function Login() {

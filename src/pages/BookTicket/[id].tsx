@@ -215,7 +215,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             </Head>
             {/* <h1 className='font-extrabold text-4xl text-center leading-loose'>Book Tickets for:</h1> */}
             <div className="flex justify-center p-3">
-                <Image src={movie.image}
+                <Image src={movie.trailerPic}
                     alt={movie.title}
                     loader={myLoader}
                     width={150}
@@ -224,7 +224,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 />
                 <div className="flex flex-col p-3 w-96">
                     <h2 className='font-extrabold text-3xl leading-loose text-primary'>{movie.title}</h2>
-                    <Rating name="read-only" value={movie.rating} precision={0.1} readOnly />
+                    <Rating name="read-only" value={movie.ratingCode} precision={0.1} readOnly />
                     <div className='hidden md:block'>
                         <p className='text-lg text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p>
                     </div>

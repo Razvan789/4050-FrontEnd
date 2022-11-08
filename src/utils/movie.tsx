@@ -13,6 +13,18 @@ export type Movie = {
     video: string;
 };
 
+
+//Gets all movies from the database
+export function getMovies(): Movie[] {
+    return [];
+}
+
+//Gets range of movies from the database
+export function getMoviesRange(start: number, end: number): Movie[] {
+    return [];
+}
+
+
 export function getMovie(id: number): Movie {
     return ({
         id: id,

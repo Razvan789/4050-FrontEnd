@@ -290,7 +290,7 @@ export default function AdminPage() {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-bg-dark w-[350px] lg:w-[800px] p-0'>
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
                     <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
                         <div className="flex justify-between items-center ">
                             <Typography id="modal-modal-title" variant="h6" component="h2">

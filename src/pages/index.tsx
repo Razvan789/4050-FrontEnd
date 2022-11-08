@@ -8,7 +8,6 @@ import CardContainer from "../components/cardContainer";
 import { useState, useContext } from "react";
 import { useRouter } from "next/router";
 import { Pagination, Chip } from "@mui/material";
-
 const handleFilterDelete = () => {
   console.log("deleted Filter");
 }
@@ -29,6 +28,10 @@ export default function Home() {
           </h1>
           <h2 className="text-text-light text-2xl leading-loose font-extrabold">Trending →</h2>
           <CardContainer>
+            <Card />
+            <Card />
+            <Card />
+            <Card />
             <Card />
             <Card />
             <Card />
