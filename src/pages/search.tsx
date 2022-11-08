@@ -1,15 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect} from 'react'
 import Layout from '../components/layout'
 import { CircularProgress, Skeleton } from '@mui/material'
+import { useRouter } from 'next/router'
 
 export default function Search() {
     const [loading, setLoading] = useState(true)
-
+    const router = useRouter();
+    const searchTerm = router.query.term;
     
     setTimeout(() => {
         setLoading(false);
     }, 3000)
 
+    useEffect(() => {
+        setLoading(true);
+    }, [searchTerm])
+    
     return (
         <Layout>
             <h1 className='font-extrabold text-4xl text-center pt-4 text-text-dark'><span className='text-primary'>Search</span> Results: </h1>
