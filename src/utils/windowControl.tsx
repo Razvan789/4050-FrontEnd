@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, createRef } from "react";
+import { useEffect, useState } from "react";
 
 
 function getWindowDimensions() {

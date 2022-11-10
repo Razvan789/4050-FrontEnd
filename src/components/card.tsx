@@ -1,5 +1,5 @@
 import Image from 'next/future/image';
-import {Rating, Button} from '@mui/material';
+import {Rating} from '@mui/material';
 import React from 'react'
 import { Movie, getMovie } from '../utils/movie';
 import Link from 'next/link';

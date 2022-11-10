@@ -1,5 +1,4 @@
-import { type } from "os";
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import { serverUrl } from "./backendInfo";
 
 export type User = {

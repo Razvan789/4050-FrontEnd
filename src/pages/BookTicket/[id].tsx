@@ -73,6 +73,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
+    //eslint-disable-next-line
     const handleSelectChange = (event: SelectChangeEvent<any>, callFunction: React.Dispatch<React.SetStateAction<any>>) => {
         callFunction(event.target.value);
     }
