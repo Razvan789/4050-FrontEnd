@@ -1,12 +1,9 @@
-import type { NextPage } from "next";
 import Head from "next/head";
-import Navbar from "../components/navbar";
 import Layout, { UserContext } from "../components/layout";
 import { User } from "../utils/user";
 import Card from "../components/card";
 import CardContainer from "../components/cardContainer";
-import { useState, useContext } from "react";
-import { useRouter } from "next/router";
+import { useContext } from "react";
 import { Pagination, Chip } from "@mui/material";
 const handleFilterDelete = () => {
   console.log("deleted Filter");

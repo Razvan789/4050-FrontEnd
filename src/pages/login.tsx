@@ -1,7 +1,4 @@
 import Layout from "../components/layout"
-import Head from 'next/head'
-import { Box, TextField, Button, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
-import Link from "next/link"
 import { useEffect } from "react"
 import { User , useUser } from "../utils/user"
 import { useRouter } from "next/router"
@@ -13,7 +10,7 @@ export default function Login() {
         if (user?.name != null) {
             router.push("/");
         }
-    }, [user])
+    }, [user, router]);
     
     return (
         <Layout>

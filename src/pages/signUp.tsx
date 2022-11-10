@@ -1,16 +1,10 @@
 import React from 'react'
 import Layout from '../components/layout'
 import StyleBox from '../components/styleBox'
-import { TextField, Button, Divider } from '@mui/material'
-import { useState } from 'react'
 import Link from 'next/link'
-import useWindowDimensions from '../utils/windowControl'
-import { SignUpForm, signUpInfo } from '../components/forms'
+import { SignUpForm } from '../components/forms'
 
 export default function SignUp() {
-    
-
-    const screen = useWindowDimensions();
     return (
         <Layout>
             <StyleBox className="transition-all">

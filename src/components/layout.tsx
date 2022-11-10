@@ -4,11 +4,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Navbar from './navbar';
-import { useRouter } from 'next/router';
 import { User } from '../utils/user';
-import orange from '@mui/material/colors/orange';
-import { text } from 'stream/consumers';
-import { serverUrl } from '../utils/backendInfo';
 
 //Required for theming in typescript
 declare module '@mui/material/styles' {
@@ -154,6 +150,7 @@ function parseColorString(color: string): string {
     return newColor.replace(/,/g, ' ');
 }
 
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseColors(colors: any): string {
 
     for (const key in colors) {

@@ -1,12 +1,11 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState , useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
 import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from '@mui/material'
 import Link from 'next/link'
-import Router, { useRouter, NextRouter } from 'next/router';
-import { UserContext } from './layout';
-import { User, useUser } from '../utils/user';
+import { useRouter } from 'next/router';
+import { User } from '../utils/user';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -233,6 +232,7 @@ export function LoginForm() {
             })
             setRememberMe(true);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     function handleLoginChange(event: React.ChangeEvent<HTMLInputElement>) {
         setLoginInfo({
@@ -335,23 +335,13 @@ export function UpdateProfileForm({ user }: { user: User }) {
         } as updateProfileInfo);
     }
 
-    function getUrlFromJSON(json: updateProfileInfo) {
+    function getUrlFromJSON() {
         //add &promotionsSubscribed=${updateProfileInfo.promotionSubscribed}`; to the end of this eventually
         let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}`;
         if (updateProfileInfo.password != '') {
             url += `&password=${updateProfileInfo.password}`;
         }
         return url;
-        // let key: keyof updateProfileInfo;
-        // for (key in json) {
-        //     console.log('Keys: ', key)
-        //     if (json[key] != 'email' && json[key] != 'currentPassword') {
-        //         if (json[key] != null) {
-        //             url += `&${key}=${json[key]}`;
-        //         }
-        //     }
-        //     return url;
-        // }
     }
 
     function handlePromotionToggle() {
@@ -363,7 +353,7 @@ export function UpdateProfileForm({ user }: { user: User }) {
 
     function sendNewPassword() {
         if (user?.password == updateProfileInfo.currentPassword) {
-            fetch(getUrlFromJSON(updateProfileInfo), {
+            fetch(getUrlFromJSON(), {
                 method: 'PUT',
                 body: JSON.stringify(updateProfileInfo)
             }).then((response) => {

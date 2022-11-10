@@ -2,20 +2,16 @@ import React from 'react';
 import Layout from '../components/layout';
 import Head from 'next/head';
 import { Box } from '@mui/system';
-import { DataGrid, GridToolbar, GridColDef, GridRenderCellParams, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react';
-import { TextField, Button, Divider } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers'
-import dayjs, { Dayjs } from 'dayjs';
+import { Button } from '@mui/material'
 import { useUser } from '../utils/user';
 import { UpdateProfileForm } from '../components/forms';
-import Link from 'next/link'
 import { serverUrl } from '../utils/backendInfo';
 import PaymentCardInfo from '../components/paymentCardInfo';
 import { AddPaymentForm } from '../components/forms';
-import {useRouter} from 'next/router';
 
 
 const rows = [
@@ -43,13 +39,13 @@ type cardInfo = {
 
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
+    //eslint-disable-next-line
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    // const handleClose = () => setOpen(false);
     const [paymentCards, setPaymentCards] = useState<cardInfo[]>([]);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
     const user = useUser();
-    const router = useRouter();
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
