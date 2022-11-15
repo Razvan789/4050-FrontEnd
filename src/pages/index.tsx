@@ -14,13 +14,16 @@ const handleFilterDelete = () => {
 
 export default function Home() {
   const user: User = useContext(UserContext);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(0); // 0 - loading 1 - loaded 2 - error
   const [movies, setMovies] = useState<Movie[]>([]);
   useEffect(() => {
     getAllMovies().then((data) => {
       console.log("Data from getMovies", data);
       setMovies(data);
-      setLoading(false);
+      setLoading(1);
+    }).catch((err) => {
+      setLoading(2);
+      console.log("Error from getMovies", err);
     });
   }, []);
   console.log("User from in", user);
@@ -37,15 +40,18 @@ export default function Home() {
         </h1>
         <h2 className="text-text-light text-2xl leading-loose font-extrabold">Trending →</h2>
         <CardContainer>
-          <>
+          <div className="flex ">
             {
-              loading ? <CircularProgress />
-                :
-                movies?.map((movie) => (
-                  <Card key={movie.id} movie={movie} />
-                ))
+              loading === 0 ? <CircularProgress /> : loading === 1 ? movies.map((movie) => {
+                return (
+                  <Card
+                    key={movie.movieID}
+                    movie={movie}
+                  />
+                );
+              }) : <h1 className="text-text-light font-extrabold">There was an error loading the movies</h1>
             }
-          </>
+          </div>
         </CardContainer>
         <div className="flex items-center">
           <h2 className="text-text-light text-2xl leading-loose font-extrabold"> All Movies →</h2>
@@ -55,11 +61,13 @@ export default function Home() {
         <CardContainer grid>
           <>
             {
-              loading ? <CircularProgress />
-                :
+              loading == 0 ? <CircularProgress /> // loading
+                : loading == 1 ? // loaded
                 movies?.map((movie) => (
-                  <Card little key={movie.id} movie={movie} />
-                ))
+                  <Card little key={movie.movieID} movie={movie} />
+                )) 
+                : // error 
+                <h1 className="text-text-light font-extrabold">There was an error loading the movies</h1>
             }
           </>
         </CardContainer>
