@@ -12,7 +12,7 @@ export type User = {
     type: string,
     address: string,
     status: string,
-    promotionSubscribed: boolean,
+    subToPromo: boolean,
 } | null;
 
 
