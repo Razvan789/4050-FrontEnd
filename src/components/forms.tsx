@@ -325,7 +325,7 @@ export function UpdateProfileForm({ user }: { user: User }) {
         currentPassword: '',
         password: '',
         address: user?.address,
-        promotionSubscribed: user?.promotionSubscribed || false,
+        promotionSubscribed: user?.subToPromo || false,
     } as updateProfileInfo);
 
     function handleProfileUpdate(event: React.ChangeEvent<HTMLInputElement>) {
@@ -337,7 +337,7 @@ export function UpdateProfileForm({ user }: { user: User }) {
 
     function getUrlFromJSON() {
         //add &promotionsSubscribed=${updateProfileInfo.promotionSubscribed}`; to the end of this eventually
-        let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}`;
+        let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}&subToPromo=${updateProfileInfo.promotionSubscribed ? 1: 0}`;
         if (updateProfileInfo.password != '') {
             url += `&password=${updateProfileInfo.password}`;
         }
