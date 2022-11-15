@@ -250,6 +250,7 @@ export default function AdminPage() {
                             <Tab label="Movies" {...a11yProps(0)} />
                             <Tab label="Users" {...a11yProps(1)} />
                             <Tab label="Promotions" {...a11yProps(2)} />
+                            <Tab label="Shows" {...a11yProps(3)} />
                         </Tabs>
                     </Box>
                     <TabPanel value={tabValue} index={0}>
@@ -274,6 +275,16 @@ export default function AdminPage() {
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Promotion</Button>
+                        <Box sx={{ height: 600, width: 1 }}>
+                            <DataGrid
+                                rows={rows.slice(0, 2)}
+                                columns={columns}
+                                components={{ Toolbar: customToolbar }}
+                            />
+                        </Box>
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={3}>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Show</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
                                 rows={rows.slice(0, 2)}
