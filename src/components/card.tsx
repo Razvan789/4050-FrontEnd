@@ -65,25 +65,3 @@ export default function Card({ movie, link = "/BookTicket/1", little = false }: 
         </Link >
     )
 }
-
-// function CardInner({ movie, little }: CardProps) {
-//     return (
-//         <div className={'relative min-w-[200px] m-2 group cursor-pointer rounded-lg  shadow-md hover:shadow-lg transition-transform ' + cardSizeClasses}>
-//             <Image src={movie?.trailerPic || defaultMovie.trailerPic}
-//                 alt={movie?.title}
-//                 loader={myLoader}
-//                 width={350}
-//                 height={500}
-//                 className={little ? 'rounded-lg' : 'rounded-lg group-hover:rounded-b-none'}
-//             />
-//             {little ? null
-//                 :
-//                 <div id="cardDesc" className='z-10 md:-z-10 absolute w-full bottom-0 rounded-b-lg bg-bg-dark opacity-100 p-3 md:group-hover:translate-y-full transition-all overflow-visible'>
-//                     <h1 className='text-lg font-extrabold text-text-dark'>{movie?.title}</h1>
-//                     <div className="flex flex-col items-center justify-center">
-//                     </div>
-//                 </div>
-//             }
-//         </div>
-//     );
-// }
