@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
@@ -6,6 +6,7 @@ import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from 
 import Link from 'next/link'
 import { useRouter } from 'next/router';
 import { User } from '../utils/user';
+import { Movie, updateMovie } from '../utils/movie';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -337,7 +338,7 @@ export function UpdateProfileForm({ user }: { user: User }) {
 
     function getUrlFromJSON() {
         //add &promotionsSubscribed=${updateProfileInfo.promotionSubscribed}`; to the end of this eventually
-        let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}&subToPromo=${updateProfileInfo.promotionSubscribed ? 1: 0}`;
+        let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}&subToPromo=${updateProfileInfo.promotionSubscribed ? 1 : 0}`;
         if (updateProfileInfo.password != '') {
             url += `&password=${updateProfileInfo.password}`;
         }
@@ -517,30 +518,30 @@ export function ResetPasswordForm({ token }: { token: string }) {
         event.preventDefault();
         if (resetPasswordInfo.password == resetPasswordInfo.confirmPassword) {
             fetch(`${serverUrl}/reset-password?token=${token}`)
-            .then((res) => {
-                if (res.status == 200) {
-                    setSuccessCode(1);
-                    console.log("Response", res);
-                    return res.text();
-                } else {
-                    setSuccessCode(3);
-                    return;
-                }
-            })
-            .then((data) => { //Data holds the email in a string
-                fetch(`${serverUrl}/edit-profile?email=${data}&password=${resetPasswordInfo.password}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                }).then((res) => {
+                .then((res) => {
                     if (res.status == 200) {
                         setSuccessCode(1);
+                        console.log("Response", res);
+                        return res.text();
                     } else {
                         setSuccessCode(3);
+                        return;
                     }
                 })
-            });
+                .then((data) => { //Data holds the email in a string
+                    fetch(`${serverUrl}/edit-profile?email=${data}&password=${resetPasswordInfo.password}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    }).then((res) => {
+                        if (res.status == 200) {
+                            setSuccessCode(1);
+                        } else {
+                            setSuccessCode(3);
+                        }
+                    })
+                });
         } else {
             setSuccessCode(2);
         }
@@ -553,13 +554,54 @@ export function ResetPasswordForm({ token }: { token: string }) {
             {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Password Reset Successfully</h3> : null}
             {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Passwords do not match</h3> : null}
             {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
-            {successCode == 1 ? 
+            {successCode == 1 ?
                 <Link href='/login'>
                     <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Login</Button>
                 </Link>
                 :
                 <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Reset Password</Button>
             }
+        </form>
+    );
+}
+
+
+export function EditMovieForm({ movie }: { movie: Movie }) {
+    const [editMovieInfo, setEditMovieInfo] = useState<Movie>({
+        ...movie,
+    } as Movie);
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
+
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setEditMovieInfo({
+            ...editMovieInfo,
+            [event.target.name]: event.target.value
+        } as Movie);
+    }
+
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        updateMovie(editMovieInfo).then((res) => {
+            if (res) {
+                setSuccessCode(1);
+            } else {
+                setSuccessCode(2);
+            }
+        });
+    }
+
+    return (
+        <form className='flex flex-col space-y-6 p-4' onSubmit={handleSubmit}>
+            <TextField type="text" name='title' variant='standard' label='Title' value={editMovieInfo.title} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='cast' variant='standard' label='Cast' value={editMovieInfo.cast} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='director' variant='standard' label='Director' value={editMovieInfo.director} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='producer' variant='standard' label='Producer' value={editMovieInfo.producer} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='synopsis' variant='standard' label='Synopsis' multiline value={editMovieInfo.synopsis} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='ratingCode' variant='standard' label='Rating Code' value={editMovieInfo.ratingCode} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='reviews' variant='standard' label='Reviews' multiline value={editMovieInfo.reviews} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='trailerPic' variant='standard' label='Trailer Picture Link' value={editMovieInfo.trailerPic} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='video' variant='standard' label='Video Link' value={editMovieInfo.video} onChange={handleFormChange}></TextField>
+            <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
         </form>
     );
 }

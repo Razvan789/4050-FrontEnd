@@ -11,6 +11,7 @@ import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show } from '../utils/show';
+import { EditMovieForm } from '../components/forms';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -53,6 +54,7 @@ export default function AdminPage() {
     const [promos, setPromos] = useState<Promo[]>([]);
     const [shows, setShows] = useState<Show[]>([]);
     const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
+    const [openMovie, setOpenMovie] = useState<Movie | null>(null);
     const handleOpen = (id: GridRowId) => {
         setOpen(true);
         setOpenMovieID(id);
@@ -64,6 +66,9 @@ export default function AdminPage() {
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
+    useEffect(() => {
+        setOpenMovie(movies.find(movie => movie.movieID == openMovieID) || null);
+    }, [openMovieID, movies]);
     useEffect(() => {
         if (window.sessionStorage.getItem("admin") == "true") {
             setAdminLogged(true);
@@ -367,29 +372,7 @@ export default function AdminPage() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
-                    <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
-                        <div className="flex justify-between items-center ">
-                            <Typography id="modal-modal-title" variant="h6" component="h2">
-                                Edit Movie for {movies.find(movie => movie.movieID == openMovieID)?.title}
-                            </Typography>
-                            <IconButton className='' onClick={handleClose}>
-                                <CloseIcon />
-                            </IconButton>
-                        </div>
-                        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        </Typography>
-                        <div className="flex flex-wrap justify-center items-center space-x-2 space-y-2">
-                            <TextField variant='standard' className='ml-2 mt-2' label="Title"></TextField>
-                            <TextField variant='standard' className='' label="Rating"></TextField>
-                            <TextField variant='standard' className='' label="ShowTimes"></TextField>
-                            <TextField variant='standard' className='' label="Director"></TextField>
-                            <TextField variant='standard' className='' label="Producer"></TextField>
-                            <TextField variant='standard' className='' label="Cast"></TextField>
-                            <TextField variant='standard' className='' label="Description"></TextField>
-                            <TextField variant='standard' className='' label="Categories"></TextField>
-                        </div>
-                    </div>
-                    <Button variant='contained' className='bg-primary float-right m-4' onClick={handleClose}> Save Changes</Button>
+                    <EditMovieForm movie={openMovie || {} as Movie}/>
                 </Box>
             </Modal>
         </Layout>

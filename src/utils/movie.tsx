@@ -42,3 +42,20 @@ export async function getAllMovies(): Promise<Movie[]> {
         })
     });
 }
+
+export async function updateMovie(movie : Movie): Promise<boolean> {
+    return new Promise<boolean>( (resolve, reject) => {
+        fetch(`${serverUrl}/movie`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(movie)
+        }).then(res => res.json()).then(data => {
+            resolve(data as boolean);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}
