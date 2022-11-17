@@ -9,6 +9,7 @@ import { Button, Modal, Typography, TextField, IconButton, CircularProgress } fr
 import CloseIcon from '@mui/icons-material/Close';
 import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
+import { getAllPromos, Promo } from '../utils/promo';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -182,6 +183,44 @@ export default function AdminPage() {
         },
     ];
 
+    const promoColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID'},
+        { field: 'promoCode', headerName: 'Code', width: 130 },
+        { field: 'startTime', headerName: 'Last name', width: 130 },
+        { field: 'endTime', headerName: 'Email', width: 130 },
+        { field: 'percentage' , headerName: 'Percentage', width: 130 },
+
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 200,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        onClick={handleOpen}
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        color='error'
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Delete
+                    </Button>
+                </span>
+            ),
+        },
+    ];
     /*
         Definition of the grif and the inclusion of buttons
         This will label the information displayed in the user grid with the const
@@ -278,7 +317,7 @@ export default function AdminPage() {
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
                                 rows={rows.slice(0, 2)}
-                                columns={columns}
+                                columns={promoColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
