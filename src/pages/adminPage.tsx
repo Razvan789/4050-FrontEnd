@@ -53,30 +53,37 @@ export default function AdminPage() {
     const [promos, setPromos] = useState<Promo[]>([]);
     const [shows, setShows] = useState<Show[]>([]);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false)
+        updateAll();
+    };
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
     useEffect(() => {
         if (window.sessionStorage.getItem("admin") == "true") {
             setAdminLogged(true);
-            getUsers().then((data) => {
-                setUsers(data);
-            });
-            getAllMovies().then((data) => {
-                setMovies(data);
-            });
-            getAllPromos().then((data) => {
-                setPromos(data);
-            });
-            getAllShows().then((data) => {
-                setShows(data);
-            });
+            updateAll();
         } else {
             window.location.href = "/";
         }
     }, []);
 
+    function updateAll() {
+        getUsers().then((data) => {
+            setUsers(data);
+        });
+        getAllMovies().then((data) => {
+            setMovies(data);
+        });
+        getAllPromos().then((data) => {
+            setPromos(data);
+        });
+        getAllShows().then((data) => {
+            setShows(data);
+        });
+    }
+    //Adds fields to rows that are needed for the DataGrid
     const userRows = users.map((user) => {
         return {
             ...user,
@@ -113,15 +120,7 @@ export default function AdminPage() {
 
     // Columns for the movie table
     const movieColumns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'title', headerName: 'Movie Title', width: 230 },
-        { field: 'cast', headerName: 'Cast', width: 230 },
-        { field: 'director', headerName: 'Director', width: 130 },
-        { field: 'producer', headerName: 'Producer', width: 130 },
-        { field: 'synopsis', headerName: 'Synopsis', width: 230 },
-        { field: 'reviews', headerName: 'Reviews', width: 130 },
-        { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
-
+        //Buttons for editing and deleting
         {
             field: 'buttons',
             headerName: 'Buttons',
@@ -152,6 +151,14 @@ export default function AdminPage() {
                 </span>
             ),
         },
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'title', headerName: 'Movie Title', width: 230 },
+        { field: 'cast', headerName: 'Cast', width: 230 },
+        { field: 'director', headerName: 'Director', width: 130 },
+        { field: 'producer', headerName: 'Producer', width: 130 },
+        { field: 'synopsis', headerName: 'Synopsis', width: 230 },
+        { field: 'reviews', headerName: 'Reviews', width: 130 },
+        { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
     ];
     // Columns for the user table
     const userColumns: GridColDef[] = [
