@@ -10,6 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
+import { getAllShows, Show } from '../utils/show';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -20,21 +21,6 @@ import { getAllPromos, Promo } from '../utils/promo';
     -SUGGEST Username slot (not just an email) 
     -Will have UIDs with specific and likely self incrementing options
 */
-const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-
-];
-
-const movieRows = [
-];
 
 /*
     This is the style of the modal that pops up when the edit button is selected. 
@@ -65,13 +51,14 @@ export default function AdminPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [movies, setMovies] = useState<Movie[]>([]);
     const [promos, setPromos] = useState<Promo[]>([]);
+    const [shows, setShows] = useState<Show[]>([]);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
     useEffect(() => {
-        if(window.sessionStorage.getItem("admin") == "true"){
+        if (window.sessionStorage.getItem("admin") == "true") {
             setAdminLogged(true);
             getUsers().then((data) => {
                 setUsers(data);
@@ -81,6 +68,9 @@ export default function AdminPage() {
             });
             getAllPromos().then((data) => {
                 setPromos(data);
+            });
+            getAllShows().then((data) => {
+                setShows(data);
             });
         } else {
             window.location.href = "/";
@@ -105,6 +95,21 @@ export default function AdminPage() {
             id: promo?.promoID,
         }
     });
+    const showRows = shows.map((show) => {
+        return {
+            ...show,
+            id: show?.showID,
+            date: show?.movieTime.split(" ")[0],
+            time: show?.movieTime.split(" ")[1],
+            movie: movies.find((movie) => movie.movieID == show.movieID)?.title,
+        }
+    });
+
+    /*
+    Definition of the grif and the inclusion of buttons
+    This will label the information displayed in the user grid with the const
+    This includes the definition of the buttons to be used to edit and delete the specific users
+    */
 
     // Columns for the movie table
     const movieColumns: GridColDef[] = [
@@ -150,16 +155,16 @@ export default function AdminPage() {
     ];
     // Columns for the user table
     const userColumns: GridColDef[] = [
-        { field: 'id', headerName: 'ID'},
+        { field: 'id', headerName: 'ID' },
         { field: 'name', headerName: 'First name', width: 130 },
         { field: 'lastname', headerName: 'Last name', width: 130 },
         { field: 'email', headerName: 'Email', width: 130 },
-        { field: 'paymentSaved' , headerName: 'Payment Saved', width: 130 },
+        { field: 'paymentSaved', headerName: 'Payment Saved', width: 130 },
         { field: 'phone', headerName: 'Phone', width: 130 },
-        { field: 'type' , headerName: 'Type', width: 130 },
+        { field: 'type', headerName: 'Type', width: 130 },
         { field: 'address', headerName: 'Address', width: 130 },
-        { field: 'status' , headerName: 'Status', width: 130 },
-        { field: 'subToPromo' , headerName: 'Promotion Subscribed', width: 130 },
+        { field: 'status', headerName: 'Status', width: 130 },
+        { field: 'subToPromo', headerName: 'Promotion Subscribed', width: 130 },
 
         {
             field: 'buttons',
@@ -194,11 +199,11 @@ export default function AdminPage() {
     ];
 
     const promoColumns: GridColDef[] = [
-        { field: 'id', headerName: 'ID'},
+        { field: 'id', headerName: 'ID' },
         { field: 'promoCode', headerName: 'Code', width: 130 },
         { field: 'startTime', headerName: 'Last name', width: 130 },
         { field: 'endTime', headerName: 'Email', width: 130 },
-        { field: 'percentage' , headerName: 'Percentage', width: 130 },
+        { field: 'percentage', headerName: 'Percentage', width: 130 },
 
         {
             field: 'buttons',
@@ -231,16 +236,14 @@ export default function AdminPage() {
             ),
         },
     ];
-    /*
-        Definition of the grif and the inclusion of buttons
-        This will label the information displayed in the user grid with the const
-        This includes the definition of the buttons to be used to edit and delete the specific users
-    */
-    const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'firstName', headerName: 'First name', width: 130 },
-        { field: 'lastName', headerName: 'Last name', width: 130 },
-        { field: 'age', headerName: 'Age', type: 'number', width: 90 },
+    const showColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID' },
+        { field: 'movieID', headerName: 'Movie ID' },
+        { field: 'movie', headerName: 'Movie', width: 130 },
+        { field: 'showroomID', headerName: 'Showroom', width: 130 },
+        { field: 'date', headerName: 'Date', width: 130 },
+        { field: 'time', headerName: 'Time', width: 130 },
+
 
         {
             field: 'buttons',
@@ -336,8 +339,8 @@ export default function AdminPage() {
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Show</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows.slice(0, 2)}
-                                columns={columns}
+                                rows={showRows}
+                                columns={showColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
@@ -346,9 +349,9 @@ export default function AdminPage() {
 
                 </main>
             ) : //If an admin is not logged in
-            <div className="flex justify-center mt-10">
-                <CircularProgress disableShrink className='w-full' />
-            </div>}
+                <div className="flex justify-center mt-10">
+                    <CircularProgress disableShrink className='w-full' />
+                </div>}
             <Modal
                 open={open}
                 onClose={handleClose}

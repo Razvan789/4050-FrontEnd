@@ -14,6 +14,7 @@ export async function getPromo(id: number): Promise<Promo> {
             resolve(data as Promo);
         }).catch(err => {
             reject(err);
+            return;
         })
     });
 }
