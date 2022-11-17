@@ -64,6 +64,7 @@ export default function AdminPage() {
     const [open, setOpen] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [movies, setMovies] = useState<Movie[]>([]);
+    const [promos, setPromos] = useState<Promo[]>([]);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -77,6 +78,9 @@ export default function AdminPage() {
             });
             getAllMovies().then((data) => {
                 setMovies(data);
+            });
+            getAllPromos().then((data) => {
+                setPromos(data);
             });
         } else {
             window.location.href = "/";
@@ -93,6 +97,12 @@ export default function AdminPage() {
         return {
             ...movie,
             id: movie?.movieID,
+        }
+    });
+    const promoRows = promos.map((promo) => {
+        return {
+            ...promo,
+            id: promo?.promoID,
         }
     });
 
@@ -316,7 +326,7 @@ export default function AdminPage() {
                         <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Promotion</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows.slice(0, 2)}
+                                rows={promoRows}
                                 columns={promoColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
