@@ -22,7 +22,6 @@ export async function getShow(idToSelect: string ,id: number): Promise<Show> {
 export async function getAllShows(): Promise<Show[]> {
     return new Promise<Show[]>( (resolve, reject) => {
         fetch(`${serverUrl}/show`).then(res => res.json()).then(data => {
-            console.log(data);
             resolve(data as Show[]);
         }).catch(err => {
             reject(err);

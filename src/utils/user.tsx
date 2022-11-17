@@ -28,6 +28,5 @@ export function useUser() {
 export async function getUsers(): Promise<User[]> {
     const response = await fetch(`${serverUrl}/get-users`);
     const data = await response.json();
-    console.log(data);
     return data as User[];
 }

@@ -35,7 +35,6 @@ export async function getMovie(id: number): Promise<Movie> {
 export async function getAllMovies(): Promise<Movie[]> {
     return new Promise<Movie[]>( (resolve, reject) => {
         fetch(`${serverUrl}/movie`).then(res => res.json()).then(data => {
-            console.log(data);
             resolve(data as Movie[]);
         }).catch(err => {
             reject(err);

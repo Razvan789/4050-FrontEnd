@@ -1,6 +1,6 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -52,7 +52,11 @@ export default function AdminPage() {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [promos, setPromos] = useState<Promo[]>([]);
     const [shows, setShows] = useState<Show[]>([]);
-    const handleOpen = () => setOpen(true);
+    const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
+    const handleOpen = (id: GridRowId) => {
+        setOpen(true);
+        setOpenMovieID(id);
+    };
     const handleClose = () => {
         setOpen(false)
         updateAll();
@@ -132,7 +136,7 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
+                        onClick={() => {handleOpen(params.id)}}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
@@ -184,7 +188,6 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
@@ -223,7 +226,6 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
@@ -263,7 +265,6 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
@@ -369,7 +370,7 @@ export default function AdminPage() {
                     <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
                         <div className="flex justify-between items-center ">
                             <Typography id="modal-modal-title" variant="h6" component="h2">
-                                Edit Movie/User/Promotion
+                                Edit Movie for {movies.find(movie => movie.movieID == openMovieID)?.title}
                             </Typography>
                             <IconButton className='' onClick={handleClose}>
                                 <CloseIcon />
