@@ -21,7 +21,14 @@ export async function getPromo(id: number): Promise<Promo> {
 
 export async function getAllPromos(): Promise<Promo[]> {
     return new Promise<Promo[]>( (resolve, reject) => {
-        fetch(`${serverUrl}/promotion`).then(res => res.json()).then(data => {
+        fetch(`${serverUrl}/promotion`).then(res =>{ 
+            if(res.status === 200) {
+                return res.json();
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).then(data => {
             resolve(data as Promo[]);
         }).catch(err => {
             reject(err);

@@ -6,7 +6,8 @@ import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from 
 import Link from 'next/link'
 import { useRouter } from 'next/router';
 import { User } from '../utils/user';
-import { Movie, updateMovie } from '../utils/movie';
+import { Movie, updateMovie, addMovie } from '../utils/movie';
+import { boolean } from 'zod';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -571,23 +572,67 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
         ...movie,
     } as Movie);
     const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
-
+    const [canSubmit, setCanSubmit] = useState(false);
+    //Fill the form with empty movie info so the for loop works to validate fields
+    useEffect(() => {
+        if(!movie?.movieID) {
+            movie.title = "";
+            movie.cast = "";
+            movie.director = "";
+            movie.producer= "";
+            movie.synopsis = "";
+            movie.reviews = "";
+            movie.ratingCode = "";
+            movie.trailerPic = "";
+            movie.video = "";
+        }
+        setEditMovieInfo(movie);
+    }, [movie]);
     function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
         setEditMovieInfo({
             ...editMovieInfo,
             [event.target.name]: event.target.value
         } as Movie);
+        checkFields();
+    }
+
+    function checkFields() {
+        let key: keyof Movie;
+        for(key in editMovieInfo) {
+            console.log(key);
+            if (editMovieInfo[key] == '') {
+                setCanSubmit(false);
+                return;
+            }
+        }
+        setCanSubmit(true);
     }
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        updateMovie(editMovieInfo).then((res) => {
-            if (res) {
-                setSuccessCode(1);
-            } else {
+        if (movie?.movieID) { // If movie already exists
+            updateMovie(editMovieInfo).then((res) => {
+                if (res) {
+                    setSuccessCode(1);
+                } else {
+                    setSuccessCode(2);
+                }
+            }).catch((err) => {
+                console.log(err);
                 setSuccessCode(2);
-            }
-        });
+            });
+        } else {
+            addMovie(editMovieInfo).then((res) => {
+                if (res) {
+                    setSuccessCode(1);
+                } else {
+                    setSuccessCode(2);
+                }
+            }).catch((err) => {
+                console.log(err);
+                setSuccessCode(2);
+            });
+        }
     }
 
     return (
@@ -601,7 +646,18 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
             <TextField type="text" name='reviews' variant='standard' label='Reviews' multiline value={editMovieInfo.reviews} onChange={handleFormChange}></TextField>
             <TextField type="text" name='trailerPic' variant='standard' label='Trailer Picture Link' value={editMovieInfo.trailerPic} onChange={handleFormChange}></TextField>
             <TextField type="text" name='video' variant='standard' label='Video Link' value={editMovieInfo.video} onChange={handleFormChange}></TextField>
-            <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
+            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+            {successCode == 0 || successCode == 2 ? // Waiting for submit
+                canSubmit ? //Can submit
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
+                    : // Can't submit
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit' disabled>Submit</Button>
+                : //Submitted
+                successCode == 1 ? // Submit successs
+                    <h3 className='text-xl font-extrabold text-green-600'>Movie Updated Successfully</h3>
+                    : // Submit failed
+                    null
+            }
         </form>
     );
 }

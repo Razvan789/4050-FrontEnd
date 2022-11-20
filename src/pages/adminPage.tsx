@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
-import { getAllShows, Show } from '../utils/show';
+import { getAllShows, Show, deleteShow } from '../utils/show';
 import { EditMovieForm } from '../components/forms';
 
 /* 
@@ -44,7 +44,9 @@ const customToolbar = () => {
         </GridToolbarContainer>
     );
 };
-
+let confirmationFunction = () => {
+    console.log('Confirmation function called');
+}
 export default function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [adminLogged, setAdminLogged] = useState(false);
@@ -55,12 +57,18 @@ export default function AdminPage() {
     const [shows, setShows] = useState<Show[]>([]);
     const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
     const [openMovie, setOpenMovie] = useState<Movie | null>(null);
+    const [openConfirmation, setOpenConfirmation] = useState(false);
+
     const handleOpen = (id: GridRowId) => {
         setOpen(true);
         setOpenMovieID(id);
     };
-    const handleClose = () => {
-        setOpen(false)
+    const openConfirmationModal = (newConfirmationFunction: () => void) => {
+        setOpenConfirmation(true);
+        confirmationFunction = newConfirmationFunction;
+    };
+    const handleClose = (functionToUse: (input: boolean) => void, myInput: boolean) => {
+        functionToUse(myInput);
         updateAll();
     };
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -81,15 +89,28 @@ export default function AdminPage() {
     function updateAll() {
         getUsers().then((data) => {
             setUsers(data);
+        }).catch((err) => {
+            console.log(err);
         });
+
         getAllMovies().then((data) => {
             setMovies(data);
+        }).catch((err) => {
+            console.log(err);
         });
+
+
         getAllPromos().then((data) => {
             setPromos(data);
+        }).catch((err) => {
+            setPromos([]);
+            console.log(err);
         });
         getAllShows().then((data) => {
             setShows(data);
+        }).catch((err) => {
+            setShows([]);
+            console.log(err);
         });
     }
     //Adds fields to rows that are needed for the DataGrid
@@ -133,7 +154,7 @@ export default function AdminPage() {
         {
             field: 'buttons',
             headerName: 'Buttons',
-            width: 200,
+            width: 100,
             renderCell: (params) => (
                 <span className=''>
                     <Button
@@ -141,21 +162,11 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={() => {handleOpen(params.id)}}
+                        onClick={() => { handleOpen(params.id) }}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
                         Edit
-                    </Button>
-                    <Button
-                        color='error'
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Delete
                     </Button>
                 </span>
             ),
@@ -171,6 +182,25 @@ export default function AdminPage() {
     ];
     // Columns for the user table
     const userColumns: GridColDef[] = [
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 100,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                </span>
+            ),
+        },
         { field: 'id', headerName: 'ID' },
         { field: 'name', headerName: 'First name', width: 130 },
         { field: 'lastname', headerName: 'Last name', width: 130 },
@@ -182,73 +212,15 @@ export default function AdminPage() {
         { field: 'status', headerName: 'Status', width: 130 },
         { field: 'subToPromo', headerName: 'Promotion Subscribed', width: 130 },
 
-        {
-            field: 'buttons',
-            headerName: 'Buttons',
-            width: 200,
-            renderCell: (params) => (
-                <span className=''>
-                    <Button
-                        color="secondary"
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        color='error'
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Delete
-                    </Button>
-                </span>
-            ),
-        },
+
     ];
 
     const promoColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID' },
         { field: 'promoCode', headerName: 'Code', width: 130 },
-        { field: 'startTime', headerName: 'Last name', width: 130 },
-        { field: 'endTime', headerName: 'Email', width: 130 },
+        { field: 'startTime', headerName: 'Start Time', width: 130 },
+        { field: 'endTime', headerName: 'End Time', width: 130 },
         { field: 'percentage', headerName: 'Percentage', width: 130 },
-
-        {
-            field: 'buttons',
-            headerName: 'Buttons',
-            width: 200,
-            renderCell: (params) => (
-                <span className=''>
-                    <Button
-                        color="secondary"
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        color='error'
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Delete
-                    </Button>
-                </span>
-            ),
-        },
     ];
     const showColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID' },
@@ -279,6 +251,13 @@ export default function AdminPage() {
                         color='error'
                         variant="outlined"
                         size="small"
+                        onClick={() => {openConfirmationModal(()=> {
+                            deleteShow(params.id as number).then(() => {
+                                handleClose(setOpenConfirmation, false);
+                            }).catch((err) => {
+                                console.log(err);
+                            });
+                        })}}
                         className='font-extrabold'
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
@@ -319,7 +298,7 @@ export default function AdminPage() {
                         </Tabs>
                     </Box>
                     <TabPanel value={tabValue} index={0}>
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Movie</Button>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => { handleOpen(0) }}>Add Movie</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
                                 rows={movieRows}
@@ -367,12 +346,29 @@ export default function AdminPage() {
                 </div>}
             <Modal
                 open={open}
-                onClose={handleClose}
+                onClose={() => { handleClose(setOpen, false) }}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
-                    <EditMovieForm movie={openMovie || {} as Movie}/>
+                    <EditMovieForm movie={openMovie || {} as Movie} />
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openConfirmation}
+                onClose={() => { handleClose(setOpenConfirmation, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[300px] p-0'>
+                    <div className="text-3xl flex flex-col justify-center items-center pt-3">
+                        <h1>Are you sure?</h1>
+                        <div className="flex justify-between w-full p-10 pb-2">
+                            <Button onClick={() => { handleClose(setOpenConfirmation, false) }}>No</Button>
+                            <Button onClick={() => { confirmationFunction() }} variant='contained' className='bg-primary'>Yes</Button>
+                        </div>
+                    </div>
                 </Box>
             </Modal>
         </Layout>
