@@ -15,7 +15,7 @@ export default function CardContainer({ children, grid }: CardContainerProps) {
                     {children}
                 </div>
             ) : (
-                <div className="z-20 flex justify-center items-center md:items-start  overflow-x-scroll md:h-[450px] h-[350px]">
+                <div className="z-20 flex items-center  overflow-x-scroll md:h-[450px] h-[350px]">
                     {children}
                 </div>
             )}

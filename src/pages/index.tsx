@@ -8,6 +8,7 @@ import { useContext } from "react";
 import { Pagination, Chip } from "@mui/material";
 import { Movie, getMovie, getAllMovies } from "../utils/movie";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Show, getAllShows } from "../utils/show";
 const handleFilterDelete = () => {
   console.log("deleted Filter");
 }
@@ -16,16 +17,36 @@ export default function Home() {
   const user: User = useContext(UserContext);
   const [loading, setLoading] = useState(0); // 0 - loading 1 - loaded 2 - error
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [shows, setShows] = useState<Show[]>([]);
+  const [showingMovies, setShowingMovies] = useState<Movie[]>([]);
   useEffect(() => {
     getAllMovies().then((data) => {
       console.log("Data from getMovies", data);
       setMovies(data);
-      setLoading(1);
     }).catch((err) => {
       setLoading(2);
       console.log("Error from getMovies", err);
     });
+
+    getAllShows().then((data) => {
+      console.log("Data from getShows", data);
+      setShows(data);
+      setLoading(1);
+    }).catch((err) => {
+      setLoading(2);
+      console.log("Error from getShows", err);
+    });
   }, []);
+
+  useEffect(() => {
+    const showingMovies : Movie[] = [];
+    movies.forEach((movie) => {
+      if (shows.find((show) => show.movieID == movie.movieID)) {
+        showingMovies.push(movie);
+      }
+    });
+    setShowingMovies(showingMovies);
+  }, [shows, movies]);
   console.log("User from in", user);
   return (
     <Layout>
@@ -38,11 +59,11 @@ export default function Home() {
         <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-text-dark">
           <span className="text-primary">E-Cinema</span> App
         </h1>
-        <h2 className="text-text-light text-2xl leading-loose font-extrabold">Trending →</h2>
+        <h2 className="text-text-light text-2xl leading-loose font-extrabold">Now Playing →</h2>
         <CardContainer>
           <div className="flex ">
             {
-              loading === 0 ? <CircularProgress /> : loading === 1 ? movies.map((movie) => {
+              loading === 0 ? <CircularProgress /> : loading === 1 ? showingMovies.map((movie) => {
                 return (
                   <Card
                     key={movie.movieID}
