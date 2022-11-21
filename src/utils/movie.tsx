@@ -82,3 +82,15 @@ export async function updateMovie(movie : Movie): Promise<boolean> {
         })
     });
 }
+
+
+export async function searchMovies(searchTerm: string): Promise<Movie[]> {
+    return new Promise<Movie[]>( (resolve, reject) => {
+        fetch(`${serverUrl}/search?term=${searchTerm}`).then(res => res.json()).then(data => {
+            resolve(data as Movie[]);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}

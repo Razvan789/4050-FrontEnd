@@ -3,7 +3,6 @@ import React from 'react'
 import { Movie, getMovie } from '../utils/movie';
 import Link from 'next/link';
 import { myLoader } from '../utils/image';
-import { Tooltip } from '@mui/material';
 import { CustomTooltip } from './CustomTooltip';
 import Zoom from '@mui/material/Zoom';
 interface CardProps {
@@ -20,7 +19,7 @@ const defaultMovie: Movie = {
     producer: "",
     synopsis: "",
     reviews: "",
-    ratingCode: 0,
+    ratingCode: "",
     trailerPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSu5iprMc1MEpOTSC7jAnweLJdcMeUL3jJg4AiNoTs&s",
     video: ""
 }

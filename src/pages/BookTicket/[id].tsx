@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Layout from '../../components/layout';
 import { getMovie, Movie } from '../../utils/movie';
 import Image from 'next/future/image';
@@ -18,6 +18,8 @@ import SeatPicker from '../../components/seatPicker';
 import { Box, Button, Modal, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { serverUrl } from '../../utils/backendInfo';
+import { format } from 'path';
+import {Show, getShowsByMovieID} from '../../utils/show';
 
 interface staticProps {
     params: {
@@ -73,8 +75,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [childTickets, setChildTickets] = React.useState(0);
     const [showTime, setShowTime] = React.useState("Select Time");
     const [open, setOpen] = useState(false);
+    const [shows, setShows] = useState<Show[]>([]);
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
+    const displayedFields = ['title', 'Producer', 'Cast', 'Director', 'Synopsis', 'Reviews'];
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -82,6 +86,25 @@ export default function BookMovie({ movie }: BookMovieProps) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
+    useEffect(() => {
+        getShowsByMovieID(movie.movieID).then((shows) => {
+            setShows(shows);
+            console.log(shows);
+        }).catch((err) => {
+            console.log(err);
+        });
+    }, []);
+
+    function getShowTimes(date : string): string[] {
+        const showTimes: string[] = [];
+        shows.forEach((show) => {
+            const splitShowTime = show.movieTime.split(" ");
+            if (splitShowTime[0] === date) {
+                showTimes.push(splitShowTime[1] || "");
+            }
+        });
+        return showTimes;
+    } 
     //eslint-disable-next-line
     const handleSelectChange = (event: SelectChangeEvent<any>, callFunction: React.Dispatch<React.SetStateAction<any>>) => {
         callFunction(event.target.value);
@@ -97,10 +120,11 @@ export default function BookMovie({ movie }: BookMovieProps) {
                             <h3 className='text-xl text-primary font-extrabold'> Available Times</h3>
                             <Divider />
                             <ul>
-                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("12:00 PM")}>12:00 PM</li>
-                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("3:00 PM")}>3:00 PM</li>
-                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("6:00 PM")}>6:00 PM</li>
-                                <li className='text-text-light cursor-pointer hover:text-primary' onClick={() => setShowTime("9:00 PM")}>9:00 PM</li>
+                                {getShowTimes(date?.format("MM/DD/YYYY") || "").map((time) => {
+                                    return (
+                                        <li key={time} className='text-text-light hover:text-primary cursor-pointer' onClick={() => setShowTime(time)}>{time}</li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     </div>
@@ -115,11 +139,11 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     value={showTime}
                                     onChange={(event) => handleSelectChange(event, setShowTime)}
                                 >
-                                    <MenuItem value="6:00pm">6:00pm</MenuItem>
-                                    <MenuItem value="7:00pm">7:00pm</MenuItem>
-                                    <MenuItem value="8:00pm">8:00pm</MenuItem>
-                                    <MenuItem value="9:00pm">9:00pm</MenuItem>
-                                    <MenuItem value="10:00pm">10:00pm</MenuItem>
+                                    {getShowTimes(date?.format("MM/DD/YYYY") || "").map((time) => {
+                                    return (
+                                        <MenuItem key={time} value={time}>{time}</MenuItem>
+                                    );
+                                })}
                                 </Select>
                             </div>
                             <div className='flex items-center mb-3 justify-center'>
@@ -234,9 +258,8 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 />
                 <div className="flex flex-col p-3 w-96">
                     <h2 className='font-extrabold text-3xl leading-loose text-primary'>{movie.title}</h2>
-                    <Rating name="read-only" value={movie.ratingCode} precision={0.1} readOnly />
                     <div className='hidden md:block'>
-                        <p className='text-lg text-gray-500 '>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Deserunt laborum sapiente quos cupiditate officiis modi expedita non deleniti eos similique..</p>
+                        <p className='text-text-light'>{movie.synopsis}</p>
                     </div>
                     <Button variant='contained' className='bg-primary' onClick={handleModalOpen}> More Information</Button>
                 </div>
@@ -283,7 +306,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[400px] lg:w-[800px] p-0'>
                     <div className="flex justify-between items-center m-3">
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Movie Information will be here
+                            {movie.title} Detials
                         </Typography>
                         <IconButton className='' onClick={handleModalClose}>
                             <CloseIcon />
@@ -291,14 +314,42 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     </div>
                     <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
                         <div className="flex justify-center">
-                            <iframe width="560" height="315" src="https://www.youtube.com/embed/JfVOs4VSpmA" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                            <iframe width="560" height="315" src={movie.video} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                         </div>
-                        <div className="flex flex-col justify-center items-center">
-                            <h2 className='text-2xl font-extrabold text-primary'>Movie Information</h2>
+                        <div className="flex flex-col">
+                            <h2 className='text-2xl font-extrabold text-primary text-center'>Movie Information</h2>
                             <Divider />
-                            <p className='text-text-dark'>
-                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloremque aspernatur, quae laudantium nemo deserunt cum possimus ratione aperiam. Amet aut sequi eos quae ipsam accusantium deserunt assumenda consequatur autem! Sit quod ipsum quo, maxime voluptatibus cum perspiciatis tempora modi assumenda nihil dicta amet ea totam repellendus recusandae quisquam culpa eum dolore numquam ab nulla suscipit reiciendis incidunt aut. Voluptatum officiis saepe porro ratione laudantium nulla veritatis aperiam corrupti minus assumenda et suscipit, dolore ut non recusandae expedita dolorem eius praesentium aliquid itaque facere quibusdam ex nemo! Odio dolore laborum reprehenderit. Sed temporibus in accusamus impedit numquam modi? Voluptatum suscipit voluptates dolore, in libero natus necessitatibus neque temporibus alias labore at ex vel eaque a ipsam eveniet quae nesciunt! Quo maxime quae, eaque doloremque culpa consequatur! Voluptas reiciendis reprehenderit, beatae perspiciatis eaque ea labore quisquam facilis laborum. Cum, vero. Eos quibusdam ipsam reiciendis hic, iusto consectetur possimus perferendis voluptates facere repudiandae molestiae vel autem nisi, alias dolor dolores velit optio magni aliquid? Iusto ea, consectetur quae tempore autem aperiam magnam odit dignissimos cupiditate. Explicabo animi quidem consequatur molestias nisi itaque alias dignissimos perspiciatis rem! Totam, neque, temporibus libero ipsa odit mollitia alias voluptatum similique autem at corrupti, ea iste officiis pariatur dolor amet. Voluptatem et, fugiat vitae eligendi nesciunt vero iure beatae, dolores aliquid est aut praesentium quas alias? Fugiat, quasi. Excepturi quas voluptas perspiciatis sed. Sit sunt ad numquam maiores laboriosam obcaecati nihil tenetur omnis veniam. Aliquam ea, cum eaque consequatur provident totam fugiat modi libero tempora unde culpa ullam praesentium laboriosam doloremque deserunt? Laboriosam cupiditate nulla, ab fugit quasi architecto ullam, numquam praesentium consectetur magnam ad officiis dolorum a obcaecati veniam assumenda rem asperiores quis sed voluptatum vitae sequi eveniet quam nemo? Ducimus ab odio deleniti autem beatae dolores qui. Voluptatem dolores natus accusantium quia vel, pariatur porro minima!
-                            </p>
+                            <div className="font-extrabold text-xl text-primary grid grid-cols-2  gap-y-24 p-4">
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Title:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.title}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Director:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.director}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Producer:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.producer}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Cast:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.cast}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Rating:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.ratingCode}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2 >Reviews:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.reviews}</p>
+                                </div>
+                                <div className='flex flex-col justify-center items-start col-span-2 '>
+                                    <h2>Synopsis</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.synopsis}</p>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                     <Button variant='contained' className='bg-primary float-right m-4' onClick={handleModalClose}> Close</Button>
