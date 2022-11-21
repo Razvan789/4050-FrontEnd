@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
-import { TextField, Button, FormControlLabel, Checkbox, CircularProgress } from '@mui/material'
+import { TextField, Button, FormControlLabel, Checkbox, CircularProgress, Modal, Box } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router';
 import { User } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
-import { boolean } from 'zod';
+import { Promo, addPromo } from '../utils/promo';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -575,11 +575,11 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
     const [canSubmit, setCanSubmit] = useState(false);
     //Fill the form with empty movie info so the for loop works to validate fields
     useEffect(() => {
-        if(!movie?.movieID) {
+        if (!movie?.movieID) {
             movie.title = "";
             movie.cast = "";
             movie.director = "";
-            movie.producer= "";
+            movie.producer = "";
             movie.synopsis = "";
             movie.reviews = "";
             movie.ratingCode = "";
@@ -598,7 +598,7 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
 
     function checkFields() {
         let key: keyof Movie;
-        for(key in editMovieInfo) {
+        for (key in editMovieInfo) {
             console.log(key);
             if (editMovieInfo[key] == '') {
                 setCanSubmit(false);
@@ -659,5 +659,100 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
                     null
             }
         </form>
+    );
+}
+
+export function AddPromotionForm() {
+    const [addPromotionInfo, setAddPromotionInfo] = useState<Promo>({
+        promoCode: '',
+        percentage: 0,
+        startTime: '',
+        endTime: '',
+    } as Promo);
+
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
+    const [canSubmit, setCanSubmit] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const modalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        boxShadow: 24,
+        p: 4,
+    };
+
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setAddPromotionInfo({
+            ...addPromotionInfo,
+            [event.target.name]: event.target.value
+        } as Promo);
+        checkFields();
+    }
+
+    function checkFields() {
+        let key: keyof Promo;
+        for (key in addPromotionInfo) {
+            console.log(key);
+            if (addPromotionInfo[key] == '' || addPromotionInfo[key] == 0) {
+                setCanSubmit(false);
+                return;
+            }
+        }
+        setCanSubmit(true);
+    }
+
+    function handleSubmit() {
+        addPromo(addPromotionInfo).then((res) => {
+            if (res) {
+                setSuccessCode(1);
+            } else {
+                setSuccessCode(2);
+            }
+        }).catch((err) => {
+            console.log(err);
+            setSuccessCode(2);
+        });
+    }
+
+    return (
+        <>
+            <div className='flex flex-col space-y-6 p-4'>
+                <TextField type="text" name='promoCode' variant='standard' label='Promo Code' value={addPromotionInfo.promoCode} onChange={handleFormChange}></TextField>
+                <TextField type="number" name='percentage' variant='standard' label='Percentage' value={addPromotionInfo.percentage} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='startTime' variant='standard' label='Start Time' value={addPromotionInfo.startTime} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='endTime' variant='standard' label='End Time' value={addPromotionInfo.endTime} onChange={handleFormChange}></TextField>
+                {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+                {successCode == 0 || successCode == 2 ? // Waiting for submit
+                    canSubmit ? //Can submit
+                        <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={()=> setModalOpen(true)} >Submit</Button>
+                        : // Can't submit
+                        <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit' disabled>Submit</Button>
+                    : //Submitted
+                    successCode == 1 ? // Submit successs
+                        <h3 className='text-xl font-extrabold text-green-600'>Promotion Added Successfully</h3>
+                        : // Submit failed
+                        null
+                }
+            </div>
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[300px] p-6'>
+                    <h1 id="modal-modal-title" className='text-2xl font-extrabold text-text-light text-center'>Are you Sure?</h1>
+                    <p id="modal-modal-description" className='text-lg font-extrabold text-text-dark text-center'>This action cannot be undone</p>
+                    <div className="flex justify-between">
+                        <Button className='m-4 mt-8 font-extrabold ' onClick={() => setModalOpen(false)}>Cancel</Button>
+                        <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => {
+                            handleSubmit();
+                            setModalOpen(false)
+                            }}>Confirm</Button>
+                    </div>
+                </Box>
+            </Modal>
+        </>
     );
 }

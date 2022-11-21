@@ -1,7 +1,7 @@
 import { serverUrl } from "./backendInfo";
 
 export type Promo = {
-    promoID: number;
+    promoID?: number;
     promoCode: string;
     percentage: number;
     startTime: string;
@@ -30,6 +30,31 @@ export async function getAllPromos(): Promise<Promo[]> {
             }
         }).then(data => {
             resolve(data as Promo[]);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}
+
+export async function addPromo(promo: Promo): Promise<number> {
+    promo.percentage = promo.percentage / 100;
+    return new Promise<number>((resolve, reject) => {
+        fetch(`${serverUrl}/promotion`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(promo)
+        }).then(res => {
+            if(res.status === 200) {
+                return res.json();
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).then(data => {
+            resolve(data as number);
         }).catch(err => {
             reject(err);
             return;

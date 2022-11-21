@@ -11,7 +11,7 @@ import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show, deleteShow } from '../utils/show';
-import { EditMovieForm } from '../components/forms';
+import { EditMovieForm, AddPromotionForm } from '../components/forms';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -58,6 +58,7 @@ export default function AdminPage() {
     const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
     const [openMovie, setOpenMovie] = useState<Movie | null>(null);
     const [openConfirmation, setOpenConfirmation] = useState(false);
+    const [openPromotion, setOpenPromotion] = useState(false); 
 
     const handleOpen = (id: GridRowId) => {
         setOpen(true);
@@ -318,7 +319,7 @@ export default function AdminPage() {
                         </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Promotion</Button>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => setOpenPromotion(true)}>Add Promotion</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
                                 rows={promoRows}
@@ -352,6 +353,17 @@ export default function AdminPage() {
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
                     <EditMovieForm movie={openMovie || {} as Movie} />
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openPromotion}
+                onClose={() => { handleClose(setOpenPromotion, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <AddPromotionForm />
                 </Box>
             </Modal>
 
