@@ -11,7 +11,7 @@ import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show, deleteShow } from '../utils/show';
-import { EditMovieForm, AddPromotionForm } from '../components/forms';
+import { EditMovieForm, AddPromotionForm, EditUserForm } from '../components/forms';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -59,10 +59,15 @@ export default function AdminPage() {
     const [openMovie, setOpenMovie] = useState<Movie | null>(null);
     const [openConfirmation, setOpenConfirmation] = useState(false);
     const [openPromotion, setOpenPromotion] = useState(false); 
-
+    const [openUserModal, setOpenUserModal] = useState(false);
+    const [openUser, setOpenUser] = useState<User | null>(null);
     const handleOpen = (id: GridRowId) => {
         setOpen(true);
         setOpenMovieID(id);
+    };
+    const handleUserOpen = (id: GridRowId) => {
+        setOpenUserModal(true);
+        setOpenUser(users.find(user => user?.userID == id) || null);
     };
     const openConfirmationModal = (newConfirmationFunction: () => void) => {
         setOpenConfirmation(true);
@@ -194,6 +199,7 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
+                        onClick={() => { handleUserOpen(params.id) }}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
@@ -364,6 +370,17 @@ export default function AdminPage() {
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
                     <AddPromotionForm />
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openUserModal}
+                onClose={() => { handleClose(setOpenUserModal, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <EditUserForm user={openUser || {} as User}></EditUserForm>
                 </Box>
             </Modal>
 

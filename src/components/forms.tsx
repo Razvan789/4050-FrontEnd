@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
-import { TextField, Button, FormControlLabel, Checkbox, CircularProgress, Modal, Box } from '@mui/material'
+import { TextField, Button, FormControlLabel, Checkbox, CircularProgress, Modal, Box, Select, MenuItem} from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router';
-import { User } from '../utils/user';
+import { User, updateType, updateStatus } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
+import { constants } from 'buffer';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -725,7 +726,7 @@ export function AddPromotionForm() {
                 {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
                 {successCode == 0 || successCode == 2 ? // Waiting for submit
                     canSubmit ? //Can submit
-                        <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={()=> setModalOpen(true)} >Submit</Button>
+                        <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => setModalOpen(true)} >Submit</Button>
                         : // Can't submit
                         <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit' disabled>Submit</Button>
                     : //Submitted
@@ -749,10 +750,59 @@ export function AddPromotionForm() {
                         <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => {
                             handleSubmit();
                             setModalOpen(false)
-                            }}>Confirm</Button>
+                        }}>Confirm</Button>
                     </div>
                 </Box>
             </Modal>
         </>
     );
+}
+
+export function EditUserForm({ user }: { user: User }) {
+    const [editUserInfo, setEditUserInfo] = useState<User>({
+        ...user
+    } as User);
+
+    return (
+        <div className='flex flex-col space-y-6 p-4'>
+            <TextField type="text" variant='standard' label='Email' value={editUserInfo?.email} InputProps={{ readOnly: true }}></TextField>
+            <TextField type="text" variant='standard' label='First Name' value={editUserInfo?.name} InputProps={{ readOnly: true }}></TextField>
+            <TextField type="text" variant='standard' label='Last Name' value={editUserInfo?.lastname} InputProps={{ readOnly: true }}></TextField>
+            <div className="flex space-x-3">
+                <TextField className='w-full' type="text" variant='standard' label='Type' value={editUserInfo?.type} InputProps={{ readOnly: true }}></TextField>
+                <TextField className='w-full' type="text" variant='standard' label='Status' value={editUserInfo?.status} InputProps={{ readOnly: true }}></TextField>
+            </div>
+            <div className="flex mx-auto">
+                
+                {editUserInfo?.type == 'customer' ? // If customer
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "admin").then(() =>{
+                    setEditUserInfo({
+                        ...editUserInfo,
+                        type: 'admin'} as User);
+                })}>Make Admin</Button>
+                : // if admin
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "customer").then(() =>{
+                    setEditUserInfo({
+                        ...editUserInfo,
+                        type: 'customer'} as User);
+                })}>Make Customer</Button>
+                }
+
+                {editUserInfo?.status == 'active' ? // If active
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "inactive").then(() =>{
+                    setEditUserInfo({
+                        ...editUserInfo,
+                        status: 'inactive'} as User);
+                })}>Deactivate</Button>
+                : // if inactive
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "active").then(() =>{
+                    setEditUserInfo({
+                        ...editUserInfo,
+                        status: 'active'} as User);
+                })}>Activate</Button>
+                }
+            </div>
+        </div>
+    );
+
 }

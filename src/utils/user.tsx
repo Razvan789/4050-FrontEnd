@@ -30,3 +30,18 @@ export async function getUsers(): Promise<User[]> {
     const data = await response.json();
     return data as User[];
 }
+
+
+export async function updateType(user: User, type: string): Promise<boolean> {
+    const response = await fetch(`${serverUrl}/edit-profile?email=${user?.email}&type=${type}`, {
+        method: 'PUT',
+    });
+    return response.status === 200;
+}
+
+export async function updateStatus(user: User, status: string): Promise<boolean> {
+    const response = await fetch(`${serverUrl}/edit-profile?email=${user?.email}&status=${status}`, {
+        method: 'PUT',
+    });
+    return response.status === 200;
+}
