@@ -747,7 +747,8 @@ export function AddPromotionForm() {
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[300px] p-6'>
                     <h1 id="modal-modal-title" className='text-2xl font-extrabold text-text-light text-center'>Are you Sure?</h1>
-                    <p id="modal-modal-description" className='text-lg font-extrabold text-text-dark text-center'>This action cannot be undone</p>
+                    <p id="modal-modal-description" className='text-lg font-extrabold text-text-dark text-center'>This action will send emails, and cannot be undone</p>
+
                     <div className="flex justify-between">
                         <Button className='m-4 mt-8 font-extrabold ' onClick={() => setModalOpen(false)}>Cancel</Button>
                         <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => {

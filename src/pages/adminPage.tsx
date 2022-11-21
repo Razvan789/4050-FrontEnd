@@ -172,7 +172,7 @@ export default function AdminPage() {
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
-                        Edit
+                        Info
                     </Button>
                 </span>
             ),
