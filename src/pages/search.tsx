@@ -46,6 +46,8 @@ export default function Search() {
         <Layout>
             <h1 className='font-extrabold text-4xl text-center pt-4 text-text-dark'><span className='text-primary'>Search</span> Results: </h1>
             <Chip label={showNowPlaying ? "Show All Movies" : "Show Now Playing"} color="primary" variant={showNowPlaying ? "filled" : "outlined"} onClick={() => setShowNowPlaying(!showNowPlaying)} className='mx-auto my-4' />
+            <h2 className='font-extrabold text-2xl pl-10 text-text-light'>{showNowPlaying ? "Movies Now Playing" : "All Movies"} → </h2>
+            
             {loading ?
                 // If loading is true, show skeletons
                 <CardSkeletons cardCount={5} />

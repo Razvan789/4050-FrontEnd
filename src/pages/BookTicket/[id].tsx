@@ -265,6 +265,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 </div>
 
             </div>
+            { shows.length > 0 ?
             <div className='lg:w-2/3 lg:mx-auto p-4 h-full'>
                 <Stepper activeStep={activeStep}>
                     {steps.map((label) => {
@@ -297,6 +298,13 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
                 </div>
             </div>
+            : 
+            <div className='flex flex-col justify-center items-center'>
+                <h2 className='text-center text-2xl font-extrabold text-primary'>No Shows Available</h2>
+                <Divider />
+                <p className='text-center text-text-light'>There are no shows available for this movie at this time.</p>
+            </div>
+            }
             <Modal
                 open={open}
                 onClose={handleModalClose}

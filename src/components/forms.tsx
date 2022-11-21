@@ -220,7 +220,7 @@ export function SignUpForm() {
 
 export function LoginForm() {
     const router = useRouter();
-    const [loginCode, setLoginCode] = useState(0); //0 - not logged in, 1 - success,2 - error server, 3 - error account, 4 - error email/password
+    const [loginCode, setLoginCode] = useState(0); //0 - not logged in, 1 - success,2 - error server, 3 - error account, 4 - error email/password, 5 - Suspended
     const [rememberMe, setRememberMe] = useState(false);
     const [loginInfo, setLoginInfo] = useState<loginInfo>({
         email: '',
@@ -275,6 +275,8 @@ export function LoginForm() {
                     } else {
                         router.push('/');
                     }
+                } else if(data.status == 'suspended'){
+                    setLoginCode(5);
                 } else {
                     setLoginCode(3);
                 }
@@ -295,6 +297,7 @@ export function LoginForm() {
                         {loginCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Login Error Please try again</h3> : null}
                         {loginCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Your account is not active, please check your email</h3> : null}
                         {loginCode == 4 ? <h3 className='text-xl font-extrabold text-red-600'>Password is incorrect</h3> : null}
+                        {loginCode == 5 ? <h3 className='text-xl font-extrabold text-red-600'>Your account has been suspended</h3> : null}
                         <Button className="mx-auto w-full bg-primary font-extrabold" variant="contained" type='submit'>Login</Button>
                         <div className="flex flex-col text-center">
                             <p className="text-text-light">Need an account? <Link href='/signUp'><span className="cursor-pointer underline text-primary">Sign up</span></Link></p>
@@ -789,10 +792,10 @@ export function EditUserForm({ user }: { user: User }) {
                 }
 
                 {editUserInfo?.status == 'active' ? // If active
-                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "inactive").then(() =>{
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "suspended").then(() =>{
                     setEditUserInfo({
                         ...editUserInfo,
-                        status: 'inactive'} as User);
+                        status: 'suspended'} as User);
                 })}>Deactivate</Button>
                 : // if inactive
                 <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "active").then(() =>{

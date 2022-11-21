@@ -241,19 +241,10 @@ export default function AdminPage() {
         {
             field: 'buttons',
             headerName: 'Buttons',
-            width: 200,
+            width: 120,
             renderCell: (params) => (
                 <span className=''>
-                    <Button
-                        color="secondary"
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Edit
-                    </Button>
+                    
                     <Button
                         color='error'
                         variant="outlined"
