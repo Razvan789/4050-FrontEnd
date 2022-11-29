@@ -15,6 +15,8 @@ type CardInfo = {
     cardID: string,
 }
 
+
+// TODO: Add a delete and edit button that will pop up modals
 export default function PaymentCardInfo({ cardNum, cardExp, cardID }: Props) {
 
     const [newCardInfo, setNewCardInfo] = React.useState();

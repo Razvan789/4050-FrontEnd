@@ -6,6 +6,8 @@ interface CardContainerProps {
 }
 
 export default function CardContainer({ children, grid }: CardContainerProps) {
+
+
     return (
         <>
             {grid ? (
@@ -13,10 +15,11 @@ export default function CardContainer({ children, grid }: CardContainerProps) {
                     {children}
                 </div>
             ) : (
-                <div className="z-20 flex relative justify-center">
+                <div className="z-20 flex items-center  overflow-x-scroll md:h-[450px] h-[350px]">
                     {children}
                 </div>
             )}
         </>
     )
 }
+

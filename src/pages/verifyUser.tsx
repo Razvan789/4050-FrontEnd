@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Layout from '../components/layout'
-import { TextField, Button, LinearProgress } from '@mui/material'
+import { Button, LinearProgress } from '@mui/material'
 import Link from 'next/link'
+<<<<<<< HEAD
 //import { encrypt } from '../utils/encryption'
+=======
+// import { encrypt } from '../utils/encryption'
+>>>>>>> 4c869753775053196f417743d42696b4b91981f7
 import { useRouter } from 'next/router'
 import {serverUrl} from '../utils/backendInfo'
-import {User, useUser} from '../utils/user'
-import { setRevalidateHeaders } from 'next/dist/server/send-payload'
 
 function testEncryption() {
     var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
@@ -30,6 +32,7 @@ export default function VerifyEmail() {
             console.log("token is " + router.query.token);
             handleVerifyEmail(router.query.token as string);
         } 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query.token]);
 
     function handleVerifyEmail(token: string) {

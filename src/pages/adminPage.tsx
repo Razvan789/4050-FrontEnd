@@ -1,12 +1,17 @@
 import Layout from '../components/layout'
 import Head from 'next/head'
-import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react'
 import { Button, Modal, Typography, TextField, IconButton, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { getAllMovies, Movie } from '../utils/movie';
+import { getUsers, User } from '../utils/user';
+import { getAllPromos, Promo } from '../utils/promo';
+import { getAllShows, Show, deleteShow } from '../utils/show';
+import { EditMovieForm, AddPromotionForm, EditUserForm } from '../components/forms';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -17,18 +22,6 @@ import CloseIcon from '@mui/icons-material/Close';
     -SUGGEST Username slot (not just an email) 
     -Will have UIDs with specific and likely self incrementing options
 */
-const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-
-];
 
 /*
     This is the style of the modal that pops up when the edit button is selected. 
@@ -51,40 +44,123 @@ const customToolbar = () => {
         </GridToolbarContainer>
     );
 };
-
+let confirmationFunction = () => {
+    console.log('Confirmation function called');
+}
 export default function AdminPage() {
     const [tabValue, setTabValue] = useState(0);
     const [adminLogged, setAdminLogged] = useState(false);
     const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [promos, setPromos] = useState<Promo[]>([]);
+    const [shows, setShows] = useState<Show[]>([]);
+    const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
+    const [openMovie, setOpenMovie] = useState<Movie | null>(null);
+    const [openConfirmation, setOpenConfirmation] = useState(false);
+    const [openPromotion, setOpenPromotion] = useState(false); 
+    const [openUserModal, setOpenUserModal] = useState(false);
+    const [openUser, setOpenUser] = useState<User | null>(null);
+    const handleOpen = (id: GridRowId) => {
+        setOpen(true);
+        setOpenMovieID(id);
+    };
+    const handleUserOpen = (id: GridRowId) => {
+        setOpenUserModal(true);
+        setOpenUser(users.find(user => user?.userID == id) || null);
+    };
+    const openConfirmationModal = (newConfirmationFunction: () => void) => {
+        setOpenConfirmation(true);
+        confirmationFunction = newConfirmationFunction;
+    };
+    const handleClose = (functionToUse: (input: boolean) => void, myInput: boolean) => {
+        functionToUse(myInput);
+        updateAll();
+    };
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
     useEffect(() => {
-        if(window.sessionStorage.getItem("admin") == "true"){
+        setOpenMovie(movies.find(movie => movie.movieID == openMovieID) || null);
+    }, [openMovieID, movies]);
+    useEffect(() => {
+        if (window.sessionStorage.getItem("admin") == "true") {
             setAdminLogged(true);
+            updateAll();
         } else {
             window.location.href = "/";
         }
     }, []);
 
+    function updateAll() {
+        getUsers().then((data) => {
+            setUsers(data);
+        }).catch((err) => {
+            console.log(err);
+        });
+
+        getAllMovies().then((data) => {
+            setMovies(data);
+        }).catch((err) => {
+            console.log(err);
+        });
+
+
+        getAllPromos().then((data) => {
+            setPromos(data);
+        }).catch((err) => {
+            setPromos([]);
+            console.log(err);
+        });
+        getAllShows().then((data) => {
+            setShows(data);
+        }).catch((err) => {
+            setShows([]);
+            console.log(err);
+        });
+    }
+    //Adds fields to rows that are needed for the DataGrid
+    const userRows = users.map((user) => {
+        return {
+            ...user,
+            id: user?.userID,
+        }
+    });
+    const movieRows = movies.map((movie) => {
+        return {
+            ...movie,
+            id: movie?.movieID,
+        }
+    });
+    const promoRows = promos.map((promo) => {
+        return {
+            ...promo,
+            id: promo?.promoID,
+        }
+    });
+    const showRows = shows.map((show) => {
+        return {
+            ...show,
+            id: show?.showID,
+            date: show?.movieTime.split(" ")[0],
+            time: show?.movieTime.split(" ")[1],
+            movie: movies.find((movie) => movie.movieID == show.movieID)?.title,
+        }
+    });
 
     /*
-        Definition of the grif and the inclusion of buttons
-        This will label the information displayed in the user grid with the const
-        This includes the definition of the buttons to be used to edit and delete the specific users
+    Definition of the grif and the inclusion of buttons
+    This will label the information displayed in the user grid with the const
+    This includes the definition of the buttons to be used to edit and delete the specific users
     */
-    const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'firstName', headerName: 'First name', width: 130 },
-        { field: 'lastName', headerName: 'Last name', width: 130 },
-        { field: 'age', headerName: 'Age', type: 'number', width: 90 },
 
+    // Columns for the movie table
+    const movieColumns: GridColDef[] = [
+        //Buttons for editing and deleting
         {
             field: 'buttons',
             headerName: 'Buttons',
-            width: 200,
+            width: 100,
             renderCell: (params) => (
                 <span className=''>
                     <Button
@@ -92,16 +168,94 @@ export default function AdminPage() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
+                        onClick={() => { handleOpen(params.id) }}
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Info
+                    </Button>
+                </span>
+            ),
+        },
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'title', headerName: 'Movie Title', width: 230 },
+        { field: 'cast', headerName: 'Cast', width: 230 },
+        { field: 'director', headerName: 'Director', width: 130 },
+        { field: 'producer', headerName: 'Producer', width: 130 },
+        { field: 'synopsis', headerName: 'Synopsis', width: 230 },
+        { field: 'reviews', headerName: 'Reviews', width: 130 },
+        { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
+    ];
+    // Columns for the user table
+    const userColumns: GridColDef[] = [
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 100,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        className='font-extrabold'
+                        onClick={() => { handleUserOpen(params.id) }}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
                         Edit
                     </Button>
+                </span>
+            ),
+        },
+        { field: 'id', headerName: 'ID' },
+        { field: 'name', headerName: 'First name', width: 130 },
+        { field: 'lastname', headerName: 'Last name', width: 130 },
+        { field: 'email', headerName: 'Email', width: 130 },
+        { field: 'paymentSaved', headerName: 'Payment Saved', width: 130 },
+        { field: 'phone', headerName: 'Phone', width: 130 },
+        { field: 'type', headerName: 'Type', width: 130 },
+        { field: 'address', headerName: 'Address', width: 130 },
+        { field: 'status', headerName: 'Status', width: 130 },
+        { field: 'subToPromo', headerName: 'Promotion Subscribed', width: 130 },
+
+
+    ];
+
+    const promoColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID' },
+        { field: 'promoCode', headerName: 'Code', width: 130 },
+        { field: 'startTime', headerName: 'Start Time', width: 130 },
+        { field: 'endTime', headerName: 'End Time', width: 130 },
+        { field: 'percentage', headerName: 'Percentage', width: 130 },
+    ];
+    const showColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID' },
+        { field: 'movieID', headerName: 'Movie ID' },
+        { field: 'movie', headerName: 'Movie', width: 130 },
+        { field: 'showroomID', headerName: 'Showroom', width: 130 },
+        { field: 'date', headerName: 'Date', width: 130 },
+        { field: 'time', headerName: 'Time', width: 130 },
+
+
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 120,
+            renderCell: (params) => (
+                <span className=''>
+                    
                     <Button
                         color='error'
                         variant="outlined"
                         size="small"
+                        onClick={() => {openConfirmationModal(()=> {
+                            deleteShow(params.id as number).then(() => {
+                                handleClose(setOpenConfirmation, false);
+                            }).catch((err) => {
+                                console.log(err);
+                            });
+                        })}}
                         className='font-extrabold'
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
@@ -128,7 +282,7 @@ export default function AdminPage() {
                 <meta name="description" content="Generated by create-t3-app" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            {adminLogged ? (
+            {adminLogged ? ( //If an admin is logged in
                 <main className="container mx-auto flex flex-col min-h-screen p-4 max-w-5xl">
                     <h1 className="w-full text-center text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-600">
                         <span className="text-primary">Admin</span> Page
@@ -138,14 +292,15 @@ export default function AdminPage() {
                             <Tab label="Movies" {...a11yProps(0)} />
                             <Tab label="Users" {...a11yProps(1)} />
                             <Tab label="Promotions" {...a11yProps(2)} />
+                            <Tab label="Shows" {...a11yProps(3)} />
                         </Tabs>
                     </Box>
                     <TabPanel value={tabValue} index={0}>
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Movie</Button>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => { handleOpen(0) }}>Add Movie</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows}
-                                columns={columns}
+                                rows={movieRows}
+                                columns={movieColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
@@ -154,18 +309,28 @@ export default function AdminPage() {
 
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows.slice(0, 6)}
-                                columns={columns}
+                                rows={userRows}
+                                columns={userColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Promotion</Button>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => setOpenPromotion(true)}>Add Promotion</Button>
                         <Box sx={{ height: 600, width: 1 }}>
                             <DataGrid
-                                rows={rows.slice(0, 2)}
-                                columns={columns}
+                                rows={promoRows}
+                                columns={promoColumns}
+                                components={{ Toolbar: customToolbar }}
+                            />
+                        </Box>
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={3}>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold'>Add Show</Button>
+                        <Box sx={{ height: 600, width: 1 }}>
+                            <DataGrid
+                                rows={showRows}
+                                columns={showColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
@@ -173,39 +338,57 @@ export default function AdminPage() {
 
 
                 </main>
-            ) : <div className="flex justify-center mt-10">
-                <CircularProgress disableShrink className='w-full' />
-            </div>}
+            ) : //If an admin is not logged in
+                <div className="flex justify-center mt-10">
+                    <CircularProgress disableShrink className='w-full' />
+                </div>}
             <Modal
                 open={open}
-                onClose={handleClose}
+                onClose={() => { handleClose(setOpen, false) }}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-bg-dark w-[350px] lg:w-[800px] p-0'>
-                    <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
-                        <div className="flex justify-between items-center ">
-                            <Typography id="modal-modal-title" variant="h6" component="h2">
-                                Edit Movie/User/Promotion
-                            </Typography>
-                            <IconButton className='' onClick={handleClose}>
-                                <CloseIcon />
-                            </IconButton>
-                        </div>
-                        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        </Typography>
-                        <div className="flex flex-wrap justify-center items-center space-x-2 space-y-2">
-                            <TextField variant='standard' className='ml-2 mt-2' label="Title"></TextField>
-                            <TextField variant='standard' className='' label="Rating"></TextField>
-                            <TextField variant='standard' className='' label="ShowTimes"></TextField>
-                            <TextField variant='standard' className='' label="Director"></TextField>
-                            <TextField variant='standard' className='' label="Producer"></TextField>
-                            <TextField variant='standard' className='' label="Cast"></TextField>
-                            <TextField variant='standard' className='' label="Description"></TextField>
-                            <TextField variant='standard' className='' label="Categories"></TextField>
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <EditMovieForm movie={openMovie || {} as Movie} />
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openPromotion}
+                onClose={() => { handleClose(setOpenPromotion, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <AddPromotionForm />
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openUserModal}
+                onClose={() => { handleClose(setOpenUserModal, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <EditUserForm user={openUser || {} as User}></EditUserForm>
+                </Box>
+            </Modal>
+
+            <Modal
+                open={openConfirmation}
+                onClose={() => { handleClose(setOpenConfirmation, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[300px] p-0'>
+                    <div className="text-3xl flex flex-col justify-center items-center pt-3">
+                        <h1>Are you sure?</h1>
+                        <div className="flex justify-between w-full p-10 pb-2">
+                            <Button onClick={() => { handleClose(setOpenConfirmation, false) }}>No</Button>
+                            <Button onClick={() => { confirmationFunction() }} variant='contained' className='bg-primary'>Yes</Button>
                         </div>
                     </div>
-                    <Button variant='contained' className='bg-primary float-right m-4' onClick={handleClose}> Save Changes</Button>
                 </Box>
             </Modal>
         </Layout>
