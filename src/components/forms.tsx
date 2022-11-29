@@ -51,7 +51,8 @@ export type resetPasswordInfo = {
     confirmPassword: string,
 }
 
-//  const salt = bcrypt.genSaltSync(10);
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
@@ -94,10 +95,10 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-        // const hashedPassword = encrypt(signUpInfo.password, salt);
+        const hashedPassword = bcrypt.hashSync(signUpInfo.password, salt);
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
-                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}`, {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.firstName}&email=${signUpInfo.email}&password=${hashedPassword/*signUpInfo.password*/}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
