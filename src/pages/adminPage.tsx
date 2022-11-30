@@ -147,6 +147,8 @@ export default function AdminPage() {
             movie: movies.find((movie) => movie.movieID == show.movieID)?.title,
         }
     });
+    const ticketRows = 
+
 
     /*
     Definition of the grif and the inclusion of buttons
@@ -183,7 +185,6 @@ export default function AdminPage() {
         { field: 'director', headerName: 'Director', width: 130 },
         { field: 'producer', headerName: 'Producer', width: 130 },
         { field: 'synopsis', headerName: 'Synopsis', width: 230 },
-        { field: 'genre', headerName: 'Genre', width: 130 },
         { field: 'reviews', headerName: 'Reviews', width: 130 },
         { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
     ];
@@ -266,6 +267,43 @@ export default function AdminPage() {
                 </span>
             ),
         },
+
+
+    ];
+
+    const ticketColumns: GridColDef[] = [
+        {
+            field: 'buttons',
+            headerName: 'Buttons',
+            width: 120,
+            renderCell: (params) => (
+                <span className=''>
+                    <Button
+                        color='secondary'
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {openConfirmationModal(()=> {
+                            /*editTicketPrice(params.id as number).then(() => {
+                                handleClose(setOpenConfirmation, false);
+                            }).catch((err) => {
+                                console.log(err);
+                            });*/
+                        })}}
+                        className='font-extrabold'
+                        style={{ marginLeft: 16 }}
+                        tabIndex={params.hasFocus ? 0 : -1}
+                    >
+                        Edit
+                    </Button>
+                    
+                </span>
+            ),
+        },
+        
+        { field: 'typeID', headerName: 'Type ID' },
+        { field: 'type', headerName: 'Ticket Type' },
+        { field: 'price', headerName: 'Ticket Price', width: 130 },
+        
     ];
 
 
@@ -294,6 +332,7 @@ export default function AdminPage() {
                             <Tab label="Users" {...a11yProps(1)} />
                             <Tab label="Promotions" {...a11yProps(2)} />
                             <Tab label="Shows" {...a11yProps(3)} />
+                            <Tab label="Tickets" {...a11yProps(4)} />
                         </Tabs>
                     </Box>
                     <TabPanel value={tabValue} index={0}>
@@ -332,6 +371,18 @@ export default function AdminPage() {
                             <DataGrid
                                 rows={showRows}
                                 columns={showColumns}
+                                components={{ Toolbar: customToolbar }}
+                            />
+                        </Box>
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={4}>
+                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => { handleOpen(0) }}>Add Movie</Button>
+                        <Box sx={{ height: 600, width: 1 }}>
+                            <DataGrid
+                                /*rows={ticketRows}
+                                put the ticket rows here, but need a pull from the backend before this can be finished*/
+                                rows={0}
+                                columns={ticketColumns}
                                 components={{ Toolbar: customToolbar }}
                             />
                         </Box>
