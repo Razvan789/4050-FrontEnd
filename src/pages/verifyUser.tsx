@@ -2,19 +2,24 @@ import React, { useEffect, useState } from 'react'
 import Layout from '../components/layout'
 import { Button, LinearProgress } from '@mui/material'
 import Link from 'next/link'
+<<<<<<< HEAD
+//import { encrypt } from '../utils/encryption'
+=======
 // import { encrypt } from '../utils/encryption'
+>>>>>>> 4c869753775053196f417743d42696b4b91981f7
 import { useRouter } from 'next/router'
 import {serverUrl} from '../utils/backendInfo'
 
-// function testEncryption() {
-//     var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
-//     const text = 'Hello World';
-//     const key = bcrypt.genSaltSync(10);
-//     const encrypted = encrypt(text, key);
-//     console.log(encrypted);
-//     console.log("this is the comparison between the unecrypted and encrypted passwords " + bcrypt.compareSync(text, encrypted));
+function testEncryption() {
+    var bcrypt = require('bcryptjs'); //This line is wrong, you need to use import not require
+    // mine likes the require syntax but I'm not sure why it's giving you an error
+    const text = 'Hello World';
+    const key = bcrypt.genSaltSync(10);
+    const encrypted = bcrypt.hashSync(text, key);
+    console.log(encrypted);
+    console.log("this is the comparison between the unhashed and hashed passwords " + bcrypt.compareSync(text, encrypted));
 
-// }
+}
 
 
 
@@ -60,6 +65,8 @@ export default function VerifyEmail() {
                         <div className='w-[80%] mx-auto'>
                             <LinearProgress />
                         </div>
+                        <Button onClick={() => testEncryption()}>Test Encryption</Button>
+
                     </>
                     : //Verified
                     <>
