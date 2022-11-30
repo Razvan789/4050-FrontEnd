@@ -183,6 +183,7 @@ export default function AdminPage() {
         { field: 'director', headerName: 'Director', width: 130 },
         { field: 'producer', headerName: 'Producer', width: 130 },
         { field: 'synopsis', headerName: 'Synopsis', width: 230 },
+        { field: 'genre', headerName: 'Genre', width: 130 },
         { field: 'reviews', headerName: 'Reviews', width: 130 },
         { field: 'ratingCode', headerName: 'Rating Code', width: 130 },
     ];
