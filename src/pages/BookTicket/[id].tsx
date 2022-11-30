@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { serverUrl } from '../../utils/backendInfo';
 import { Show, getShowsByMovieID } from '../../utils/show';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
+import { clientSeat, getAllBookedSeats, getSeatCount } from '../../utils/seat';
 interface staticProps {
     params: {
         id: string
@@ -75,15 +76,31 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [open, setOpen] = useState(false);
     const [shows, setShows] = useState<Show[]>([]);
     const [selectedShow, setSelectedShow] = useState<Show | null>(null);
+
+
+    //Seats stuff
+    const [seats, setSeats] = useState<clientSeat[]>([]);
+    const [bookedIndexs, setBookedIndexs] = useState<number[]>([]);
+    const [seatCount, setSeatCount] = useState(0);
+    const [seatsLeft, setSeatsLeft] = useState(adultTickets + childTickets);
+
+
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        console.log("Seats", seats);
     };
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
+    //update seats left when ticket count changes
+    useEffect(() => {
+        setSeatsLeft(adultTickets + childTickets);
+    }, [adultTickets, childTickets]);
+   
+    //update shows on movie change
     useEffect(() => {
         getShowsByMovieID(movie.movieID).then((shows) => {
             setShows(shows);
@@ -92,6 +109,76 @@ export default function BookMovie({ movie }: BookMovieProps) {
             console.log(err);
         });
     }, [movie]);
+
+
+    //update seats on show change
+    useEffect(() => {
+        if (selectedShow) { // A show was passed in
+            //Get however many seats there are in the show's showroom
+            //get Correct seat count
+            getSeatCount(selectedShow.showroomID).then((count) => {
+                setSeatCount(count);
+            }).catch((err) => {
+                console.log(err);
+            })
+            //Populate booked seats
+            getAllBookedSeats(selectedShow.showID).then((bookedSeats) => {
+                const bookedIndexs = bookedSeats.map((seat) => seat.seatNumber);
+                setBookedIndexs(bookedIndexs);
+            }).catch((err) => {
+                console.log(err);
+            })
+        }
+    }, [selectedShow]);
+
+    //update seats on seat count change
+    useEffect(() => {
+        //Create seats
+        const seats: clientSeat[] = [];
+        for (let i = 0; i < seatCount; i++) {
+            seats.push({
+                seatNumber: i,
+                showID: selectedShow?.showID || 0,
+                booked: bookedIndexs.includes(i),
+                selected: false
+            })
+        }
+        setSeats(seats);
+    }, [seatCount, bookedIndexs, selectedShow]);
+
+    function selectSeat(seatNum: number) {
+        if(seatsLeft > 0) {
+            const newSeats = seats.map((seat) => {
+                if (seat.seatNumber === seatNum) {
+                    return {
+                        ...seat,
+                        selected: !seat.selected
+                    }
+                } else {
+                    return seat;
+                }
+            })
+            setSeats(newSeats);
+            setSeatsLeft(seatsLeft - 1);
+            console.log("Seats Left", seatsLeft);
+        }
+    }
+
+    function deselectSeat( seatNum: number) {
+        const newSeats = seats.map((seat) => {
+            if (seat.seatNumber === seatNum) {
+                return {
+                    ...seat,
+                    selected: false
+                }
+            } else {
+                return seat;
+            }
+        });
+        setSeats(newSeats);
+        setSeatsLeft(seatsLeft + 1);
+        console.log("Seats Left", seatsLeft);
+    }
 
     function getShowTimes(date: string): string[] {
         const showTimes: string[] = [];
@@ -193,14 +280,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 2: //----------------------------------------------------------------------------------------------------------------PICK SEATS
                 return (
                     <div className='flex justify-center mt-5'>
-                        <SeatPicker show={selectedShow} ticketCount={adultTickets + childTickets}/>
-
-                        {/* <div className="flex flex-col text-text-light ml-10">
-                            <h3 className='text-center text-xl font-extrabold text-primary'>Seats Left:</h3>
-                            <Divider />
-                            <p> Adult Tickets: {adultTickets}</p>
-                            <p> Child Tickets: {childTickets}</p>
-                        </div> */}
+                        <SeatPicker seats={seats} seatsLeft={seatsLeft} handleSelect={selectSeat} handleDeselect={deselectSeat}/>
                     </div>
 
                 )
@@ -261,7 +341,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 1:
                 return adultTickets + childTickets > 0 && selectedShow !== null;
             case 2:
-                return true;
+                return seatsLeft == 0;
             case 3:
                 return true;
             default:
