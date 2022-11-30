@@ -8,7 +8,6 @@ import { useRouter } from 'next/router';
 import { User, updateType, updateStatus } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
-import { constants } from 'buffer';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -589,6 +588,7 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
             movie.ratingCode = "";
             movie.trailerPic = "";
             movie.video = "";
+            movie.genre = "";
         }
         setEditMovieInfo(movie);
     }, [movie]);
@@ -646,6 +646,7 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
             <TextField type="text" name='director' variant='standard' label='Director' value={editMovieInfo.director} onChange={handleFormChange}></TextField>
             <TextField type="text" name='producer' variant='standard' label='Producer' value={editMovieInfo.producer} onChange={handleFormChange}></TextField>
             <TextField type="text" name='synopsis' variant='standard' label='Synopsis' multiline value={editMovieInfo.synopsis} onChange={handleFormChange}></TextField>
+            <TextField type="text" name='genre' variant='standard' label='Genre' value={editMovieInfo.genre} onChange={handleFormChange}></TextField>
             <TextField type="text" name='ratingCode' variant='standard' label='Rating Code' value={editMovieInfo.ratingCode} onChange={handleFormChange}></TextField>
             <TextField type="text" name='reviews' variant='standard' label='Reviews' multiline value={editMovieInfo.reviews} onChange={handleFormChange}></TextField>
             <TextField type="text" name='trailerPic' variant='standard' label='Trailer Picture Link' value={editMovieInfo.trailerPic} onChange={handleFormChange}></TextField>

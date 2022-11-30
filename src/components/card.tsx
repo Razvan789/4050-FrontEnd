@@ -20,6 +20,7 @@ const defaultMovie: Movie = {
     synopsis: "",
     reviews: "",
     ratingCode: "",
+    genre: "",
     trailerPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSu5iprMc1MEpOTSC7jAnweLJdcMeUL3jJg4AiNoTs&s",
     video: ""
 }

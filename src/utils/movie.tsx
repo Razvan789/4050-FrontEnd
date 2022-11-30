@@ -11,6 +11,7 @@ export type Movie = {
     ratingCode: string;
     trailerPic: string;
     video: string;
+    genre: string;
 };
 
 

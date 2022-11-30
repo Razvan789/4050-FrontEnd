@@ -8,7 +8,6 @@ import { myLoader } from '../../utils/image';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
-import Rating from '@mui/material/Rating';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarPicker } from '@mui/x-date-pickers/CalendarPicker';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -18,9 +17,8 @@ import SeatPicker from '../../components/seatPicker';
 import { Box, Button, Modal, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { serverUrl } from '../../utils/backendInfo';
-import { format } from 'path';
-import {Show, getShowsByMovieID} from '../../utils/show';
-
+import { Show, getShowsByMovieID } from '../../utils/show';
+import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 interface staticProps {
     params: {
         id: string
@@ -76,9 +74,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [showTime, setShowTime] = React.useState("Select Time");
     const [open, setOpen] = useState(false);
     const [shows, setShows] = useState<Show[]>([]);
+    const [selectedShow, setSelectedShow] = useState<Show | null>(null);
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
-    const displayedFields = ['title', 'Producer', 'Cast', 'Director', 'Synopsis', 'Reviews'];
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -93,9 +91,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
         }).catch((err) => {
             console.log(err);
         });
-    }, []);
+    }, [movie]);
 
-    function getShowTimes(date : string): string[] {
+    function getShowTimes(date: string): string[] {
         const showTimes: string[] = [];
         shows.forEach((show) => {
             const splitShowTime = show.movieTime.split(" ");
@@ -104,7 +102,8 @@ export default function BookMovie({ movie }: BookMovieProps) {
             }
         });
         return showTimes;
-    } 
+    }
+
     //eslint-disable-next-line
     const handleSelectChange = (event: SelectChangeEvent<any>, callFunction: React.Dispatch<React.SetStateAction<any>>) => {
         callFunction(event.target.value);
@@ -115,14 +114,23 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
                 return (
                     <div className="flex flex-wrap  justify-center p-5">
-                        <CalendarPicker date={date} className="bg-bg-dark m-5 mt-3 rounded-xl shadow-xl text-text-light border-[1px] border-primary" onChange={(newDate) => setDate(newDate)} />
+                        <CalendarPicker date={date} className="bg-bg-dark m-5 mt-3 rounded-xl shadow-xl text-text-light border-[1px] border-primary" onChange={(newDate) => setDate(newDate)}
+                            renderDay={(day, value, dayComponentProps) => {
+                                const dayIsBooked = getShowTimes(day.format("MM/DD/YYYY")).length > 0;
+                                return (
+                                    <>
+                                    {dayIsBooked ?  <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} className="font-extrabold" /> : <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} disabled />}
+                                    </>
+                                );
+                            }}
+                        />
                         <div className='flex flex-col'>
                             <h3 className='text-xl text-primary font-extrabold'> Available Times</h3>
                             <Divider />
                             <ul>
                                 {getShowTimes(date?.format("MM/DD/YYYY") || "").map((time) => {
                                     return (
-                                        <li key={time} className='text-text-light hover:text-primary cursor-pointer' onClick={() => setShowTime(time)}>{time}</li>
+                                        <li key={time} className='text-text-light hover:text-primary cursor-pointer'>{time}</li>
                                     );
                                 })}
                             </ul>
@@ -137,13 +145,16 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 <h3 className='text-xl text-primary font-extrabold mr-5'>Show times: </h3>
                                 <Select
                                     value={showTime}
-                                    onChange={(event) => handleSelectChange(event, setShowTime)}
+                                    onChange={(event) => { //When the select is changed
+                                        handleSelectChange(event, setShowTime)
+                                        setSelectedShow(shows.find((show) => show.movieTime === `${date?.format("MM/DD/YYYY")} ${event.target.value}`) || null);
+                                    }}
                                 >
                                     {getShowTimes(date?.format("MM/DD/YYYY") || "").map((time) => {
-                                    return (
-                                        <MenuItem key={time} value={time}>{time}</MenuItem>
-                                    );
-                                })}
+                                        return (
+                                            <MenuItem key={time} value={time}>{time}</MenuItem>
+                                        );
+                                    })}
                                 </Select>
                             </div>
                             <div className='flex items-center mb-3 justify-center'>
@@ -182,14 +193,14 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 2: //----------------------------------------------------------------------------------------------------------------PICK SEATS
                 return (
                     <div className='flex justify-center mt-5'>
-                        <SeatPicker />
+                        <SeatPicker show={selectedShow} ticketCount={adultTickets + childTickets}/>
 
-                        <div className="flex flex-col text-text-light ml-10">
+                        {/* <div className="flex flex-col text-text-light ml-10">
                             <h3 className='text-center text-xl font-extrabold text-primary'>Seats Left:</h3>
                             <Divider />
                             <p> Adult Tickets: {adultTickets}</p>
                             <p> Child Tickets: {childTickets}</p>
-                        </div>
+                        </div> */}
                     </div>
 
                 )
@@ -242,12 +253,26 @@ export default function BookMovie({ movie }: BookMovieProps) {
         }
     }
 
+
+    function canStepForward() {
+        switch (activeStep) {
+            case 0:
+                return true;
+            case 1:
+                return adultTickets + childTickets > 0 && selectedShow !== null;
+            case 2:
+                return true;
+            case 3:
+                return true;
+            default:
+                return false;
+        }
+    }
     return (
         <Layout>
             <Head>
                 <title>Book {movie.title}</title>
             </Head>
-            {/* <h1 className='font-extrabold text-4xl text-center leading-loose'>Book Tickets for:</h1> */}
             <div className="flex justify-center p-3">
                 <Image src={movie.trailerPic}
                     alt={movie.title}
@@ -265,46 +290,55 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 </div>
 
             </div>
-            { shows.length > 0 ?
-            <div className='lg:w-2/3 lg:mx-auto p-4 h-full'>
-                <Stepper activeStep={activeStep}>
-                    {steps.map((label) => {
-                        const stepProps: { completed?: boolean } = {};
-                        const labelProps: {
-                            optional?: React.ReactNode;
-                        } = {};
-                        return (
-                            <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                            </Step>
-                        );
-                    })}
-                </Stepper>
-                <div className='h-full'>
-                    {getStepContent(activeStep)}
+            {shows.length > 0 ? 
+                //If there are showtimes
+                <div className='lg:w-2/3 lg:mx-auto p-4 h-full'>
+                    <Stepper activeStep={activeStep}>
+                        {steps.map((label) => {
+                            const stepProps: { completed?: boolean } = {};
+                            const labelProps: {
+                                optional?: React.ReactNode;
+                            } = {};
+                            return (
+                                <Step key={label} {...stepProps}>
+                                    <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                            );
+                        })}
+                    </Stepper>
+                    <div className='h-full'>
+                        {getStepContent(activeStep)}
+                    </div>
+                    <div className='flex justify-between p-4'>
+                        <Button
+                            disabled={activeStep === 0}
+                            onClick={handleBack}
+                            variant="outlined"
+                            className=""
+                        >Back</Button>
+                        <Button
+                            disabled={!canStepForward()}
+                            onClick={handleNext}
+                            variant="outlined"
+                            className=""
+                        >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
+                    </div>
                 </div>
-                <div className='flex justify-between p-4'>
-                    <Button
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        variant="outlined"
-                        className=""
-                    >Back</Button>
-                    <Button
-                        disabled={activeStep === steps.length}
-                        onClick={handleNext}
-                        variant="outlined"
-                        className=""
-                    >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
+
+                : 
+                
+                
+                
+                // IF no showtimes could be found
+                <div className='flex flex-col justify-center items-center'>
+                    <h2 className='text-center text-2xl font-extrabold text-primary'>No Shows Available</h2>
+                    <Divider />
+                    <p className='text-center text-text-light'>There are no shows available for this movie at this time.</p>
                 </div>
-            </div>
-            : 
-            <div className='flex flex-col justify-center items-center'>
-                <h2 className='text-center text-2xl font-extrabold text-primary'>No Shows Available</h2>
-                <Divider />
-                <p className='text-center text-text-light'>There are no shows available for this movie at this time.</p>
-            </div>
             }
+
+
+            {/* /Modal that shows movie informatino */}
             <Modal
                 open={open}
                 onClose={handleModalClose}
@@ -328,6 +362,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
                             <h2 className='text-2xl font-extrabold text-primary text-center'>Movie Information</h2>
                             <Divider />
                             <div className="font-extrabold text-xl text-primary grid grid-cols-2  gap-y-24 p-4">
+                                <div className='flex flex-col justify-center items-start col-span-2'>
+                                    <h2>Synopsis:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.synopsis}</p>
+                                </div>
                                 <div className='flex flex-col justify-center items-start'>
                                     <h2 >Title:</h2>
                                     <p className='ml-2 font-normal text-white text-base'>{movie.title}</p>
@@ -352,9 +390,9 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     <h2 >Reviews:</h2>
                                     <p className='ml-2 font-normal text-white text-base'>{movie.reviews}</p>
                                 </div>
-                                <div className='flex flex-col justify-center items-start col-span-2 '>
-                                    <h2>Synopsis</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.synopsis}</p>
+                                <div className='flex flex-col justify-center items-start'>
+                                    <h2>Genres:</h2>
+                                    <p className='ml-2 font-normal text-white text-base'>{movie.genre}</p>
                                 </div>
                             </div>
 
