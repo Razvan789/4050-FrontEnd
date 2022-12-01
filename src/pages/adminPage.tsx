@@ -147,7 +147,7 @@ export default function AdminPage() {
             movie: movies.find((movie) => movie.movieID == show.movieID)?.title,
         }
     });
-    const ticketRows = 
+    //const ticketRows = 
 
 
     /*
