@@ -12,7 +12,7 @@ import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show, deleteShow } from '../utils/show';
 import { EditMovieForm, AddPromotionForm, EditUserForm, EditTicketTypeForm } from '../components/forms';
-import { getTicketType, getAllTicketTypes, TicketType, addTicketType } from '../utils/tickettype';
+import { getAllTicketTypes, TicketType, addTicketType } from '../utils/tickettype';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -477,7 +477,7 @@ export default function AdminPage() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
-                    <EditTicketTypeForm tickettype={openTicket || {} as TicketType}></EditTicketTypeForm>
+                    <EditTicketTypeForm inTicketType={openTicket || {} as TicketType}></EditTicketTypeForm>
                 </Box>
             </Modal>
         </Layout>

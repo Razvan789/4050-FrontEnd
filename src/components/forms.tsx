@@ -8,10 +8,8 @@ import { useRouter } from 'next/router';
 import { User, updateType, updateStatus } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
-import { TicketType, getTicketType, editTicketType } from '../utils/tickettype';
+import { TicketType, editTicketType } from '../utils/tickettype';
 import { getTicket } from '../utils/ticket';
-// import bcrypt from 'bcryptjs';
-// import {salt } from 'bcryptjs';
 
 export type signUpInfo = {
     firstName: string,
@@ -821,16 +819,23 @@ export function EditUserForm({ user }: { user: User }) {
 }
 
 
-export function EditTicketTypeForm({ tickettype }: { tickettype: TicketType }) {
-    const [editTicketTypeModal, setTicketType] = useState<TicketType>({
-        ...tickettype
+export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType }) {
+    const [newTicketInfo, setNewTicketInfo] = useState<TicketType>({
+        typeID: 0,
+        type: "",
+        price: 0,
+        ticketCount: 0,
     } as TicketType);
     const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
     const [canSubmit, setCanSubmit] = useState(false);
 
+    useEffect(() => {
+        setNewTicketInfo(inTicketType);
+    }, [inTicketType]);
+
     function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setTicketType({
-            ...editTicketType,
+        setNewTicketInfo({
+            ...newTicketInfo,
             [event.target.name]: event.target.value
         } as TicketType);
         checkFields();
@@ -838,9 +843,9 @@ export function EditTicketTypeForm({ tickettype }: { tickettype: TicketType }) {
 
     function checkFields() {
         let key : keyof TicketType;
-        for (key in editTicketTypeModal) {
+        for (key in newTicketInfo) {
             console.log(key);
-            if (editTicketTypeModal[key] == '' || editTicketTypeModal[key] == 0) {
+            if (newTicketInfo[key] == '' || newTicketInfo[key] == 0) {
                 setCanSubmit(false);
                 return;
             }
@@ -848,8 +853,11 @@ export function EditTicketTypeForm({ tickettype }: { tickettype: TicketType }) {
         setCanSubmit(true);
     }
 
-    function handleSubmit() {
-        editTicketType(tickettype).then((res) => {
+
+
+    function handleSubmit(event : React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        editTicketType(newTicketInfo).then((res) => {
             if (res) {
                 setSuccessCode(1);
             } else {
@@ -864,24 +872,13 @@ export function EditTicketTypeForm({ tickettype }: { tickettype: TicketType }) {
     return (
 
         <form className='flex flex-col space-y-6 p-4 mb-4' onSubmit={handleSubmit}>
-            <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' defaultValue={tickettype.typeID} onChange={handleFormChange}></TextField>
-            <TextField name="type" variant='standard' type="text" label='Ticket Type' defaultValue={tickettype.type} onChange={handleFormChange}></TextField>
-            <TextField name="price" variant='standard' type="text" label='Price' defaultValue={tickettype.price} onChange={handleFormChange}></TextField>
+            <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' value={newTicketInfo.typeID} onChange={handleFormChange}></TextField>
+            <TextField name="type" variant='standard' type="text" label='Ticket Type' value={newTicketInfo.type} onChange={handleFormChange}></TextField>
+            <TextField name="price" variant='standard' type="text" label='Price' value={newTicketInfo.price} onChange={handleFormChange}></TextField>
             <div className="flex justify-between">
                 <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
             </div>
-            {/*{successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
-            {successCode == 0 || successCode == 2 ? // Waiting for submit
-                canSubmit ? //Can submit
-                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => setModalOpen(true)} >Submit</Button>
-                    : // Can't submit
-                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit' disabled>Submit</Button>
-                : //Submitted
-                successCode == 1 ? // Submit successs
-                    <h3 className='text-xl font-extrabold text-green-600'>Promotion Added Successfully</h3>
-                    : // Submit failed
-                    null
-            }*/}
+            {successCode == 1 ? <p className='text-green-500'>Success!</p> : successCode == 2 ? <p className='text-red-500'>Server Error</p> : null}
         </form>
     );
 }
