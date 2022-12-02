@@ -23,7 +23,7 @@ import { clientSeat, getAllBookedSeats, getSeatCount } from '../../utils/seat';
 import { useUser } from '../../utils/user';
 import { useRouter } from 'next/router';
 import { TicketType, getTicketTypes } from '../../utils/tickettype';
-
+import { Booking } from '../../utils/booking';
 interface staticProps {
     params: {
         id: string
@@ -71,6 +71,11 @@ export async function getStaticPaths() {
 const steps = ['Select Date', 'Select Tickets', 'Pick Seats', 'Checkout'];
 
 
+//LEFT TO DO
+// 1. Checkout form
+// 2. Select card from list
+// 3. Enter Promo Code
+// 4. Create a booking object to send to backend
 export default function BookMovie({ movie }: BookMovieProps) {
     const [activeStep, setActiveStep] = useState(0);
     const [date, setDate] = React.useState<Dayjs | null>(dayjs());
@@ -80,6 +85,12 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [open, setOpen] = useState(false);
     const [shows, setShows] = useState<Show[]>([]);
     const [selectedShow, setSelectedShow] = useState<Show | null>(null);
+    const [booking, setBooking] = useState<Booking>({
+        showID: 0,
+        customerID: 0,
+        total: 0,
+        paymentID: 0,
+    });
     const user = useUser();
     const router = useRouter();
 
@@ -103,6 +114,16 @@ export default function BookMovie({ movie }: BookMovieProps) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
+    //Update Booking
+    useEffect(() => {
+        if (selectedShow) {
+            const newBooking: Booking = {
+            ...booking,
+            showID: selectedShow?.showID,
+            total: ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0),
+            };
+        }
+    }, [selectedShow]);
     //On Page load could be done earlier then cached but oh well
     useEffect(() => {
         getTicketTypes().then(data => {
@@ -336,9 +357,18 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 <Divider />
                                 <div className='flex flex-col justify-center items-center'>
                                     <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
-                                    <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
-                                    <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
-                                    <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
+                                    {ticketTypes.map((ticketType) => {
+                                        return (
+                                            <div key={ticketType.typeID} className='flex mb-3 justify-center'>
+                                                <h3 className='text-lg text-text-light font-extrabold mr-1'>{ticketType.type}: </h3>
+                                                <h3 className='text-lg text-text-light font-extrabold'>${ticketType.price * ticketType.ticketCount}</h3>
+                                            </div>
+                                        )
+                                    })
+                                    }
+                                    <p className='text-2xl font-extrabold text-primary mb-5'>Total: <span className='text-text-light'>${ticketTypes.reduce((acc, ticketType)=>{
+                                        return acc + (ticketType.price * ticketType.ticketCount)
+                                    }, 0)}</span></p>
                                 </div>
                                 <div className='flex flex-col items-center justify-between'>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
@@ -360,7 +390,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     </div>
                                 </div>
                             </div>
-                            :
+                            : //User not logged in
                             <div className='mt-10 space-y-10'>
                                 <h2 className='text-center text-2xl font-extrabold text-primary'>You must be logged in to continue</h2>
                                 <div className='flex justify-center'>
