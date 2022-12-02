@@ -20,6 +20,10 @@ import { serverUrl } from '../../utils/backendInfo';
 import { Show, getShowsByMovieID } from '../../utils/show';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { clientSeat, getAllBookedSeats, getSeatCount } from '../../utils/seat';
+import { useUser } from '../../utils/user';
+import { useRouter } from 'next/router';
+import { TicketType, getTicketTypes } from '../../utils/tickettype';
+
 interface staticProps {
     params: {
         id: string
@@ -76,14 +80,18 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [open, setOpen] = useState(false);
     const [shows, setShows] = useState<Show[]>([]);
     const [selectedShow, setSelectedShow] = useState<Show | null>(null);
-
+    const user = useUser();
+    const router = useRouter();
 
     //Seats stuff
-    const [seats, setSeats] = useState<clientSeat[]>([]);
+    const [seats, setSeats] = useState<clientSeat[]>();
     const [bookedIndexs, setBookedIndexs] = useState<number[]>([]);
     const [seatCount, setSeatCount] = useState(0);
-    const [seatsLeft, setSeatsLeft] = useState(adultTickets + childTickets);
+    const [seatsLeft, setSeatsLeft] = useState(0);
 
+
+    //Ticket Stuff
+    const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
 
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
@@ -95,11 +103,21 @@ export default function BookMovie({ movie }: BookMovieProps) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    //update seats left when ticket count changes
+    //On Page load could be done earlier then cached but oh well
     useEffect(() => {
-        setSeatsLeft(adultTickets + childTickets);
-    }, [adultTickets, childTickets]);
-   
+        getTicketTypes().then(data => {
+            setTicketTypes(data);
+        });
+    }, []);
+
+    //update seats left when ticket count or seats changes
+    useEffect(() => {
+        const seatsSelected = seats?.filter(seat => seat.selected).length || 0;
+        setSeatsLeft(ticketTypes.reduce((acc, ticketType) => {
+            return acc + ticketType.ticketCount;
+        }, 0) - seatsSelected);
+    }, [ticketTypes, seats]);
+
     //update shows on movie change
     useEffect(() => {
         getShowsByMovieID(movie.movieID).then((shows) => {
@@ -110,7 +128,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
         });
     }, [movie]);
 
-
+    
     //update seats on show change
     useEffect(() => {
         if (selectedShow) { // A show was passed in
@@ -135,7 +153,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
     useEffect(() => {
         //Create seats
         const seats: clientSeat[] = [];
-        for (let i = 0; i < seatCount; i++) {
+        for (let i = 1; i < seatCount; i++) {
             seats.push({
                 seatNumber: i,
                 showID: selectedShow?.showID || 0,
@@ -147,25 +165,24 @@ export default function BookMovie({ movie }: BookMovieProps) {
     }, [seatCount, bookedIndexs, selectedShow]);
 
     function selectSeat(seatNum: number) {
-        if(seatsLeft > 0) {
-            const newSeats = seats.map((seat) => {
-                if (seat.seatNumber === seatNum) {
+        if (seatsLeft > 0) {
+            const newSeats = seats?.map((seat) => {
+                if (seat.seatNumber == seatNum) {
                     return {
                         ...seat,
-                        selected: !seat.selected
+                        selected: true
                     }
                 } else {
                     return seat;
                 }
             })
             setSeats(newSeats);
-            setSeatsLeft(seatsLeft - 1);
             console.log("Seats Left", seatsLeft);
         }
     }
 
-    function deselectSeat( seatNum: number) {
-        const newSeats = seats.map((seat) => {
+    function deselectSeat(seatNum: number) {
+        const newSeats = seats?.map((seat) => {
             if (seat.seatNumber === seatNum) {
                 return {
                     ...seat,
@@ -176,7 +193,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
             }
         });
         setSeats(newSeats);
-        setSeatsLeft(seatsLeft + 1);
         console.log("Seats Left", seatsLeft);
     }
 
@@ -196,9 +212,25 @@ export default function BookMovie({ movie }: BookMovieProps) {
         callFunction(event.target.value);
     }
 
+    function updateTicketCount(ticketID : number, count : number) {
+        console.log("Changing ticket count", ticketID, count);
+        console.log("Ticket Types", ticketTypes);
+        if(count == NaN || count < 0) count = 0;
+        const newTicketTypes = ticketTypes.map((ticketType) => {
+            if (ticketType.typeID === ticketID) {
+                return {
+                    ...ticketType,
+                    ticketCount: count
+                }
+            } else {
+                return ticketType;
+            }
+        });
+        setTicketTypes(newTicketTypes);
+    }
     function getStepContent(step: number) {
         switch (step) {
-            case 0: //----------------------------------------------------------------------------------------------------------------PICK DATE
+            case 0: //----------------------------------PICK DATE
                 return (
                     <div className="flex flex-wrap  justify-center p-5">
                         <CalendarPicker date={date} className="bg-bg-dark m-5 mt-3 rounded-xl shadow-xl text-text-light border-[1px] border-primary" onChange={(newDate) => setDate(newDate)}
@@ -206,7 +238,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 const dayIsBooked = getShowTimes(day.format("MM/DD/YYYY")).length > 0;
                                 return (
                                     <>
-                                    {dayIsBooked ?  <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} className="font-extrabold" /> : <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} disabled />}
+                                        {dayIsBooked ? <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} className="font-extrabold" /> : <PickersDay {...dayComponentProps} key={day.format('DD/MM/YYYY')} disabled />}
                                     </>
                                 );
                             }}
@@ -224,12 +256,13 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         </div>
                     </div>
                 );
-            case 1://----------------------------------------------------------------------------------------------------------------PICK TICKETS
+            case 1://-----------------------------------PICK TICKETS
                 return (
                     <div className='mb-[4.3rem] md:mb-0 p-5'>
                         <div className='mx-auto max-w-[300px] bg-bg-dark p-4 rounded-xl border-[1px] border-primary shadow-lg'>
                             <div className='flex items-center mb-3 justify-center'>
                                 <h3 className='text-xl text-primary font-extrabold mr-5'>Show times: </h3>
+
                                 <Select
                                     value={showTime}
                                     onChange={(event) => { //When the select is changed
@@ -244,7 +277,17 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     })}
                                 </Select>
                             </div>
-                            <div className='flex items-center mb-3 justify-center'>
+                            {ticketTypes.map((ticketType) => {
+                                return (
+                                    <div key={ticketType.typeID} className='grid grid-cols-2 items-center mb-5'>
+                                        <h1 className='text-xl text-center text-primary'>{ticketType.type}:</h1>
+                                        <TextField className='max-w-[70px]' type="number" value={ticketType.ticketCount} onChange={(event)=>{updateTicketCount(ticketType.typeID || -1, parseInt(event.target.value))}}/>
+                                    </div>
+                                )
+                            })
+                            }
+                            {/* <div className='flex items-center mb-3 justify-center'>
+
                                 <h3 className='text-xl text-primary font-extrabold mr-5'>Adult Tickets: </h3>
                                 <Select
                                     value={adultTickets}
@@ -273,50 +316,61 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     <MenuItem value={4}>4</MenuItem>
                                     <MenuItem value={5}>5</MenuItem>
                                 </Select>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 )
-            case 2: //----------------------------------------------------------------------------------------------------------------PICK SEATS
+            case 2: //----------------------------------PICK SEATS
                 return (
                     <div className='flex justify-center mt-5'>
-                        <SeatPicker seats={seats} seatsLeft={seatsLeft} handleSelect={selectSeat} handleDeselect={deselectSeat}/>
+                        <SeatPicker seats={seats || []} seatsLeft={seatsLeft} handleSelect={selectSeat} handleDeselect={deselectSeat} />
                     </div>
 
                 )
-            case 3: //----------------------------------------------------------------------------------------------------------------CHECKOUT
+            case 3: //----------------------------------CHECKOUT
                 return (
-                    <div className="flex flex-col w-[500px] mx-auto">
-                        <h2 className='text-center text-2xl font-extrabold text-primary'>Checkout</h2>
-                        <Divider />
-                        <div className='flex flex-col justify-center items-center'>
-                            <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
-                            <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
-                            <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
-                            <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
-                        </div>
-                        <div className='flex flex-col items-center justify-between'>
-                            <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
-                                <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]'>Use Existing Card</Button>
-                            </div>
-                            <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
-                            <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
-                                <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
-                                <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
-                                <div className=" flex w-[250px]">
-                                    <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
-                                    <TextField id="outlined-basic" size="small" label="CVV" variant="outlined" />
+                    <>
+                        {user?.email ?
+                            <div className="flex flex-col w-[500px] mx-auto">
+                                <h2 className='text-center text-2xl font-extrabold text-primary'>Checkout</h2>
+                                <Divider />
+                                <div className='flex flex-col justify-center items-center'>
+                                    <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
+                                    <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
+                                    <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
+                                    <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
                                 </div>
-                                <br />
-                                <TextField id="outlined-basic" size="small" label="Name on Card" variant="outlined" className='w-[250px] mt-2' />
-                                <TextField id="outlined-basic" size="small" label="Billing Address" variant="outlined" className='w-[250px] mt-2' />
-                                <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
+                                <div className='flex flex-col items-center justify-between'>
+                                    <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
+                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]'>Use Existing Card</Button>
+                                    </div>
+                                    <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
+                                    <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
+                                        <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
+                                        <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
+                                        <div className=" flex w-[250px]">
+                                            <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
+                                            <TextField id="outlined-basic" size="small" label="CVV" variant="outlined" />
+                                        </div>
+                                        <br />
+                                        <TextField id="outlined-basic" size="small" label="Name on Card" variant="outlined" className='w-[250px] mt-2' />
+                                        <TextField id="outlined-basic" size="small" label="Billing Address" variant="outlined" className='w-[250px] mt-2' />
+                                        <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
 
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                            :
+                            <div className='mt-10 space-y-10'>
+                                <h2 className='text-center text-2xl font-extrabold text-primary'>You must be logged in to continue</h2>
+                                <div className='flex justify-center'>
+                                    <Button className='text-3xl font-extrabold text-primary' onClick={() => router.push('/login')} variant="outlined">Login</Button>
+                                </div>
+                            </div>
+                        }
+                    </>
                 )
-            default: //----------------------------------------------------------------------------------------------------------------Error/Done
+            default: //----------------------------------Error/Done
                 return (
                     <div className='flex flex-col justify-center mt-5'>
                         <h2 className='text-center text-2xl font-extrabold text-primary'> Order Placed</h2>
@@ -339,11 +393,18 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 0:
                 return true;
             case 1:
-                return adultTickets + childTickets > 0 && selectedShow !== null;
+                let toReturn = false;
+                ticketTypes.forEach((ticketType) => {
+                    if (ticketType.ticketCount != 0) {
+                        console.log('ticket count is 0')
+                        toReturn = true;
+                    }
+                })
+                return selectedShow !== null && toReturn;
             case 2:
                 return seatsLeft == 0;
             case 3:
-                return true;
+                return user?.email;
             default:
                 return false;
         }
@@ -370,7 +431,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 </div>
 
             </div>
-            {shows.length > 0 ? 
+            {shows.length > 0 ?
                 //If there are showtimes
                 <div className='lg:w-2/3 lg:mx-auto p-4 h-full'>
                     <Stepper activeStep={activeStep}>
@@ -405,10 +466,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     </div>
                 </div>
 
-                : 
-                
-                
-                
+                :
+
+
+
                 // IF no showtimes could be found
                 <div className='flex flex-col justify-center items-center'>
                     <h2 className='text-center text-2xl font-extrabold text-primary'>No Shows Available</h2>
