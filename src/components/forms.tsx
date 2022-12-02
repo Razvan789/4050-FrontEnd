@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers'
 import { serverUrl } from '../utils/backendInfo';
-import { TextField, Button, FormControlLabel, Checkbox, CircularProgress, Modal, Box, Select, MenuItem} from '@mui/material'
+import { TextField, Button, FormControlLabel, Checkbox, CircularProgress, Modal, Box, Select, MenuItem } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router';
 import { User, updateType, updateStatus } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
+import { TicketType, getTicketType, editTicketType } from '../utils/tickettype';
+import { getTicket } from '../utils/ticket';
 // import bcrypt from 'bcryptjs';
 // import {salt } from 'bcryptjs';
 
@@ -275,7 +277,7 @@ export function LoginForm() {
                     } else {
                         router.push('/');
                     }
-                } else if(data.status == 'suspended'){
+                } else if (data.status == 'suspended') {
                     setLoginCode(5);
                 } else {
                     setLoginCode(3);
@@ -321,6 +323,7 @@ export function signOut() {
     window.sessionStorage.removeItem('admin');
     window.location.href = '/';
 }
+
 
 
 export function UpdateProfileForm({ user }: { user: User }) {
@@ -779,36 +782,106 @@ export function EditUserForm({ user }: { user: User }) {
                 <TextField className='w-full' type="text" variant='standard' label='Status' value={editUserInfo?.status} InputProps={{ readOnly: true }}></TextField>
             </div>
             <div className="flex mx-auto">
-                
+
                 {editUserInfo?.type == 'customer' ? // If customer
-                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "admin").then(() =>{
-                    setEditUserInfo({
-                        ...editUserInfo,
-                        type: 'admin'} as User);
-                })}>Make Admin</Button>
-                : // if admin
-                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "customer").then(() =>{
-                    setEditUserInfo({
-                        ...editUserInfo,
-                        type: 'customer'} as User);
-                })}>Make Customer</Button>
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "admin").then(() => {
+                        setEditUserInfo({
+                            ...editUserInfo,
+                            type: 'admin'
+                        } as User);
+                    })}>Make Admin</Button>
+                    : // if admin
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateType(user, "customer").then(() => {
+                        setEditUserInfo({
+                            ...editUserInfo,
+                            type: 'customer'
+                        } as User);
+                    })}>Make Customer</Button>
                 }
 
                 {editUserInfo?.status == 'active' ? // If active
-                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "suspended").then(() =>{
-                    setEditUserInfo({
-                        ...editUserInfo,
-                        status: 'suspended'} as User);
-                })}>Deactivate</Button>
-                : // if inactive
-                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "active").then(() =>{
-                    setEditUserInfo({
-                        ...editUserInfo,
-                        status: 'active'} as User);
-                })}>Activate</Button>
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "suspended").then(() => {
+                        setEditUserInfo({
+                            ...editUserInfo,
+                            status: 'suspended'
+                        } as User);
+                    })}>Deactivate</Button>
+                    : // if inactive
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => updateStatus(user, "active").then(() => {
+                        setEditUserInfo({
+                            ...editUserInfo,
+                            status: 'active'
+                        } as User);
+                    })}>Activate</Button>
                 }
             </div>
         </div>
     );
 
+}
+
+
+export function EditTicketTypeForm({ tickettype }: { tickettype: TicketType }) {
+    const [editTicketTypeModal, setTicketType] = useState<TicketType>({
+        ...tickettype
+    } as TicketType);
+    const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
+    const [canSubmit, setCanSubmit] = useState(false);
+
+    function handleFormChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setTicketType({
+            ...editTicketType,
+            [event.target.name]: event.target.value
+        } as TicketType);
+        checkFields();
+    }
+
+    function checkFields() {
+        let key : keyof TicketType;
+        for (key in editTicketTypeModal) {
+            console.log(key);
+            if (editTicketTypeModal[key] == '' || editTicketTypeModal[key] == 0) {
+                setCanSubmit(false);
+                return;
+            }
+        }
+        setCanSubmit(true);
+    }
+
+    function handleSubmit() {
+        editTicketType(tickettype).then((res) => {
+            if (res) {
+                setSuccessCode(1);
+            } else {
+                setSuccessCode(2);
+            }
+        }).catch((err) => {
+            console.log(err);
+            setSuccessCode(2);
+        });
+    }
+
+    return (
+
+        <form className='flex flex-col space-y-6 p-4 mb-4' onSubmit={handleSubmit}>
+            <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' defaultValue={tickettype.typeID} onChange={handleFormChange}></TextField>
+            <TextField name="type" variant='standard' type="text" label='Ticket Type' defaultValue={tickettype.type} onChange={handleFormChange}></TextField>
+            <TextField name="price" variant='standard' type="text" label='Price' defaultValue={tickettype.price} onChange={handleFormChange}></TextField>
+            <div className="flex justify-between">
+                <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
+            </div>
+            {/*{successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+            {successCode == 0 || successCode == 2 ? // Waiting for submit
+                canSubmit ? //Can submit
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' onClick={() => setModalOpen(true)} >Submit</Button>
+                    : // Can't submit
+                    <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit' disabled>Submit</Button>
+                : //Submitted
+                successCode == 1 ? // Submit successs
+                    <h3 className='text-xl font-extrabold text-green-600'>Promotion Added Successfully</h3>
+                    : // Submit failed
+                    null
+            }*/}
+        </form>
+    );
 }
