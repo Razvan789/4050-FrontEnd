@@ -87,7 +87,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [seats, setSeats] = useState<clientSeat[]>();
     const [bookedIndexs, setBookedIndexs] = useState<number[]>([]);
     const [seatCount, setSeatCount] = useState(0);
-    const [seatsLeft, setSeatsLeft] = useState(adultTickets + childTickets);
+    const [seatsLeft, setSeatsLeft] = useState(0);
 
 
     //Ticket Stuff
@@ -110,10 +110,13 @@ export default function BookMovie({ movie }: BookMovieProps) {
         });
     }, []);
 
-    //update seats left when ticket count changes
+    //update seats left when ticket count or seats changes
     useEffect(() => {
-        setSeatsLeft(adultTickets + childTickets);
-    }, [adultTickets, childTickets]);
+        const seatsSelected = seats?.filter(seat => seat.selected).length || 0;
+        setSeatsLeft(ticketTypes.reduce((acc, ticketType) => {
+            return acc + ticketType.ticketCount;
+        }, 0) - seatsSelected);
+    }, [ticketTypes, seats]);
 
     //update shows on movie change
     useEffect(() => {
@@ -125,7 +128,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
         });
     }, [movie]);
 
-
+    
     //update seats on show change
     useEffect(() => {
         if (selectedShow) { // A show was passed in
@@ -174,7 +177,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 }
             })
             setSeats(newSeats);
-            setSeatsLeft(seatsLeft - 1);
             console.log("Seats Left", seatsLeft);
         }
     }
@@ -191,7 +193,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
             }
         });
         setSeats(newSeats);
-        setSeatsLeft(seatsLeft + 1);
         console.log("Seats Left", seatsLeft);
     }
 
@@ -211,6 +212,22 @@ export default function BookMovie({ movie }: BookMovieProps) {
         callFunction(event.target.value);
     }
 
+    function updateTicketCount(ticketID : number, count : number) {
+        console.log("Changing ticket count", ticketID, count);
+        console.log("Ticket Types", ticketTypes);
+        if(count == NaN || count < 0) count = 0;
+        const newTicketTypes = ticketTypes.map((ticketType) => {
+            if (ticketType.typeID === ticketID) {
+                return {
+                    ...ticketType,
+                    ticketCount: count
+                }
+            } else {
+                return ticketType;
+            }
+        });
+        setTicketTypes(newTicketTypes);
+    }
     function getStepContent(step: number) {
         switch (step) {
             case 0: //----------------------------------PICK DATE
@@ -264,7 +281,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 return (
                                     <div key={ticketType.typeID} className='grid grid-cols-2 items-center mb-5'>
                                         <h1 className='text-xl text-center text-primary'>{ticketType.type}:</h1>
-                                        <TextField className='max-w-[70px]' type="number" value={ticketType.ticketCount} />
+                                        <TextField className='max-w-[70px]' type="number" value={ticketType.ticketCount} onChange={(event)=>{updateTicketCount(ticketType.typeID || -1, parseInt(event.target.value))}}/>
                                     </div>
                                 )
                             })
@@ -376,7 +393,14 @@ export default function BookMovie({ movie }: BookMovieProps) {
             case 0:
                 return true;
             case 1:
-                return adultTickets + childTickets > 0 && selectedShow !== null;
+                let toReturn = false;
+                ticketTypes.forEach((ticketType) => {
+                    if (ticketType.ticketCount != 0) {
+                        console.log('ticket count is 0')
+                        toReturn = true;
+                    }
+                })
+                return selectedShow !== null && toReturn;
             case 2:
                 return seatsLeft == 0;
             case 3:
