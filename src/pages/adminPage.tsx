@@ -11,7 +11,8 @@ import { getAllMovies, Movie } from '../utils/movie';
 import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show, deleteShow } from '../utils/show';
-import { EditMovieForm, AddPromotionForm, EditUserForm } from '../components/forms';
+import { EditMovieForm, AddPromotionForm, EditUserForm, EditTicketTypeForm } from '../components/forms';
+import { getTicketType, getAllTicketTypes, TicketType, addTicketType } from '../utils/tickettype';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.
@@ -55,12 +56,15 @@ export default function AdminPage() {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [promos, setPromos] = useState<Promo[]>([]);
     const [shows, setShows] = useState<Show[]>([]);
+    const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
     const [openMovieID, setOpenMovieID] = useState<GridRowId>(0);
     const [openMovie, setOpenMovie] = useState<Movie | null>(null);
     const [openConfirmation, setOpenConfirmation] = useState(false);
-    const [openPromotion, setOpenPromotion] = useState(false); 
+    const [openPromotion, setOpenPromotion] = useState(false);
     const [openUserModal, setOpenUserModal] = useState(false);
     const [openUser, setOpenUser] = useState<User | null>(null);
+    const [openTicketModal, setOpenTicketModal] = useState(false);
+    const [openTicket, setOpenTicket] = useState<TicketType | null>(null);
     const handleOpen = (id: GridRowId) => {
         setOpen(true);
         setOpenMovieID(id);
@@ -68,6 +72,10 @@ export default function AdminPage() {
     const handleUserOpen = (id: GridRowId) => {
         setOpenUserModal(true);
         setOpenUser(users.find(user => user?.userID == id) || null);
+    };
+    const handleTicketOpen = (id: GridRowId) => {
+        setOpenTicketModal(true);
+        setOpenTicket(ticketTypes.find(ticketTypes => ticketTypes?.typeID == id) || null);
     };
     const openConfirmationModal = (newConfirmationFunction: () => void) => {
         setOpenConfirmation(true);
@@ -118,6 +126,12 @@ export default function AdminPage() {
             setShows([]);
             console.log(err);
         });
+        getAllTicketTypes().then((data) => {
+            setTicketTypes(data);
+        }).catch((err) => {
+            setTicketTypes([]);
+            console.log(err);
+        })
     }
     //Adds fields to rows that are needed for the DataGrid
     const userRows = users.map((user) => {
@@ -147,7 +161,15 @@ export default function AdminPage() {
             movie: movies.find((movie) => movie.movieID == show.movieID)?.title,
         }
     });
-    const ticketRows = 
+    const ticketTypeRows = ticketTypes.map((tickettype) => {
+        return {
+            ...tickettype,
+            id: tickettype?.typeID,
+            type: tickettype?.type,
+            price: tickettype?.price,
+        }
+    });
+
 
 
     /*
@@ -246,18 +268,20 @@ export default function AdminPage() {
             width: 120,
             renderCell: (params) => (
                 <span className=''>
-                    
+
                     <Button
                         color='error'
                         variant="outlined"
                         size="small"
-                        onClick={() => {openConfirmationModal(()=> {
-                            deleteShow(params.id as number).then(() => {
-                                handleClose(setOpenConfirmation, false);
-                            }).catch((err) => {
-                                console.log(err);
-                            });
-                        })}}
+                        onClick={() => {
+                            openConfirmationModal(() => {
+                                deleteShow(params.id as number).then(() => {
+                                    handleClose(setOpenConfirmation, false);
+                                }).catch((err) => {
+                                    console.log(err);
+                                });
+                            })
+                        }}
                         className='font-extrabold'
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
@@ -279,31 +303,25 @@ export default function AdminPage() {
             renderCell: (params) => (
                 <span className=''>
                     <Button
-                        color='secondary'
+                        color="secondary"
                         variant="outlined"
                         size="small"
-                        onClick={() => {openConfirmationModal(()=> {
-                            /*editTicketPrice(params.id as number).then(() => {
-                                handleClose(setOpenConfirmation, false);
-                            }).catch((err) => {
-                                console.log(err);
-                            });*/
-                        })}}
                         className='font-extrabold'
+                        onClick={() => { handleTicketOpen(params.id) }}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
                         Edit
                     </Button>
-                    
+
                 </span>
             ),
         },
-        
+
         { field: 'typeID', headerName: 'Type ID' },
         { field: 'type', headerName: 'Ticket Type' },
         { field: 'price', headerName: 'Ticket Price', width: 130 },
-        
+
     ];
 
 
@@ -376,15 +394,24 @@ export default function AdminPage() {
                         </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={4}>
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={() => { handleOpen(0) }}>Add Movie</Button>
                         <Box sx={{ height: 600, width: 1 }}>
+                            {
+                            //to be continued, need to get the text fields to display properly, instead of going with the modal datagrid
+                            //The datagrid displays properly but the modal doesn't pop up, so need to get the textfield working instead
+                            }
+
+                            {/*<form className='flex flex-col space-y-6 p-4 mb-4'>
+                                <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' value={ticketTypeRows.id} onChange={handleFormChange}></TextField>
+                                <TextField name="type" variant='standard' type="text" label='Ticket Type' value={ticketTypeRows.type} onChange={handleFormChange}></TextField>
+                                <TextField name="price" variant='standard' type="text" label='Price' value={ticketTypeRows.price} onChange={handleFormChange}></TextField>
+                                <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Edit</Button>
+                            </form>     */}                      
                             <DataGrid
-                                /*rows={ticketRows}
-                                put the ticket rows here, but need a pull from the backend before this can be finished*/
-                                rows={0}
+                                rows={ticketTypeRows}
                                 columns={ticketColumns}
                                 components={{ Toolbar: customToolbar }}
-                            />
+                            /> 
+
                         </Box>
                     </TabPanel>
 
@@ -441,6 +468,16 @@ export default function AdminPage() {
                             <Button onClick={() => { confirmationFunction() }} variant='contained' className='bg-primary'>Yes</Button>
                         </div>
                     </div>
+                </Box>
+            </Modal>
+            <Modal
+                open = {openTicketModal}
+                onClose={() => { handleClose(setOpenTicketModal, false) }}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <EditTicketTypeForm tickettype={openTicket || {} as TicketType}></EditTicketTypeForm>
                 </Box>
             </Modal>
         </Layout>

@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Layout from '../components/layout'
 import { Button, LinearProgress } from '@mui/material'
 import Link from 'next/link'
-<<<<<<< HEAD
-//import { encrypt } from '../utils/encryption'
-=======
 // import { encrypt } from '../utils/encryption'
->>>>>>> 4c869753775053196f417743d42696b4b91981f7
 import { useRouter } from 'next/router'
 import {serverUrl} from '../utils/backendInfo'
 
