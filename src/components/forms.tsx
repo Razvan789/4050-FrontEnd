@@ -845,7 +845,7 @@ export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType 
     }
 
     function checkFields() {
-        let key : keyof TicketType;
+        let key: keyof TicketType;
         for (key in newTicketInfo) {
             console.log(key);
             if (newTicketInfo[key] == '' || newTicketInfo[key] == 0) {
@@ -858,7 +858,7 @@ export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType 
 
 
 
-    function handleSubmit(event : React.FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         editTicketType(newTicketInfo).then((res) => {
             if (res) {
@@ -884,4 +884,14 @@ export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType 
             {successCode == 1 ? <p className='text-green-500'>Success!</p> : successCode == 2 ? <p className='text-red-500'>Server Error</p> : null}
         </form>
     );
+}
+
+export function CheckPromoForm({handlePromoCheck}: {handlePromoCheck: (promoCode : string) => void}) {
+    const [promoCode, setPromoCode] = useState("");
+    return (
+        <div className="flex">
+            <TextField variant='standard' label="Enter Promo Code" className='mr-10' value={promoCode} onChange={(event) => { setPromoCode(event.target.value) }}></TextField>
+            <Button variant='contained' className='bg-primary font-extrabold' onClick={() => { handlePromoCheck(promoCode) }}>Check Code</Button>
+        </div>
+    )
 }
