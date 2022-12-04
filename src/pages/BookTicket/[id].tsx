@@ -10,7 +10,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarPicker } from '@mui/x-date-pickers/CalendarPicker';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select, { SelectChangeEvent, selectClasses } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Divider, TextField } from '@mui/material';
 import SeatPicker from '../../components/seatPicker';
@@ -25,7 +25,7 @@ import { useRouter } from 'next/router';
 import { TicketType, getTicketTypes } from '../../utils/tickettype';
 import { Booking } from '../../utils/booking';
 import { Promo, getPromoByCode } from '../../utils/promo';
-import { PaymentCard } from '../../utils/paymentcard';
+import { PaymentCard, getPaymentCardByUserID } from '../../utils/paymentcard';
 import { CheckPromoForm } from '../../components/forms';
 
 interface staticProps {
@@ -112,7 +112,13 @@ export default function BookMovie({ movie }: BookMovieProps) {
 
     //Promo stuff
     const [promo, setPromo] = useState<Promo | null>(null);
-    const [promoStatus, setPromoStatus] = useState(0); //0- Waiting 1- Valid 2- Invalid 
+    const [promoStatus, setPromoStatus] = useState(0); //0- Waiting 1- Valid 2- Invalid
+    
+    //Payment card stuff
+    const [selectedCardID, setSelectedCardID] = useState(-1);
+    const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([]);
+    const [cardStatus, setCardStatus] = useState(0); //0- none selected, 1 - selected
+
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
     const handleNext = () => {
@@ -129,7 +135,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             const newBooking: Booking = {
                 ...booking,
                 showID: selectedShow?.showID,
-                total: ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1 - (promo?.percentage || 0)),
+                total: Math.round(ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1 - (promo?.percentage || 0)) * 100) / 100,
                 customerID: user?.userID || -1,
                 promoID: promo?.promoID,
                 paymentID: -1,
@@ -142,7 +148,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
         getTicketTypes().then(data => {
             setTicketTypes(data);
         });
-    }, []);
+        getPaymentCardByUserID(user?.userID).then(data => {
+            setPaymentCards(data);
+        })
+    }, [user]);
 
     //update seats left when ticket count or seats changes
     useEffect(() => {
@@ -411,8 +420,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 </div>
                                 <div className='flex flex-col items-center justify-between'>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
-                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]' onClick={()=>{handleModalOpen(); setModalToShow(1)}}>Use Existing Card</Button>
+                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]' onClick={() => { handleModalOpen(); setModalToShow(1) }}>{ selectedCardID == -1 ? "Use Existing Card" : `Using Card ${selectedCardID} Click to change`}</Button>
                                     </div>
+                                    {selectedCardID == -1 ? // No selected card
+                                    <>
                                     <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
                                         <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
@@ -427,6 +438,8 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                         <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
 
                                     </div>
+                                    </>
+                                    : null}
                                 </div>
                             </div>
                             : //User not logged in
@@ -456,7 +469,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
         }
     }
 
-
+    function selectCard(cardID : number) {
+        setSelectedCardID(cardID);
+        setCardStatus(1);
+    }
     function canStepForward() {
         switch (activeStep) {
             case 0:
@@ -496,7 +512,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     <div className='hidden md:block'>
                         <p className='text-text-light'>{movie.synopsis}</p>
                     </div>
-                    <Button variant='contained' className='bg-primary' onClick={() => {handleModalOpen(); setModalToShow(0)}}> More Information</Button>
+                    <Button variant='contained' className='bg-primary' onClick={() => { handleModalOpen(); setModalToShow(0) }}> More Information</Button>
                 </div>
 
             </div>
@@ -555,7 +571,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     {modalToShow == 0 ?
                         <MovieModalInfo movie={movie} handleModalClose={handleModalClose} />
                         :
-                        <CardModalInfo cards={[] as PaymentCard[]} handleModalClose={handleModalClose}/>
+                        <CardModalInfo cards={paymentCards} handleModalClose={handleModalClose} selectCard={selectCard}/>
                     }
                 </Box>
             </Modal>
@@ -625,7 +641,7 @@ function MovieModalInfo({ movie, handleModalClose }: { movie: Movie, handleModal
     );
 }
 
-function CardModalInfo({cards, handleModalClose } : {cards: PaymentCard[], handleModalClose?: () => void}) {
+function CardModalInfo({ cards, selectCard, handleModalClose }: { cards: PaymentCard[], handleModalClose: () => void, selectCard: (cardID: number) => void }) {
     return (
         <>
             <div className="flex justify-between items-center m-3">
@@ -635,6 +651,13 @@ function CardModalInfo({cards, handleModalClose } : {cards: PaymentCard[], handl
                 <IconButton className='' onClick={handleModalClose}>
                     <CloseIcon />
                 </IconButton>
+            </div>
+            <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
+                <div className="flex flex-col">
+                    {cards.map((card, index) => (
+                        <Button key={card.paymentID} className='bg-bg-dark border-primary border-2 rounded-xl m-2 p-2' onClick={() => {selectCard(card.paymentID); handleModalClose()}}> Select Card with Num : {card.paymentNum}</Button>
+                    ))}
+                </div>
             </div>
         </>
     );

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { serverUrl } from '../utils/backendInfo'
-import bcrypt, { hash } from 'bcrypt';
-import { string } from 'zod';
+import bcrypt, { hash } from 'bcryptjs';
 
 export function encryptCardNumber(cardNum: string, salt: number) {
     //const stringCardNum = JSON.stringify(cardNum);
-    var lastFourNums = "";
-    for (var i = 0; i < cardNum.length; i++){
+    let lastFourNums = "";
+    for (let i = 0; i < cardNum.length; i++){
         if (i > cardNum.length - 4) {
             lastFourNums += cardNum[i];
         } 
