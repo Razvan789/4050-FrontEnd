@@ -1,5 +1,6 @@
 import {useState, useEffect} from "react";
 import { serverUrl } from "./backendInfo";
+import { encryptCompare } from "./encryptionHelper";
 
 export type User = {
     userID: number,
