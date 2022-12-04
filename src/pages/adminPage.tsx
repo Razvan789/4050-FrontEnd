@@ -12,7 +12,7 @@ import { getUsers, User } from '../utils/user';
 import { getAllPromos, Promo } from '../utils/promo';
 import { getAllShows, Show, deleteShow } from '../utils/show';
 import { EditMovieForm, AddPromotionForm, EditUserForm, EditTicketTypeForm } from '../components/forms';
-import { getAllTicketTypes, TicketType, addTicketType } from '../utils/tickettype';
+import { getAllTicketTypes, TicketType } from '../utils/tickettype';
 
 /* 
     This const will be the database of users, pulling from the MySQL or whatever the DB devs decide to use.

@@ -19,3 +19,7 @@ export async function getBooking(id: number): Promise<Booking> {
         })
     });
 }
+
+export async function addBooking(booking: Booking){
+    //body of addbooking here
+}

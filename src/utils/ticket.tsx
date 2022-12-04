@@ -16,3 +16,8 @@ export async function getTicket(id: number): Promise<Ticket> {
         })
     });
 }
+
+
+export async function addTicket(ticket: Ticket){
+    //body of addTicket here
+}

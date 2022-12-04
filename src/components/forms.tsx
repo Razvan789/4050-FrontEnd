@@ -9,8 +9,8 @@ import { User, updateType, updateStatus } from '../utils/user';
 import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
 import { TicketType, editTicketType } from '../utils/tickettype';
-import { getTicket } from '../utils/ticket';
 import { encryptCardNumber, encryptPassword, encryptCompare } from '../utils/encryptionHelper';
+import bcrypt from 'bcryptjs';
 
 export type signUpInfo = {
     firstName: string,
@@ -54,7 +54,8 @@ export type resetPasswordInfo = {
 }
 
 // const bcrypt = require('bcryptjs');
-const salt = 10;
+const saltRounds = 10;
+const salt = bcrypt.genSaltSync(saltRounds);
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
@@ -97,11 +98,11 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
-        const hashedPassword = encryptPassword(signUpInfo.password, salt);
+        const password = encryptPassword(signUpInfo.password, salt);
         // const hashedPassword = bcrypt.hashSync(signUpInfo.password, salt);
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
-                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.phoneNumber}&email=${signUpInfo.email}&password=${hashedPassword}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}&subToPromo=${signUpInfo.promotionsSubscribed ? 1 : 0}`, {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.phoneNumber}&email=${signUpInfo.email}&password=${password}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}&subToPromo=${signUpInfo.promotionsSubscribed ? 1 : 0}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -116,14 +117,14 @@ export function SignUpForm() {
                     }
                 }).then((data) => {
                     if (data && cardDetailsOpen) {
-                        const hashedCard = encryptCardNumber(signUpInfo.cardNumber, salt);
+                        const cardNum = encryptCardNumber(signUpInfo.cardNumber, salt);
                         fetch(`${serverUrl}/payment-card`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             //Add CVC here
-                            body: JSON.stringify({ paymentNum: hashedCard, userID: data.userID, expDate: signUpInfo.cardExpiration })
+                            body: JSON.stringify({ paymentNum: cardNum, userID: data.userID, expDate: signUpInfo.cardExpiration })
                         }).then(res => {
                             if (res.status == 200) {
                                 console.log('Card Added', signUpInfo);
@@ -263,29 +264,31 @@ export function LoginForm() {
         }).then((data) => {
             if (data == null) return;
             //Password match check here
-            if (data.password == loginInfo.password) {
-                if (data.status == 'active') {
-                    window.sessionStorage.setItem('user', JSON.stringify(data));
-                    if (rememberMe) {
-                        localStorage.setItem('savedEmail', loginInfo.email);
+            encryptCompare(loginInfo.password, data.password).then((success) => {
+                if (success) {
+                    if (data.status == 'active') {
+                        window.sessionStorage.setItem('user', JSON.stringify(data));
+                        if (rememberMe) {
+                            localStorage.setItem('savedEmail', loginInfo.email);
+                        } else {
+                            localStorage.removeItem('savedEmail');
+                        }
+                        setLoginCode(1);
+                        if (data.type == 'admin') {
+                            window.sessionStorage.setItem('admin', 'true');
+                            router.push('/adminPage');
+                        } else {
+                            router.push('/');
+                        }
+                    } else if (data.status == 'suspended') {
+                        setLoginCode(5);
                     } else {
-                        localStorage.removeItem('savedEmail');
+                        setLoginCode(3);
                     }
-                    setLoginCode(1);
-                    if (data.type == 'admin') {
-                        window.sessionStorage.setItem('admin', 'true');
-                        router.push('/adminPage');
-                    } else {
-                        router.push('/');
-                    }
-                } else if (data.status == 'suspended') {
-                    setLoginCode(5);
                 } else {
-                    setLoginCode(3);
+                    setLoginCode(4);
                 }
-            } else {
-                setLoginCode(4);
-            }
+            });
         });
     }
     return (
@@ -349,7 +352,8 @@ export function UpdateProfileForm({ user }: { user: User }) {
         //add &promotionsSubscribed=${updateProfileInfo.promotionSubscribed}`; to the end of this eventually
         let url = `${serverUrl}/edit-profile?email=${user?.email}&name=${updateProfileInfo.name}&lastname=${updateProfileInfo.lastname}&address=${updateProfileInfo.address}&subToPromo=${updateProfileInfo.promotionSubscribed ? 1 : 0}`;
         if (updateProfileInfo.password != '') {
-            url += `&password=${updateProfileInfo.password}`;
+            const password = encryptPassword(updateProfileInfo.password, salt);
+            url += `&password=${password}`;
         }
         return url;
     }
@@ -362,43 +366,46 @@ export function UpdateProfileForm({ user }: { user: User }) {
     }
 
     function sendNewPassword() {
-        if (user?.password == updateProfileInfo.currentPassword) {
-            fetch(getUrlFromJSON(), {
-                method: 'PUT',
-                body: JSON.stringify(updateProfileInfo)
-            }).then((response) => {
-                if (response.status == 200) {
-                    return response.json();
-                }
-                return null;
-            }).then((data) => {
-                if (data == null) {
-                    setSuccessCode(3);
-                    return
-                }
-                setSuccessCode(1);
-            });
-        } else {
-            setSuccessCode(2);
-        }
+        encryptCompare(updateProfileInfo.currentPassword, user?.password || "").then((success) => {
+            if (success) {
+                fetch(getUrlFromJSON(), {
+                    method: 'PUT',
+                    body: JSON.stringify(updateProfileInfo)
+                }).then((response) => {
+                    if (response.status == 200) {
+                        return response.json();
+                    }
+                    return null;
+                }).then((data) => {
+                    if (data == null) {
+                        setSuccessCode(3);
+                        return
+                    }
+                    setSuccessCode(1);
+                });
+            } else {
+                setSuccessCode(2);
+            }
+        });
     }
 
-    return (
-        <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-            <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{ readOnly: true }}></TextField>
-            <TextField variant='standard' name='name' label='First Name' value={updateProfileInfo.name} onChange={handleProfileUpdate}></TextField>
-            <TextField variant='standard' name='lastname' label='Last Name' value={updateProfileInfo.lastname} onChange={handleProfileUpdate}></TextField>
-            <TextField variant='standard' name='address' label='Address' value={updateProfileInfo.address} onChange={handleProfileUpdate}></TextField>
-            <TextField variant='standard' type="password" label='Current Password' name="currentPassword" value={updateProfileInfo.currentPassword} onChange={handleProfileUpdate}></TextField>
-            <TextField variant='standard' type="password" label='New Password' name="password" value={updateProfileInfo.password} onChange={handleProfileUpdate}></TextField>
-            <FormControlLabel className="text-text-light" control={<Checkbox checked={updateProfileInfo.promotionSubscribed} onChange={handlePromotionToggle} />} label="Recieve Promotion?" />
-            <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={sendNewPassword}>Update Profile</Button>
-            {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Updated Successfully</h3> : null}
-            {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Current Password is incorrect</h3> : null}
-            {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
-        </form>
 
-    );
+        return (
+            <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
+                <TextField variant='standard' type="email" label='Email' value={user?.email} InputProps={{ readOnly: true }}></TextField>
+                <TextField variant='standard' name='name' label='First Name' value={updateProfileInfo.name} onChange={handleProfileUpdate}></TextField>
+                <TextField variant='standard' name='lastname' label='Last Name' value={updateProfileInfo.lastname} onChange={handleProfileUpdate}></TextField>
+                <TextField variant='standard' name='address' label='Address' value={updateProfileInfo.address} onChange={handleProfileUpdate}></TextField>
+                <TextField variant='standard' type="password" label='Current Password' name="currentPassword" value={updateProfileInfo.currentPassword} onChange={handleProfileUpdate}></TextField>
+                <TextField variant='standard' type="password" label='New Password' name="password" value={updateProfileInfo.password} onChange={handleProfileUpdate}></TextField>
+                <FormControlLabel className="text-text-light" control={<Checkbox checked={updateProfileInfo.promotionSubscribed} onChange={handlePromotionToggle} />} label="Recieve Promotion?" />
+                <Button className="bg-primary w-full font-extrabold my-3" variant='contained' onClick={sendNewPassword}>Update Profile</Button>
+                {successCode == 1 ? <h3 className='text-xl font-extrabold text-green-600'>Updated Successfully</h3> : null}
+                {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Current Password is incorrect</h3> : null}
+                {successCode == 3 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
+            </form>
+
+        );
 }
 
 export function AddPaymentForm({ user }: { user: User }) {
@@ -420,13 +427,14 @@ export function AddPaymentForm({ user }: { user: User }) {
     }
 
     function handleSubmit() {
+        const cardNum = encryptCardNumber(addPaymentInfo.cardNumber, salt);
         fetch(`${serverUrl}/payment-card`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             //Add CVC here
-            body: JSON.stringify({ paymentNum: addPaymentInfo.cardNumber, userID: user?.userID, expDate: addPaymentInfo.cardExpiration })
+            body: JSON.stringify({ paymentNum: cardNum, userID: user?.userID, expDate: addPaymentInfo.cardExpiration })
         }).then(res => {
             if (res.status == 200) {
                 console.log('Card Added', addPaymentInfo);
@@ -538,7 +546,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
                     }
                 })
                 .then((data) => { //Data holds the email in a string
-                    fetch(`${serverUrl}/edit-profile?email=${data}&password=${resetPasswordInfo.password}`, {
+                    const newPassword = encryptPassword(resetPasswordInfo.password, salt);
+                    fetch(`${serverUrl}/edit-profile?email=${data}&password=${newPassword}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -886,7 +895,7 @@ export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType 
     );
 }
 
-export function CheckPromoForm({handlePromoCheck}: {handlePromoCheck: (promoCode : string) => void}) {
+export function CheckPromoForm({ handlePromoCheck }: { handlePromoCheck: (promoCode: string) => void }) {
     const [promoCode, setPromoCode] = useState("");
     return (
         <div className="flex">
