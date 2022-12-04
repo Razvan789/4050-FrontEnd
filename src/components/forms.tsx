@@ -10,6 +10,7 @@ import { Movie, updateMovie, addMovie } from '../utils/movie';
 import { Promo, addPromo } from '../utils/promo';
 import { TicketType, editTicketType } from '../utils/tickettype';
 import { getTicket } from '../utils/ticket';
+import { encryptCardNumber, encryptPassword, encryptCompare } from '../utils/encryptionHelper';
 
 export type signUpInfo = {
     firstName: string,
@@ -53,7 +54,7 @@ export type resetPasswordInfo = {
 }
 
 // const bcrypt = require('bcryptjs');
-// const salt = bcrypt.genSaltSync(10);
+const salt = 10;
 
 export function SignUpForm() {
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
@@ -96,10 +97,11 @@ export function SignUpForm() {
     }
 
     function sendSignUpInfo() {
+        const hashedPassword = encryptPassword(signUpInfo.password, salt);
         // const hashedPassword = bcrypt.hashSync(signUpInfo.password, salt);
         fetch(`${serverUrl}/check-user?email=${signUpInfo.email}`).then((res) => {
             if (res.status === 404) {
-                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.phoneNumber}&email=${signUpInfo.email}&password=${signUpInfo.password}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}&subToPromo=${signUpInfo.promotionsSubscribed ? 1 : 0}`, {
+                fetch(`${serverUrl}/create-user?name=${signUpInfo.firstName}&lastname=${signUpInfo.lastName}&phone=${signUpInfo.phoneNumber}&email=${signUpInfo.email}&password=${hashedPassword}&paymentSaved=${cardDetailsOpen}&status=inactive&type=customer&address=${signUpInfo.address}&subToPromo=${signUpInfo.promotionsSubscribed ? 1 : 0}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -114,13 +116,14 @@ export function SignUpForm() {
                     }
                 }).then((data) => {
                     if (data && cardDetailsOpen) {
+                        const hashedCard = encryptCardNumber(signUpInfo.cardNumber, salt);
                         fetch(`${serverUrl}/payment-card`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             //Add CVC here
-                            body: JSON.stringify({ paymentNum: signUpInfo.cardNumber, userID: data.userID, expDate: signUpInfo.cardExpiration })
+                            body: JSON.stringify({ paymentNum: hashedCard, userID: data.userID, expDate: signUpInfo.cardExpiration })
                         }).then(res => {
                             if (res.status == 200) {
                                 console.log('Card Added', signUpInfo);

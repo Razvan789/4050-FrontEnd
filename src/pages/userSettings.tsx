@@ -53,7 +53,7 @@ export default function UserSettings() {
     useEffect(() => {
         if (user?.name != null) {
             getPaymentCards(user.userID);
-        } 
+        }
     }, [user]);
 
     function getPaymentCards(userID: number) {
@@ -147,9 +147,9 @@ export default function UserSettings() {
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
                     <Box sx={{ height: 600, width: 1 }}>
-                        {paymentCards.length < 3 ? 
-                        <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={handleOpenCard}>Add Payment Method</Button>
-                        : null}
+                        {paymentCards.length < 3 ?
+                            <Button variant='outlined' className='w-full my-3 text-2xl font-extrabold' onClick={handleOpenCard}>Add Payment Method</Button>
+                            : null}
                         <div className={cardDetailsOpen ? "block w-full" : "hidden"}>
                             <AddPaymentForm user={user} />
                         </div>
@@ -167,31 +167,9 @@ export default function UserSettings() {
                         />
                     </Box>
                 </TabPanel>
-                <TabPanel value={tabValue} index={3}>
-                    <Box sx={{ height: 600, width: 1 }}>
-                        <form className='flex flex-col space-y-6 p-4 mb-4 w-full'>
-                            <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-primary">Fonts: </span>
-                            </h1>
-                            <select>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Comic Sans">Comic Sans</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Helvetica">Helvetica</option>
-                            </select>
-                            <h1 className="w-full text-xl md:text-[1rem] leading-normal font-extrabold text-gray-600">
-                                <span className="text-primary">Colorblind Mode: </span>
-                            </h1>
-                            <select>
-                                <option value="Not Colorblind">Not Colorblind</option>
-                                <option value="Red-Green Colorblind">Red-Green Colorblind</option>
-                            </select>
-                            <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Update Site Settings</Button>
-                        </form>
-                    </Box>
-                </TabPanel>
-
-
+                {
+                //deleted the site settings tab
+                }
             </main>
         </Layout>
 
