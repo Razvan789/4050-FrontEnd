@@ -24,6 +24,10 @@ import { useUser } from '../../utils/user';
 import { useRouter } from 'next/router';
 import { TicketType, getTicketTypes } from '../../utils/tickettype';
 import { Booking } from '../../utils/booking';
+import { Promo, getPromoByCode } from '../../utils/promo';
+import { PaymentCard } from '../../utils/paymentcard';
+import { CheckPromoForm } from '../../components/forms';
+
 interface staticProps {
     params: {
         id: string
@@ -83,6 +87,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [childTickets, setChildTickets] = React.useState(0);
     const [showTime, setShowTime] = React.useState("Select Time");
     const [open, setOpen] = useState(false);
+    const [modalToShow, setModalToShow] = useState(1); // 0 - Movie info, 1 - Cards
     const [shows, setShows] = useState<Show[]>([]);
     const [selectedShow, setSelectedShow] = useState<Show | null>(null);
     const [booking, setBooking] = useState<Booking>({
@@ -104,6 +109,10 @@ export default function BookMovie({ movie }: BookMovieProps) {
     //Ticket Stuff
     const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
 
+
+    //Promo stuff
+    const [promo, setPromo] = useState<Promo | null>(null);
+    const [promoStatus, setPromoStatus] = useState(0); //0- Waiting 1- Valid 2- Invalid 
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
     const handleNext = () => {
@@ -118,12 +127,16 @@ export default function BookMovie({ movie }: BookMovieProps) {
     useEffect(() => {
         if (selectedShow) {
             const newBooking: Booking = {
-            ...booking,
-            showID: selectedShow?.showID,
-            total: ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0),
+                ...booking,
+                showID: selectedShow?.showID,
+                total: ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1 - (promo?.percentage || 0)),
+                customerID: user?.userID || -1,
+                promoID: promo?.promoID,
+                paymentID: -1,
             };
+            setBooking(newBooking);
         }
-    }, [selectedShow]);
+    }, [selectedShow, promo, ticketTypes, user]);
     //On Page load could be done earlier then cached but oh well
     useEffect(() => {
         getTicketTypes().then(data => {
@@ -149,7 +162,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
         });
     }, [movie]);
 
-    
+
     //update seats on show change
     useEffect(() => {
         if (selectedShow) { // A show was passed in
@@ -228,15 +241,31 @@ export default function BookMovie({ movie }: BookMovieProps) {
         return showTimes;
     }
 
+    function handlePromoCheck(promoCode: string) {
+        if (promoCode.length > 0) {
+            setPromoStatus(0);
+            getPromoByCode(promoCode).then((promo) => {
+                if (promo) {
+                    setPromo(promo);
+                    setPromoStatus(1);
+                } else {
+                    setPromoStatus(2);
+                }
+            }).catch((err) => {
+                console.log(err);
+                setPromoStatus(2);
+            })
+        }
+    }
     //eslint-disable-next-line
     const handleSelectChange = (event: SelectChangeEvent<any>, callFunction: React.Dispatch<React.SetStateAction<any>>) => {
         callFunction(event.target.value);
     }
 
-    function updateTicketCount(ticketID : number, count : number) {
+    function updateTicketCount(ticketID: number, count: number) {
         console.log("Changing ticket count", ticketID, count);
         console.log("Ticket Types", ticketTypes);
-        if(count == NaN || count < 0) count = 0;
+        if (count == NaN || count < 0) count = 0;
         const newTicketTypes = ticketTypes.map((ticketType) => {
             if (ticketType.typeID === ticketID) {
                 return {
@@ -302,7 +331,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 return (
                                     <div key={ticketType.typeID} className='grid grid-cols-2 items-center mb-5'>
                                         <h1 className='text-xl text-center text-primary'>{ticketType.type}:</h1>
-                                        <TextField className='max-w-[70px]' type="number" value={ticketType.ticketCount} onChange={(event)=>{updateTicketCount(ticketType.typeID || -1, parseInt(event.target.value))}}/>
+                                        <TextField className='max-w-[70px]' type="number" value={ticketType.ticketCount} onChange={(event) => { updateTicketCount(ticketType.typeID || -1, parseInt(event.target.value)) }} />
                                     </div>
                                 )
                             })
@@ -366,13 +395,23 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                         )
                                     })
                                     }
-                                    <p className='text-2xl font-extrabold text-primary mb-5'>Total: <span className='text-text-light'>${ticketTypes.reduce((acc, ticketType)=>{
-                                        return acc + (ticketType.price * ticketType.ticketCount)
-                                    }, 0)}</span></p>
+                                    <p className='text-2xl font-extrabold text-primary mb-5'>Total: <span className='text-text-light'>${booking.total}</span></p>
+
+                                    {promoStatus == 0 ? // Waiting for promo code
+                                        <CheckPromoForm handlePromoCheck={handlePromoCheck} />
+                                        : promoStatus == 1 ? // Promo code is valid
+                                            <h1 className='text-xl text-green-600 font-extrabold'>Promo Code Applied!</h1>
+                                            :  // Promo code is invalid
+                                            <>
+                                                <CheckPromoForm handlePromoCheck={handlePromoCheck} />
+                                                <h1 className='text-xl text-red-400 font-extrabold'>Promo Code Invalid!</h1>
+                                            </>
+                                    }
+
                                 </div>
                                 <div className='flex flex-col items-center justify-between'>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
-                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]'>Use Existing Card</Button>
+                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]' onClick={()=>{handleModalOpen(); setModalToShow(1)}}>Use Existing Card</Button>
                                     </div>
                                     <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
@@ -457,7 +496,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     <div className='hidden md:block'>
                         <p className='text-text-light'>{movie.synopsis}</p>
                     </div>
-                    <Button variant='contained' className='bg-primary' onClick={handleModalOpen}> More Information</Button>
+                    <Button variant='contained' className='bg-primary' onClick={() => {handleModalOpen(); setModalToShow(0)}}> More Information</Button>
                 </div>
 
             </div>
@@ -495,11 +534,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                         >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
                     </div>
                 </div>
-
                 :
-
-
-
                 // IF no showtimes could be found
                 <div className='flex flex-col justify-center items-center'>
                     <h2 className='text-center text-2xl font-extrabold text-primary'>No Shows Available</h2>
@@ -516,63 +551,91 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[400px] lg:w-[800px] p-0'>
-                    <div className="flex justify-between items-center m-3">
-                        <Typography id="modal-modal-title" variant="h6" component="h2">
-                            {movie.title} Detials
-                        </Typography>
-                        <IconButton className='' onClick={handleModalClose}>
-                            <CloseIcon />
-                        </IconButton>
-                    </div>
-                    <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
-                        <div className="flex justify-center">
-                            <iframe width="560" height="315" src={movie.video} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-                        </div>
-                        <div className="flex flex-col">
-                            <h2 className='text-2xl font-extrabold text-primary text-center'>Movie Information</h2>
-                            <Divider />
-                            <div className="font-extrabold text-xl text-primary grid grid-cols-2  gap-y-24 p-4">
-                                <div className='flex flex-col justify-center items-start col-span-2'>
-                                    <h2>Synopsis:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.synopsis}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Title:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.title}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Director:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.director}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Producer:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.producer}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Cast:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.cast}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Rating:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.ratingCode}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2 >Reviews:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.reviews}</p>
-                                </div>
-                                <div className='flex flex-col justify-center items-start'>
-                                    <h2>Genres:</h2>
-                                    <p className='ml-2 font-normal text-white text-base'>{movie.genre}</p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <Button variant='contained' className='bg-primary float-right m-4' onClick={handleModalClose}> Close</Button>
+                <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[400px] lg:w-[800px] p-0 min-h-[300px]'>
+                    {modalToShow == 0 ?
+                        <MovieModalInfo movie={movie} handleModalClose={handleModalClose} />
+                        :
+                        <CardModalInfo cards={[] as PaymentCard[]} handleModalClose={handleModalClose}/>
+                    }
                 </Box>
             </Modal>
         </Layout>
 
     )
+}
+
+
+function MovieModalInfo({ movie, handleModalClose }: { movie: Movie, handleModalClose?: () => void }) {
+    return (
+        <>
+            <div className="flex justify-between items-center m-3">
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                    {movie.title} Detials
+                </Typography>
+                <IconButton className='' onClick={handleModalClose}>
+                    <CloseIcon />
+                </IconButton>
+            </div>
+            <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
+                <div className="flex justify-center">
+                    <iframe width="560" height="315" src={movie.video} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                </div>
+                <div className="flex flex-col">
+                    <h2 className='text-2xl font-extrabold text-primary text-center'>Movie Information</h2>
+                    <Divider />
+                    <div className="font-extrabold text-xl text-primary grid grid-cols-2  gap-y-24 p-4">
+                        <div className='flex flex-col justify-center items-start col-span-2'>
+                            <h2>Synopsis:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.synopsis}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Title:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.title}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Director:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.director}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Producer:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.producer}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Cast:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.cast}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Rating:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.ratingCode}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2 >Reviews:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.reviews}</p>
+                        </div>
+                        <div className='flex flex-col justify-center items-start'>
+                            <h2>Genres:</h2>
+                            <p className='ml-2 font-normal text-white text-base'>{movie.genre}</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <Button variant='contained' className='bg-primary float-right m-4' onClick={handleModalClose}> Close</Button>
+        </>
+    );
+}
+
+function CardModalInfo({cards, handleModalClose } : {cards: PaymentCard[], handleModalClose?: () => void}) {
+    return (
+        <>
+            <div className="flex justify-between items-center m-3">
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                    Payment Cards
+                </Typography>
+                <IconButton className='' onClick={handleModalClose}>
+                    <CloseIcon />
+                </IconButton>
+            </div>
+        </>
+    );
 }

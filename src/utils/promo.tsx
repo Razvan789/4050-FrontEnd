@@ -61,3 +61,21 @@ export async function addPromo(promo: Promo): Promise<number> {
         })
     });
 }
+
+export async function getPromoByCode(promoCode: string): Promise<Promo> {
+    return new Promise<Promo>((resolve, reject) => {
+        fetch(`${serverUrl}/promotion?promoCode=${promoCode}`).then(res => {
+            if(res.status === 200) {
+                return res.json();
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).then(data => {
+            resolve(data as Promo);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}
