@@ -657,17 +657,19 @@ export function EditMovieForm({ movie }: { movie: Movie }) {
     }
 
     return (
-        <form className='flex flex-col space-y-6 p-4' onSubmit={handleSubmit}>
-            <TextField type="text" name='title' variant='standard' label='Title' value={editMovieInfo.title} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='cast' variant='standard' label='Cast' value={editMovieInfo.cast} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='director' variant='standard' label='Director' value={editMovieInfo.director} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='producer' variant='standard' label='Producer' value={editMovieInfo.producer} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='synopsis' variant='standard' label='Synopsis' multiline value={editMovieInfo.synopsis} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='genre' variant='standard' label='Genre' value={editMovieInfo.genre} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='ratingCode' variant='standard' label='Rating Code' value={editMovieInfo.ratingCode} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='reviews' variant='standard' label='Reviews' multiline value={editMovieInfo.reviews} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='trailerPic' variant='standard' label='Trailer Picture Link' value={editMovieInfo.trailerPic} onChange={handleFormChange}></TextField>
-            <TextField type="text" name='video' variant='standard' label='Video Link' value={editMovieInfo.video} onChange={handleFormChange}></TextField>
+        <form className='flex flex-col space-y-6 p-2' onSubmit={handleSubmit}>
+            <div className="flex flex-col space-y-6 max-h-[75vh] overflow-auto p-3">
+                <TextField type="text" name='title' variant='standard' label='Title' value={editMovieInfo.title} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='cast' variant='standard' label='Cast' value={editMovieInfo.cast} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='director' variant='standard' label='Director' value={editMovieInfo.director} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='producer' variant='standard' label='Producer' value={editMovieInfo.producer} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='synopsis' variant='standard' label='Synopsis' multiline value={editMovieInfo.synopsis} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='genre' variant='standard' label='Genre' value={editMovieInfo.genre} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='ratingCode' variant='standard' label='Rating Code' value={editMovieInfo.ratingCode} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='reviews' variant='standard' label='Reviews' multiline value={editMovieInfo.reviews} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='trailerPic' variant='standard' label='Trailer Picture Link' value={editMovieInfo.trailerPic} onChange={handleFormChange}></TextField>
+                <TextField type="text" name='video' variant='standard' label='Video Link' value={editMovieInfo.video} onChange={handleFormChange}></TextField>
+            </div>
             {successCode == 2 ? <h3 className='text-xl font-extrabold text-red-600'>Server Error</h3> : null}
             {successCode == 0 || successCode == 2 ? // Waiting for submit
                 canSubmit ? //Can submit

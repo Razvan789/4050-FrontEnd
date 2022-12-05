@@ -196,7 +196,7 @@ export default function AdminPage() {
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
-                        Info
+                        Edit
                     </Button>
                 </span>
             ),
@@ -396,8 +396,8 @@ export default function AdminPage() {
                     <TabPanel value={tabValue} index={4}>
                         <Box sx={{ height: 600, width: 1 }}>
                             {
-                            //to be continued, need to get the text fields to display properly, instead of going with the modal datagrid
-                            //The datagrid displays properly but the modal doesn't pop up, so need to get the textfield working instead
+                                //to be continued, need to get the text fields to display properly, instead of going with the modal datagrid
+                                //The datagrid displays properly but the modal doesn't pop up, so need to get the textfield working instead
                             }
 
                             {/*<form className='flex flex-col space-y-6 p-4 mb-4'>
@@ -405,12 +405,12 @@ export default function AdminPage() {
                                 <TextField name="type" variant='standard' type="text" label='Ticket Type' value={ticketTypeRows.type} onChange={handleFormChange}></TextField>
                                 <TextField name="price" variant='standard' type="text" label='Price' value={ticketTypeRows.price} onChange={handleFormChange}></TextField>
                                 <Button className="bg-primary w-full font-extrabold my-3" variant='contained'>Edit</Button>
-                            </form>     */}                      
+                            </form>     */}
                             <DataGrid
                                 rows={ticketTypeRows}
                                 columns={ticketColumns}
                                 components={{ Toolbar: customToolbar }}
-                            /> 
+                            />
 
                         </Box>
                     </TabPanel>
@@ -428,6 +428,14 @@ export default function AdminPage() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                    <div className="flex justify-between items-center m-3">
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Edit Movie
+                        </Typography>
+                        <IconButton className='' onClick={()=>{handleClose(setOpen, false)}}>
+                            <CloseIcon />
+                        </IconButton>
+                    </div>
                     <EditMovieForm movie={openMovie || {} as Movie} />
                 </Box>
             </Modal>
@@ -471,7 +479,7 @@ export default function AdminPage() {
                 </Box>
             </Modal>
             <Modal
-                open = {openTicketModal}
+                open={openTicketModal}
                 onClose={() => { handleClose(setOpenTicketModal, false) }}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
