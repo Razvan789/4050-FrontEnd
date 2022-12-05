@@ -63,11 +63,6 @@ export default function Navbar({ title = "Default Value", userInfo }: NavbarProp
                 : //If user is not admin do nothing
                 null
             }
-            <IconButton >
-              <Badge className="scale-[95%]" badgeContent={100} color="primary">
-                <LocalActivityIcon className={styles.rotateHover} />
-              </Badge>
-            </IconButton>
             <Link href="/userSettings">
               <IconButton className={styles.rotateHover}>
                 <SettingsIcon />
