@@ -2,24 +2,31 @@ import React from 'react';
 import Layout from '../components/layout';
 import Head from 'next/head';
 import { Box } from '@mui/system';
-import { DataGrid, GridColDef, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowId, GridToolbarContainer, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useState, useEffect } from 'react';
-import { Button } from '@mui/material'
+import { Button, Modal } from '@mui/material'
 import { useUser } from '../utils/user';
 import { UpdateProfileForm } from '../components/forms';
 import { serverUrl } from '../utils/backendInfo';
 import PaymentCardInfo from '../components/paymentCardInfo';
 import { AddPaymentForm } from '../components/forms';
+import { getPaymentCardByUserID, addPaymentCard } from '../utils/paymentcard';
+import { Booking, getBookingsByUserID, } from '../utils/booking';
+import { Show, getShow } from '../utils/show';
+import { Movie, getMovie, getAllMovies } from '../utils/movie';
+import { TicketsDisplay } from '../components/ticketsDisplay';
 
 
-const rows = [
-    { id: 1, cardNumber: 1111 },
-    { id: 2, cardNumber: 2222 },
-    { id: 3, cardNumber: 3333 }
-
-];
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    boxShadow: 24,
+    p: 4,
+};
 
 const customToolbar = () => {
     return (
@@ -40,21 +47,55 @@ type cardInfo = {
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
     //eslint-disable-next-line
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    // const handleClose = () => setOpen(false);
+    const [openTickets, setOpenTickets] = useState(false);
+    const handleOpen = (bookingID: GridRowId) => { setOpenTickets(true); setSelectedBookingID(bookingID); };
+    const handleClose = () => setOpenTickets(false);
     const [paymentCards, setPaymentCards] = useState<cardInfo[]>([]);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [selectedBookingID, setSelectedBookingID] = useState<GridRowId>(0);
+    const [shows, setShows] = useState<Show[]>([]);
+    const [movies, setMovies] = useState<Movie[]>([]);
     const [cardDetailsOpen, setCardDetailsOpen] = useState(false);
     const user = useUser();
+    const [updateShows, setUpdateShows] = useState(false);
+
+
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
 
+
     useEffect(() => {
         if (user?.name != null) {
             getPaymentCards(user.userID);
+            getBookingsByUserID(user.userID).then((data) => {
+                setBookings(data);
+                setUpdateShows(!updateShows);
+            });
+            getAllMovies().then((data) => {
+                setMovies(data);
+            });
         }
     }, [user]);
+
+    //Update shows when bookings are updated
+    useEffect(() => {
+        bookings.forEach((booking) => {
+            getShow("showID", booking.showID).then((show) => {
+                setShows((shows) => [...shows, show]);
+            });
+        });
+    }, [updateShows]);
+
+
+    //Update movies when shows are updated
+    // useEffect(() => {
+
+    // }, [updateMovies]);
+
+
+
 
     function getPaymentCards(userID: number) {
         fetch(`${serverUrl}/payment-card?userID=${userID}`)
@@ -78,9 +119,22 @@ export default function UserSettings() {
     This will label the information displayed in the user grid with the const
     This includes the definition of the buttons to be used to edit and delete the specific users
 */
-    const columns: GridColDef[] = [
+    const bookingRows = bookings.map((booking) => {
+        const show = shows.find((show) => show.showID === booking.showID);
+        const movie = movies.find((movie) => movie.movieID === show?.movieID);
+        return {
+            ...booking,
+            id: booking.bookingID,
+            movie: movie?.title,
+            showTime: show?.movieTime,
+        };
+    });
+
+    const bookingColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'cardNumber', headerName: 'Card Number', width: 130 },
+        { field: 'total', headerName: 'Total Price', width: 130 },
+        { field: 'movie', headerName: 'Movie', width: 130 },
+        { field: 'showTime', headerName: 'Show Time', width: 200 },
 
         {
             field: 'buttons',
@@ -93,21 +147,11 @@ export default function UserSettings() {
                         variant="outlined"
                         size="small"
                         className='font-extrabold'
-                        onClick={handleOpen}
+                        onClick={() => handleOpen(params.id)}
                         style={{ marginLeft: 16 }}
                         tabIndex={params.hasFocus ? 0 : -1}
                     >
-                        Edit
-                    </Button>
-                    <Button
-                        color='error'
-                        variant="outlined"
-                        size="small"
-                        className='font-extrabold'
-                        style={{ marginLeft: 16 }}
-                        tabIndex={params.hasFocus ? 0 : -1}
-                    >
-                        Delete
+                        See Tickets
                     </Button>
                 </span>
             ),
@@ -161,15 +205,26 @@ export default function UserSettings() {
                 <TabPanel value={tabValue} index={2}>
                     <Box sx={{ height: 600, width: 1 }}>
                         <DataGrid
-                            rows={rows}
-                            columns={columns}
+                            rows={bookingRows}
+                            columns={bookingColumns}
                             components={{ Toolbar: customToolbar }}
                         />
                     </Box>
                 </TabPanel>
-                {
-                //deleted the site settings tab
-                }
+                <Modal
+                    open={openTickets}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={modalStyle} className='text-text-light border-primary border-2 rounded-xl bg-bg-dark w-[350px] md:w-[500px] lg:w-[800px] p-0'>
+                        <div className='flex flex-col items-center justify-center'>
+                            <h1 className='text-3xl font-extrabold text-center'>Tickets</h1>
+                            <TicketsDisplay bookingID={selectedBookingID} />
+                        </div>
+
+                    </Box>
+                </Modal>
             </main>
         </Layout>
 

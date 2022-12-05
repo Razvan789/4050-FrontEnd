@@ -17,6 +17,25 @@ export async function getTicket(id: number): Promise<Ticket> {
     });
 }
 
+export async function getTicketsByBookingID(bookingID: number): Promise<Ticket[]> {
+    return new Promise<Ticket[]>((resolve, reject) => {
+        fetch(`${serverUrl}/ticket?bookingID=${bookingID}`).then(res => {
+            if (res.status === 200) {
+                return res.json();
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).then(data => {
+            resolve(data as Ticket[]);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}
+
+
 
 export async function addTicket(ticket: Ticket): Promise<boolean> {
     return new Promise((resolve, reject) => {
