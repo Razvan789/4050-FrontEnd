@@ -28,3 +28,24 @@ export async function getPaymentCardByUserID(id: number | undefined): Promise<Pa
         })
     });
 }
+
+export async function addPaymentCard(paymentCard: PaymentCard): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fetch(`${serverUrl}/payment-card`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paymentCard)
+        }).then(res => {
+            if (res.status === 200) {
+                resolve(true);
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).catch(err => {
+            reject(err);
+        })
+    });
+}

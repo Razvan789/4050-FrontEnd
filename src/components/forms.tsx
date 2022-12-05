@@ -11,6 +11,8 @@ import { Promo, addPromo } from '../utils/promo';
 import { TicketType, editTicketType } from '../utils/tickettype';
 import { encryptCardNumber, encryptPassword, encryptCompare } from '../utils/encryptionHelper';
 import bcrypt from 'bcryptjs';
+import { addPaymentCard, PaymentCard } from '../utils/paymentcard';
+import { gridRowCountSelector } from '@mui/x-data-grid';
 
 export type signUpInfo = {
     firstName: string,
@@ -112,28 +114,26 @@ export function SignUpForm() {
                     if (res.status == 200) {
                         console.log('signup send', signUpInfo);
 
-                        setSuccessCode(1);
+                        if (!cardDetailsOpen) {
+                            setSuccessCode(1);
+                        }
                         return res.json();
                     }
                 }).then((data) => {
+                    //If card details are open, send card details to backend
                     if (data && cardDetailsOpen) {
-                        const cardNum = encryptCardNumber(signUpInfo.cardNumber, salt);
-                        fetch(`${serverUrl}/payment-card`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            //Add CVC here
-                            body: JSON.stringify({ paymentNum: cardNum, userID: data.userID, expDate: signUpInfo.cardExpiration })
-                        }).then(res => {
-                            if (res.status == 200) {
-                                console.log('Card Added', signUpInfo);
-                                setSuccessCode(1);
-                                return res.json();
-                            } else {
-                                setSuccessCode(4);
-                            }
-                        })
+                        const card : PaymentCard = {
+                            paymentID: 0,
+                            paymentNum: encryptCardNumber(signUpInfo.cardNumber, salt),
+                            expDate: signUpInfo.cardExpiration,
+                            CCV: signUpInfo.cardCVC,
+                            userID: data.userID,
+                        }
+                        addPaymentCard(card).then(() => {
+                            setSuccessCode(1);
+                        }).catch((err) => {
+                            setSuccessCode(4);
+                        })                     
                     }
                 });
             }
@@ -289,6 +289,9 @@ export function LoginForm() {
                     setLoginCode(4);
                 }
             });
+        }).catch((error) => {
+            console.log(error);
+            setLoginCode(2);
         });
     }
     return (
@@ -427,23 +430,23 @@ export function AddPaymentForm({ user }: { user: User }) {
     }
 
     function handleSubmit() {
-        const cardNum = encryptCardNumber(addPaymentInfo.cardNumber, salt);
-        fetch(`${serverUrl}/payment-card`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            //Add CVC here
-            body: JSON.stringify({ paymentNum: cardNum, userID: user?.userID, expDate: addPaymentInfo.cardExpiration })
-        }).then(res => {
-            if (res.status == 200) {
-                console.log('Card Added', addPaymentInfo);
+        const card: PaymentCard = {
+            paymentID: 0,
+            userID: user?.userID || -1,
+            paymentNum: encryptCardNumber(addPaymentInfo.cardNumber, salt),
+            CCV: addPaymentInfo.cardCVC,
+            expDate: addPaymentInfo.cardExpiration,
+        }
+        addPaymentCard(card).then((success) => {
+            if (success) {
                 setSuccessCode(1);
-                return res.json();
             } else {
                 setSuccessCode(2);
             }
-        })
+        }).catch((error) => {
+            console.log(error);
+            setSuccessCode(2);
+        });
     }
 
     return (
