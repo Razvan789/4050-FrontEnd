@@ -19,14 +19,15 @@ import CloseIcon from '@mui/icons-material/Close';
 import { serverUrl } from '../../utils/backendInfo';
 import { Show, getShowsByMovieID } from '../../utils/show';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
-import { clientSeat, getAllBookedSeats, getSeatCount } from '../../utils/seat';
+import { clientSeat, getAllBookedSeats, getSeatCount, addSeats } from '../../utils/seat';
 import { useUser } from '../../utils/user';
 import { useRouter } from 'next/router';
 import { TicketType, getTicketTypes } from '../../utils/tickettype';
-import { Booking } from '../../utils/booking';
+import { addBooking, Booking } from '../../utils/booking';
 import { Promo, getPromoByCode } from '../../utils/promo';
 import { PaymentCard, getPaymentCardByUserID } from '../../utils/paymentcard';
 import { CheckPromoForm } from '../../components/forms';
+import { Ticket, addTicket } from '../../utils/ticket';
 
 interface staticProps {
     params: {
@@ -90,6 +91,8 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const [modalToShow, setModalToShow] = useState(1); // 0 - Movie info, 1 - Cards
     const [shows, setShows] = useState<Show[]>([]);
     const [selectedShow, setSelectedShow] = useState<Show | null>(null);
+
+    const [bookingStatus, setBookingStatus] = useState(0); //0 - not booked, 1 - booked, 2 - error
     const [booking, setBooking] = useState<Booking>({
         showID: 0,
         customerID: 0,
@@ -113,7 +116,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
     //Promo stuff
     const [promo, setPromo] = useState<Promo | null>(null);
     const [promoStatus, setPromoStatus] = useState(0); //0- Waiting 1- Valid 2- Invalid
-    
+
     //Payment card stuff
     const [selectedCardID, setSelectedCardID] = useState(-1);
     const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([]);
@@ -122,8 +125,11 @@ export default function BookMovie({ movie }: BookMovieProps) {
     const handleModalOpen = () => setOpen(true);
     const handleModalClose = () => setOpen(false);
     const handleNext = () => {
+        if (activeStep === 3) {
+            //Checkout
+            submitBooking();
+        }
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        console.log("Seats", seats);
     };
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -138,11 +144,11 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 total: Math.round(ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1 - (promo?.percentage || 0)) * 100) / 100,
                 customerID: user?.userID || -1,
                 promoID: promo?.promoID,
-                paymentID: -1,
+                paymentID: selectedCardID || -1,
             };
             setBooking(newBooking);
         }
-    }, [selectedShow, promo, ticketTypes, user]);
+    }, [selectedShow, promo, ticketTypes, user, selectedCardID]);
     //On Page load could be done earlier then cached but oh well
     useEffect(() => {
         getTicketTypes().then(data => {
@@ -287,11 +293,58 @@ export default function BookMovie({ movie }: BookMovieProps) {
         });
         setTicketTypes(newTicketTypes);
     }
+
+    function selectCard(cardID: number) {
+        setSelectedCardID(cardID);
+        setCardStatus(1);
+    }
+
+    function submitBooking() {
+        const selectedSeats = seats?.filter((seat) => seat.selected) || [];
+        //Add Seats to DB return those seats
+        addSeats(selectedSeats).then((seats) => {
+            //Add booking to DB
+            addBooking(booking).then((booking) => {
+                //Add tickets to DB return those tickets
+                seats.forEach((seat) => {
+                    addTicket({
+                        seatID: seat.seatID || -1,
+                        bookingID: booking.bookingID || -1,
+                        typeID: 1,
+                    }).then(() => { setBookingStatus(1) }).catch((err) => { setBookingStatus(2); console.log(err) });
+                });
+            }).catch((err) => { setBookingStatus(2); console.log(err) });
+        }).catch((err) => { setBookingStatus(2); console.log(err) });
+    }
+
+    function canStepForward() {
+        switch (activeStep) {
+            case 0:
+                return true;
+            case 1:
+                let toReturn = false;
+                ticketTypes.forEach((ticketType) => {
+                    if (ticketType.ticketCount != 0) {
+                        console.log('ticket count is 0')
+                        toReturn = true;
+                    }
+                })
+                return selectedShow !== null && toReturn;
+            case 2:
+                return seatsLeft == 0;
+            case 3:
+                return booking?.paymentID != -1;
+            default:
+                return false;
+        }
+    }
+
+
     function getStepContent(step: number) {
         switch (step) {
             case 0: //----------------------------------PICK DATE
                 return (
-                    <div className="flex flex-wrap  justify-center p-5">
+                    <div className="flex flex-wrap-reverse  justify-center p-5">
                         <CalendarPicker date={date} className="bg-bg-dark m-5 mt-3 rounded-xl shadow-xl text-text-light border-[1px] border-primary" onChange={(newDate) => setDate(newDate)}
                             renderDay={(day, value, dayComponentProps) => {
                                 const dayIsBooked = getShowTimes(day.format("MM/DD/YYYY")).length > 0;
@@ -345,37 +398,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 )
                             })
                             }
-                            {/* <div className='flex items-center mb-3 justify-center'>
-
-                                <h3 className='text-xl text-primary font-extrabold mr-5'>Adult Tickets: </h3>
-                                <Select
-                                    value={adultTickets}
-                                    onChange={(event) => handleSelectChange(event, setAdultTickets)}
-                                    label=""
-                                >
-                                    <MenuItem value={0}>0</MenuItem>
-                                    <MenuItem value={1}>1</MenuItem>
-                                    <MenuItem value={2}>2</MenuItem>
-                                    <MenuItem value={3}>3</MenuItem>
-                                    <MenuItem value={4}>4</MenuItem>
-                                    <MenuItem value={5}>5</MenuItem>
-                                </Select>
-                            </div>
-                            <div className='flex items-center mb-3 justify-center'>
-                                <h3 className='text-xl text-primary font-extrabold mr-5'>Child Tickets: </h3>
-                                <Select
-                                    value={childTickets}
-                                    onChange={(event) => handleSelectChange(event, setChildTickets)}
-                                    label=""
-                                >
-                                    <MenuItem value={0}>0</MenuItem>
-                                    <MenuItem value={1}>1</MenuItem>
-                                    <MenuItem value={2}>2</MenuItem>
-                                    <MenuItem value={3}>3</MenuItem>
-                                    <MenuItem value={4}>4</MenuItem>
-                                    <MenuItem value={5}>5</MenuItem>
-                                </Select>
-                            </div> */}
                         </div>
                     </div>
                 )
@@ -390,7 +412,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 return (
                     <>
                         {user?.email ?
-                            <div className="flex flex-col w-[500px] mx-auto">
+                            <div className="flex flex-col min-w-[380px] max-w-[500px] mx-auto">
                                 <h2 className='text-center text-2xl font-extrabold text-primary'>Checkout</h2>
                                 <Divider />
                                 <div className='flex flex-col justify-center items-center'>
@@ -405,41 +427,41 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                     })
                                     }
                                     <p className='text-2xl font-extrabold text-primary mb-5'>Total: <span className='text-text-light'>${booking.total}</span></p>
-
-                                    {promoStatus == 0 ? // Waiting for promo code
-                                        <CheckPromoForm handlePromoCheck={handlePromoCheck} />
-                                        : promoStatus == 1 ? // Promo code is valid
-                                            <h1 className='text-xl text-green-600 font-extrabold'>Promo Code Applied!</h1>
-                                            :  // Promo code is invalid
-                                            <>
-                                                <CheckPromoForm handlePromoCheck={handlePromoCheck} />
-                                                <h1 className='text-xl text-red-400 font-extrabold'>Promo Code Invalid!</h1>
-                                            </>
-                                    }
-
                                 </div>
                                 <div className='flex flex-col items-center justify-between'>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>
-                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]' onClick={() => { handleModalOpen(); setModalToShow(1) }}>{ selectedCardID == -1 ? "Use Existing Card" : `Using Card ${selectedCardID} Click to change`}</Button>
+                                        <Button className='text-lg font-extrabold text-primary w-full h-full min-h-[50px]' onClick={() => { handleModalOpen(); setModalToShow(1) }}>{selectedCardID == -1 ? "Use Existing Card" : `Using Card ${selectedCardID} Click to change`}</Button>
                                     </div>
                                     {selectedCardID == -1 ? // No selected card
-                                    <>
-                                    <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
-                                    <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
-                                        <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
-                                        <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
-                                        <div className=" flex w-[250px]">
-                                            <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
-                                            <TextField id="outlined-basic" size="small" label="CVV" variant="outlined" />
-                                        </div>
-                                        <br />
-                                        <TextField id="outlined-basic" size="small" label="Name on Card" variant="outlined" className='w-[250px] mt-2' />
-                                        <TextField id="outlined-basic" size="small" label="Billing Address" variant="outlined" className='w-[250px] mt-2' />
-                                        <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
+                                        <>
+                                            <h2 className='text-center text-3xl font-extrabold text-primary'>Or</h2>
+                                            <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] border-[1px] border-primary rounded-xl shadow-lg mt-2 p-2'>
+                                                <h4 className='text-xl font-extrabold text-primary mb-2'>Enter New info</h4>
+                                                <TextField id="outlined-basic" size="small" label="Card Number" variant="outlined" className='w-[250px] mb-2' />
+                                                <div className=" flex w-[250px]">
+                                                    <TextField id="outlined-basic" size="small" label="Expiration Date" variant="outlined" className='mr-2' />
+                                                    <TextField id="outlined-basic" size="small" label="CVV" variant="outlined" />
+                                                </div>
+                                                <br />
+                                                <TextField id="outlined-basic" size="small" label="Name on Card" variant="outlined" className='w-[250px] mt-2' />
+                                                <TextField id="outlined-basic" size="small" label="Billing Address" variant="outlined" className='w-[250px] mt-2' />
+                                                <TextField id="outlined-basic" size="small" label="Zip Code" variant="outlined" className='w-[250px] mt-2' />
 
+                                            </div>
+                                        </>
+                                        : null}
+                                    <div className="mt-5">
+                                        {promoStatus == 0 ? // Waiting for promo code
+                                            <CheckPromoForm handlePromoCheck={handlePromoCheck} />
+                                            : promoStatus == 1 ? // Promo code is valid
+                                                <h1 className='text-xl text-green-600 font-extrabold'>Promo Code Applied!</h1>
+                                                :  // Promo code is invalid
+                                                <>
+                                                    <CheckPromoForm handlePromoCheck={handlePromoCheck} />
+                                                    <h1 className='text-xl text-red-400 font-extrabold'>Promo Code Invalid!</h1>
+                                                </>
+                                        }
                                     </div>
-                                    </>
-                                    : null}
                                 </div>
                             </div>
                             : //User not logged in
@@ -454,46 +476,24 @@ export default function BookMovie({ movie }: BookMovieProps) {
                 )
             default: //----------------------------------Error/Done
                 return (
-                    <div className='flex flex-col justify-center mt-5'>
-                        <h2 className='text-center text-2xl font-extrabold text-primary'> Order Placed</h2>
-                        <Divider />
-                        <div className='flex flex-col justify-center items-center'>
-                            <h3 className='text-xl text-primary font-extrabold'>Ticket information: </h3>
-                            <p className='text-text-light'>Adult Tickets: ${adultTickets * 10}</p>
-                            <p className='text-text-light'>Child Tickets: ${childTickets * 5}</p>
-                            <p className='text-text-light'>Total: ${(adultTickets * 10) + (childTickets * 5)}</p>
-                            <p className='text-text-light'>Show Time: {showTime}</p>
-                        </div>
+                    <div className='flex flex-col justify-center mt-5 text-center text-3xl mt-5'>
+                        {bookingStatus == 0 ?
+                            //Waiting for booking to submit
+                            <h1 className='text-primary font-extrabold'>Loading...</h1>
+                            :
+                            bookingStatus == 1 ?
+                                //Booking submitted successfully
+                                <h1 className='text-primary font-extrabold'>Booking Submitted Successfully!</h1>
+                                :
+                                //Booking failed to submit
+                                <h1 className='text-primary font-extrabold'>Booking Failed to Submit!</h1>
+                        }
                     </div>
                 );
         }
     }
 
-    function selectCard(cardID : number) {
-        setSelectedCardID(cardID);
-        setCardStatus(1);
-    }
-    function canStepForward() {
-        switch (activeStep) {
-            case 0:
-                return true;
-            case 1:
-                let toReturn = false;
-                ticketTypes.forEach((ticketType) => {
-                    if (ticketType.ticketCount != 0) {
-                        console.log('ticket count is 0')
-                        toReturn = true;
-                    }
-                })
-                return selectedShow !== null && toReturn;
-            case 2:
-                return seatsLeft == 0;
-            case 3:
-                return user?.email;
-            default:
-                return false;
-        }
-    }
+
     return (
         <Layout>
             <Head>
@@ -535,20 +535,22 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     <div className='h-full'>
                         {getStepContent(activeStep)}
                     </div>
-                    <div className='flex justify-between p-4'>
-                        <Button
-                            disabled={activeStep === 0}
-                            onClick={handleBack}
-                            variant="outlined"
-                            className=""
-                        >Back</Button>
-                        <Button
-                            disabled={!canStepForward()}
-                            onClick={handleNext}
-                            variant="outlined"
-                            className=""
-                        >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
-                    </div>
+                    {bookingStatus == 0 ? //Booking is not done
+                        <div className='flex justify-between p-4'>
+                            <Button
+                                disabled={activeStep === 0}
+                                onClick={handleBack}
+                                variant="outlined"
+                                className=""
+                            >Back</Button>
+                            <Button
+                                disabled={!canStepForward()}
+                                onClick={handleNext}
+                                variant="outlined"
+                                className=""
+                            >{activeStep >= 3 ? "Place Order" : "Next"}</Button>
+                        </div>
+                        : null}
                 </div>
                 :
                 // IF no showtimes could be found
@@ -571,7 +573,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                     {modalToShow == 0 ?
                         <MovieModalInfo movie={movie} handleModalClose={handleModalClose} />
                         :
-                        <CardModalInfo cards={paymentCards} handleModalClose={handleModalClose} selectCard={selectCard}/>
+                        <CardModalInfo cards={paymentCards} handleModalClose={handleModalClose} selectCard={selectCard} />
                     }
                 </Box>
             </Modal>
@@ -645,7 +647,7 @@ function CardModalInfo({ cards, selectCard, handleModalClose }: { cards: Payment
     return (
         <>
             <div className="flex justify-between items-center m-3">
-                <Typography id="modal-modal-title" variant="h6" component="h2">
+                <Typography id="modal-modal-title" variant="h6" component="h2" className='font-extrabold'>
                     Payment Cards
                 </Typography>
                 <IconButton className='' onClick={handleModalClose}>
@@ -653,10 +655,25 @@ function CardModalInfo({ cards, selectCard, handleModalClose }: { cards: Payment
                 </IconButton>
             </div>
             <div className="h-full max-h-[80vh] overflow-y-auto m-3 mr-1">
-                <div className="flex flex-col">
-                    {cards.map((card, index) => (
-                        <Button key={card.paymentID} className='bg-bg-dark border-primary border-2 rounded-xl m-2 p-2' onClick={() => {selectCard(card.paymentID); handleModalClose()}}> Select Card with Num : {card.paymentNum}</Button>
-                    ))}
+                <div className="flex flex-col min-h-[300px] justify-between">
+                    <div className="flex flex-col">
+                        {cards.map((card, index) => (
+                            <Button key={card.paymentID} className='rounded-xl m-2 p-2' onClick={() => { selectCard(card.paymentID); handleModalClose() }}>
+                                <div>
+                                    <h2 className='text-xl font-extrabold text-primary'>Card ID: {card.paymentID}</h2>
+                                    <div className="flex flex-col justify-between">
+                                        <p className='text-lg font-normal text-text-dark normal-case'>CCV: {card.CCV}</p>
+                                        <p className='text-lg font-normal text-text-dark normal-case'>Expiration Date: {card.expDate}</p>
+                                    </div>
+                                </div>
+                            </Button>
+                        ))}
+                        {cards.length == 0 ?
+                            <h2 className='text-center text-2xl font-extrabold text-primary'>No Cards Available</h2>
+                            :
+                            null}
+                    </div>
+                    <Button variant='contained' className='bg-primary font-extrabold' onClick={() => { selectCard(-1); handleModalClose() }}> Clear Selected Card</Button>
                 </div>
             </div>
         </>

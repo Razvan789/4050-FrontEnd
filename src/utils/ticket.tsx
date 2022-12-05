@@ -1,7 +1,7 @@
 import { serverUrl } from "./backendInfo";
 export type Ticket = {
     ticketID?: number;
-    showID: number;
+    bookingID: number;
     seatID: number;
     typeID: number;
 }
@@ -18,6 +18,22 @@ export async function getTicket(id: number): Promise<Ticket> {
 }
 
 
-export async function addTicket(ticket: Ticket){
-    //body of addTicket here
+export async function addTicket(ticket: Ticket): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fetch(`${serverUrl}/ticket`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ticket)
+        }).then(res => {
+            if (res.status === 200) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        }).catch(err => {
+            reject(err);
+        })
+    });
 }

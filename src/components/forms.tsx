@@ -884,8 +884,8 @@ export function EditTicketTypeForm({ inTicketType }: { inTicketType: TicketType 
     return (
 
         <form className='flex flex-col space-y-6 p-4 mb-4' onSubmit={handleSubmit}>
-            <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' value={newTicketInfo.typeID} onChange={handleFormChange}></TextField>
-            <TextField name="type" variant='standard' type="text" label='Ticket Type' value={newTicketInfo.type} onChange={handleFormChange}></TextField>
+            <TextField name="typeID" variant='standard' type="text" label='Ticket Type ID' value={newTicketInfo.typeID} onChange={handleFormChange} inputProps={{readOnly:true}}></TextField>
+            <TextField name="type" variant='standard' type="text" label='Ticket Type' value={newTicketInfo.type} onChange={handleFormChange} inputProps={{readOnly:true}}></TextField>
             <TextField name="price" variant='standard' type="text" label='Price' value={newTicketInfo.price} onChange={handleFormChange}></TextField>
             <div className="flex justify-between">
                 <Button className='bg-primary m-4 mt-8 font-extrabold ' variant='contained' type='submit'>Submit</Button>
@@ -900,7 +900,7 @@ export function CheckPromoForm({ handlePromoCheck }: { handlePromoCheck: (promoC
     return (
         <div className="flex">
             <TextField variant='standard' label="Enter Promo Code" className='mr-10' value={promoCode} onChange={(event) => { setPromoCode(event.target.value) }}></TextField>
-            <Button variant='contained' className='bg-primary font-extrabold' onClick={() => { handlePromoCheck(promoCode) }}>Check Code</Button>
+            <Button variant='contained' className='bg-primary font-extrabold' onClick={() => { handlePromoCheck(promoCode) }}>Apply Code</Button>
         </div>
     )
 }
