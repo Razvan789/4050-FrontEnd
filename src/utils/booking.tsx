@@ -38,6 +38,24 @@ export async function getBookingsByUserID(userID: number): Promise<Booking[]> {
     });
 }
 
+export async function getBookingByPaymentID(paymentID: number): Promise<Booking[]> {
+    return new Promise<Booking[]>((resolve, reject) => {
+        fetch(`${serverUrl}/booking?paymentID=${paymentID}`).then(res => {
+            if (res.status === 200) {
+                return res.json();
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).then(data => {
+            resolve(data as Booking[]);
+        }).catch(err => {
+            reject(err);
+            return;
+        })
+    });
+}
+
 export async function addBooking(booking: Booking): Promise<Booking> {
     return new Promise((resolve, reject) => {
         fetch(`${serverUrl}/booking`, {

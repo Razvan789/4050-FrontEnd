@@ -49,3 +49,24 @@ export async function addPaymentCard(paymentCard: PaymentCard): Promise<boolean>
         })
     });
 }
+
+export function getLast4Digits(paymentNum: string): string {
+    return paymentNum.slice(-4);
+}
+
+export async function deletePaymentCard(paymentID: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fetch(`${serverUrl}/payment-card?paymentID=${paymentID}`, {
+            method: 'DELETE'
+        }).then(res => {
+            if (res.status === 200) {
+                resolve(true);
+            } else {
+                reject(res.status);
+                return;
+            }
+        }).catch(err => {
+            reject(err);
+        })
+    });
+}

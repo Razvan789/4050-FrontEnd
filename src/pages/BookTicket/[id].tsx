@@ -141,7 +141,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
             const newBooking: Booking = {
                 ...booking,
                 showID: selectedShow?.showID,
-                total: Math.round(ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1 - (promo?.percentage || 0)) * 100) / 100,
+                total: Math.round(ticketTypes.reduce((acc, ticketType) => acc + ticketType.price * ticketType.ticketCount, 0) * (1.06) *(1 - (promo?.percentage || 0)) * 100) / 100,
                 customerID: user?.userID || -1,
                 promoID: promo?.promoID,
                 paymentID: selectedCardID || -1,
@@ -416,7 +416,6 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                 <h2 className='text-center text-2xl font-extrabold text-primary'>Checkout</h2>
                                 <Divider />
                                 <div className='flex flex-col justify-center items-center'>
-                                    <h3 className='text-xl text-primary font-extrabold'>Total Cost: </h3>
                                     {ticketTypes.map((ticketType) => {
                                         return (
                                             <div key={ticketType.typeID} className='flex mb-3 justify-center'>
@@ -426,7 +425,7 @@ export default function BookMovie({ movie }: BookMovieProps) {
                                         )
                                     })
                                     }
-                                    <p className='text-2xl font-extrabold text-primary mb-5'>Total: <span className='text-text-light'>${booking.total}</span></p>
+                                    <p className='text-2xl font-extrabold text-primary mb-5'>Total with Tax: <span className='text-text-light'>${booking.total}</span></p>
                                 </div>
                                 <div className='flex flex-col items-center justify-between'>
                                     <div className='flex flex-col items-center justify-between bg-bg-dark w-[90%] min-h-[50px] border-[1px] border-primary rounded-xl shadow-lg mt-2'>

@@ -412,7 +412,7 @@ export function UpdateProfileForm({ user }: { user: User }) {
 }
 
 export function AddPaymentForm({ user }: { user: User }) {
-
+    const router = useRouter();
     const [successCode, setSuccessCode] = useState(0); // 0 - waiting for submit, 1 - Success, 2 - Server Error
     const [expirationDate, setExpirationDate] = useState<Dayjs | null>(null);
     const [addPaymentInfo, setAddPaymentInfo] = useState<addPaymentInfo>({
@@ -440,6 +440,7 @@ export function AddPaymentForm({ user }: { user: User }) {
         addPaymentCard(card).then((success) => {
             if (success) {
                 setSuccessCode(1);
+                router.reload();
             } else {
                 setSuccessCode(2);
             }

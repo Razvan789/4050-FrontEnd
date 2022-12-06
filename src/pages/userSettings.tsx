@@ -12,7 +12,7 @@ import { UpdateProfileForm } from '../components/forms';
 import { serverUrl } from '../utils/backendInfo';
 import PaymentCardInfo from '../components/paymentCardInfo';
 import { AddPaymentForm } from '../components/forms';
-import { getPaymentCardByUserID, addPaymentCard } from '../utils/paymentcard';
+import { PaymentCard, getPaymentCardByUserID, addPaymentCard } from '../utils/paymentcard';
 import { Booking, getBookingsByUserID, } from '../utils/booking';
 import { Show, getShow } from '../utils/show';
 import { Movie, getMovie, getAllMovies } from '../utils/movie';
@@ -37,20 +37,13 @@ const customToolbar = () => {
 };
 
 
-type cardInfo = {
-    paymentID: number,
-    paymentNum: string,
-    expDate: string,
-    cvc: string,
-}
-
 export default function UserSettings() {
     const [tabValue, setTabValue] = useState(0);
     //eslint-disable-next-line
     const [openTickets, setOpenTickets] = useState(false);
     const handleOpen = (bookingID: GridRowId) => { setOpenTickets(true); setSelectedBookingID(bookingID); };
     const handleClose = () => setOpenTickets(false);
-    const [paymentCards, setPaymentCards] = useState<cardInfo[]>([]);
+    const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [selectedBookingID, setSelectedBookingID] = useState<GridRowId>(0);
     const [shows, setShows] = useState<Show[]>([]);
@@ -181,7 +174,6 @@ export default function UserSettings() {
                         <Tab label="Account Settings" {...a11yProps(0)} />
                         <Tab label="Payment Methods" {...a11yProps(1)} />
                         <Tab label="Order History" {...a11yProps(2)} />
-                        <Tab label="Site Settings" {...a11yProps(3)} />
                     </Tabs>
                 </Box>
                 <TabPanel value={tabValue} index={0}>
@@ -198,7 +190,7 @@ export default function UserSettings() {
                             <AddPaymentForm user={user} />
                         </div>
                         {paymentCards.map((card) => (
-                            <PaymentCardInfo key={card.paymentID} cardNum={card.paymentNum} cardExp={card.expDate} cardID={card.paymentID} />
+                            <PaymentCardInfo key={card.paymentID} card={card}/>
                         ))}
                     </Box>
                 </TabPanel>

@@ -6,6 +6,7 @@ import { Show, getShow } from '../utils/show'
 import { Showroom, getShowroom } from '../utils/showroom'
 import { Booking, getBooking } from '../utils/booking'
 import { Divider } from '@mui/material'
+import { CircularProgress } from '@mui/material'
 
 export function TicketsDisplay({ bookingID }: { bookingID: GridRowId }) {
 
@@ -50,7 +51,10 @@ export function TicketsDisplay({ bookingID }: { bookingID: GridRowId }) {
 
         return (
             <div className='w-full p-10'>
-                {loading ? <p>Loading...</p>
+                {loading ? 
+                <div className="w-full flex flex-col items-center">
+                    <CircularProgress />
+                </div>
                     :
                     tickets.map(ticket => {
                         const seat = seats.find(seat => seat.seatID === ticket.seatID)
@@ -68,7 +72,7 @@ export function TicketsDisplay({ bookingID }: { bookingID: GridRowId }) {
 
 function Ticket({ seat, ticket, showroom }: { seat: Seat, ticket: Ticket, showroom: Showroom }) {
             return (
-                <div className='flex w-full justify-around text-xl text-primary' >
+                <div className='flex w-full justify-around text-xl text-primary font-extrabold p-5 hover:bg-bg-light rounded-full' >
                     <p>Ticket ID: {ticket.ticketID}</p>
                     <p>Showroom:  {showroom.roomName}</p>
                     <p>Seat Number: {seat.seatNumber}</p>

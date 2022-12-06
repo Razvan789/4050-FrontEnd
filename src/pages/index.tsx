@@ -76,8 +76,7 @@ export default function Home() {
         </CardContainer>
         <div className="flex items-center">
           <h2 className="text-text-light text-2xl leading-loose font-extrabold"> All Movies →</h2>
-          <Chip label="Filters will go here" color='primary' variant="outlined" onDelete={handleFilterDelete} className="ml-2" />
-          <Chip label="Filter 2" color='primary' onDelete={handleFilterDelete} className="ml-2" />
+
         </div>
         <CardContainer grid>
           <>
