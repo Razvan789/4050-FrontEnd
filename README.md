@@ -1,6 +1,12 @@
 # Entry Point:
 /src/pages/index.tsx
 
+# How to get started
+Make sure you have [node.js](https://nodejs.org/en/) installed
+
+
+
+
 # Useful NPM commands:
 
 npm run dev - Starts a development server
